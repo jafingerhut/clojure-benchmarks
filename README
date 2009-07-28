@@ -1,0 +1,53 @@
+July 27, 2009
+
+The non-Clojure versions of these benchmark programs have been
+downloaded from this web site:
+
+http://shootout.alioth.debian.org
+
+I only have Clojure implementations for the k-nucleotide and
+mandelbrot benchmarks so far (k-nucleotide is in the knuc
+subdirectory).
+
+I have hacked up some shell scripts to automate the compilation and
+running of some of these programs.  They have been tested on Mac OS X
+10.5.7 with appropriate installations of the Glasgow Haskell Compiler
+ghc, SBCL Common Lisp, Perl, the version of Java distributed by Apple,
+and a recent version of Clojure (either 1.0.0 or more recent, I don't
+recall).  Getting SBCL and ghc installed is relatively straightforward
+by installing MacPorts first.
+
+You should edit the file env.sh to point at the location of your
+Clojure JAR file, and perhaps give explicit path names to some of the
+other language implementations, if you wish.
+
+If you have those installed, you can run all of the implementations of
+the k-nucleotide benchmark, with the quick, medium, and long test
+input sizes, run these commands:
+
+cd knuc
+./batch.sh
+
+You can also pick and choose which benchmark lengths to run, and which
+language implementations to run, by giving options like these on the
+command line:
+
+./batch.sh java clj quick medium
+
+That would run both the Clojure and Java versions of the benchmark,
+each with the quick and medium size input files.  The following
+command would run only the Clojure version with the long input file:
+
+./batch.sh clj long
+
+If you find any improvements to the Clojure versions, I'd love to hear
+about them.
+
+The file RESULTS contains some summarized execution times from running
+these programs on my home iMac.  It also has copies of some of the
+running times reported on the shootout web site above, which were run
+on different machine (see RESULTS for some specs).
+
+
+Andy Fingerhut
+andy_fingerhut@alum.wustl.edu
