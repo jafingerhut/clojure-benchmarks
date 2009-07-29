@@ -47,7 +47,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
-A - Copyright 2009 Andy Fingerhut - Revised BSD license
+A - Copyright 2009 John Andrew Fingerhut - Revised BSD license
 ----------------------------------------------------------------------
 This is a specific instance of the Open Source Initiative (OSI) BSD
 license template.
@@ -151,12 +151,9 @@ O mandelbrot/other-code/speed10.clj
 A mandelbrot/sbcl-compile.sh
 A mandelbrot/sbcl-run.sh
 A misc/cat-n.clj
-A misc/clj-batch.sh
   misc/in.txt
 A misc/notes.txt
-  misc/perl-batch.sh
   misc/post2.txt
-  misc/sbcl-batch.sh
   misc/test-sbcl-input.lisp
   misc/tiny-fasta-input.txt
 A misc/too-much-memory.clj
