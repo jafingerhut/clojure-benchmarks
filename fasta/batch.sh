@@ -83,6 +83,6 @@ do
 	echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
 	( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
-	$CMP ${T}-expected-output.txt ${OUT}
+	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done
 done
