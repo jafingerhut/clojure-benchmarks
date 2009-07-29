@@ -26,25 +26,6 @@
 ;;(set! *warn-on-reflection* true)
 
 
-;; The shell script clj-run.sh always sends the program name as the
-;; first command line argument.
-(def prog-name (first *command-line-args*))
-(def args (rest *command-line-args*))
-
-(when (not= (count args) 2)
-  (println (format "usage: %s input-file output-file" prog-name))
-  (flush)
-  (. System (exit 1)))
-
-(def input-fname (nth args 0))
-;;(def input-fname 
-     ;;"/Users/Shared/doc/language-shootout/fasta/sbcl-output.txt"
-     ;; "knucleotide-input.txt"
-     ;;)
-(def output-fname (nth args 1))
-;;(def output-fname "clj-output.txt")
-
-
 (defn fasta-description-line
   "Return true when the line l is a FASTA description line"
   [l]
@@ -125,42 +106,40 @@
   (format "%d\t%s" (get tally key 0) key))
 
 
-(with-open [fr (java.io.FileReader. input-fname)
-            br (java.io.BufferedReader. fr)]
-  (binding [*out* (java.io.FileWriter. output-fname)]
-    (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))]
-      (flush)
-      (let [tally1 (all-tally-to-str
-		    (tally-loses-head (all-equal-len-subs 1 dna-str)))]
-        (println tally1))
-      (flush)
-      (let [tally2 (all-tally-to-str
-		    (tally-loses-head (all-equal-len-subs 2 dna-str)))]
-        (println tally2))
-      (flush)
-      (let [tally3 (one-tally-to-str
-		    "GGT" (tally-loses-head (all-equal-len-subs 3 dna-str)))]
-        (println tally3))
-      (flush)
-      (let [tally4 (one-tally-to-str
-		    "GGTA" (tally-loses-head (all-equal-len-subs 4 dna-str)))]
-        (println tally4))
-      (flush)
-      (let [tally6 (one-tally-to-str
-		    "GGTATT"
-		    (tally-loses-head (all-equal-len-subs 6 dna-str)))]
-        (println tally6))
-      (flush)
-      (let [tally12 (one-tally-to-str
-		     "GGTATTTTAATT"
-		     (tally-loses-head (all-equal-len-subs 12 dna-str)))]
-        (println tally12))
-      (flush)
-      (let [tally18 (one-tally-to-str
-		     "GGTATTTTAATTTATAGT"
-		     (tally-loses-head (all-equal-len-subs 18 dna-str)))]
-        (println tally18))
-      (flush)
-      )))
+(with-open [br (java.io.BufferedReader. *in*)]
+  (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))]
+    (flush)
+    (let [tally1 (all-tally-to-str
+		  (tally-loses-head (all-equal-len-subs 1 dna-str)))]
+      (println tally1))
+    (flush)
+    (let [tally2 (all-tally-to-str
+		  (tally-loses-head (all-equal-len-subs 2 dna-str)))]
+      (println tally2))
+    (flush)
+    (let [tally3 (one-tally-to-str
+		  "GGT" (tally-loses-head (all-equal-len-subs 3 dna-str)))]
+      (println tally3))
+    (flush)
+    (let [tally4 (one-tally-to-str
+		  "GGTA" (tally-loses-head (all-equal-len-subs 4 dna-str)))]
+      (println tally4))
+    (flush)
+    (let [tally6 (one-tally-to-str
+		  "GGTATT"
+		  (tally-loses-head (all-equal-len-subs 6 dna-str)))]
+      (println tally6))
+    (flush)
+    (let [tally12 (one-tally-to-str
+		   "GGTATTTTAATT"
+		   (tally-loses-head (all-equal-len-subs 12 dna-str)))]
+      (println tally12))
+    (flush)
+    (let [tally18 (one-tally-to-str
+		   "GGTATTTTAATTTATAGT"
+		   (tally-loses-head (all-equal-len-subs 18 dna-str)))]
+      (println tally18))
+    (flush)
+    ))
 
 (. System (exit 0))

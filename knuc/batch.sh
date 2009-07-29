@@ -70,15 +70,9 @@ do
 	IN=${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	if [ $L == "clj" ]
-	then
-	    echo "( time ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}
-	else
-	    echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
-	fi
+	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
-	$CMP ${T}-expected-output.txt ${OUT}
+	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done
 done

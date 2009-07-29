@@ -1,9 +1,7 @@
 #! /bin/bash
 
-# usage: ./clj-run.sh <input-file-name> <output-file-name>
-
-# Can use /dev/stdin or /dev/stdout on some OS's (Linux, Mac OS X) in
-# place of a name.
+# Read input from stdin
+# Write output to stdout
 
 # 512m - not enough
 # 768m - not enough
@@ -11,4 +9,4 @@
 
 source ../env.sh
 
-$JAVA -server -Xmx1280m ${JAVA_PROFILING} -cp ${CLOJURE_JAR} clojure.main knucleotide.clj $0 "$@"
+$JAVA -server -Xmx1280m ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main knucleotide.clj-6.clj "$@"

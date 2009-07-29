@@ -12,7 +12,7 @@ BENCHMARK="reverse-complement"
 # SBCL 1.0.23 works on Mac OS X, but SBCL 1.0.29 doesn't like opening
 # /dev/stdin with :element-type '(unsigned-byte 8) for some reason.
 
-ALL_LANGUAGES="perl java"
+ALL_LANGUAGES="perl ghc java clj"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -21,7 +21,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	perl|java|clj) LANGUAGES="$LANGUAGES $1"
+	perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
@@ -64,25 +64,19 @@ do
 		;;
 	    perl) CMD="$PERL revcomp.perl-2.perl"
 		;;
+	    ghc) CMD=./ghc-run.sh
+		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
 	esac
 	
 	echo
 	echo "benchmark: $BENCHMARK"
 	echo "language: $L"
 	echo "test: $T"
-	echo
-
 	IN=${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	if [ $L == "clj" ]
-	then
-	    echo "( time ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}
-	else
-	    echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
-	fi
+	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
 	$CMP ${T}-expected-output.txt ${OUT}
     done

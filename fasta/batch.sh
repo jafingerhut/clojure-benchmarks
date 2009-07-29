@@ -80,14 +80,8 @@ do
 	echo "test: $T"
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	if [ $L == "clj" ]
-	then
-	    echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
-	else
-	    echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	    ( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
-	fi
+	echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+	( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
 	$CMP ${T}-expected-output.txt ${OUT}
     done

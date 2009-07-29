@@ -51,105 +51,116 @@
         (apply str y)))))
 
 
-(defn all-equal-len-subs
-  "Returns a sequence of all length len substrings of the string s, if (count s) >= len, otherwise nil."
-  [len s]
-  (when (>= (count s) len)
-    (map #(subs s % (+ % len)) (range (inc (- (count s) len))))))
+;;(defn dna-char-to-code-val
+;;  [c]
+;;  ({\A 0, \C 1, \T 2, \G 3} c))
+
+;;(defmacro dna-char-to-code-val
+;;  [c]
+;;  `({\A 0, \C 1, \T 2, \G 3} ~c))
 
 
-;; Unfortunately, at least with (clojure-version)=1.1.0-alpha-SNAPSHOT
-;; and java version 1.5.0_19 on an Intel Mac with OS X 10.5.7,
-;; tally-keeps-head keeps a reference to the beginning of the sequence
-;; 'things', and thus keeps memory for the entire sequence during the
-;; computation, which is too much.
-
-;; Why does it keep the head, when tally-loses-head does not?
-
-(defn tally-keeps-head
-  "Take a sequence things, and return a hash map h whose keys are the set of unique objects in the sequence, and where (h obj) is equal to the number of times obj occurs in the sequence."
-  [things]
-  (loop [h {}
-         remaining things]
-    (if-let [r (seq remaining)]
-      (let [key (first r)]
-        (recur (assoc h key (inc (get h key 0))) (rest r)))
-      h)))
+(def dna-char-to-code-val {\A 0, \C 1, \T 2, \G 3})
 
 
-(defn tally-loses-head-helper
-  "Like tally-keeps-head, except requires that you pass in an empty map as the first argument in order to return the same result.  However, it 'loses its head' (see 'Programming Clojure', pp. 139-140), thus using significantly less memory than tally-keeps-head if no one else is keeping a reference to the head of 'things'."
-  [h things]
-  (if-let [r (seq things)]
-    (let [key (first r)]
-      (recur (assoc h key (inc (get h key 0))) (rest r)))
-    h))
+;;(defn code-val-to-dna-char
+;;  [val]
+;;  ({0 \A, 1 \C, 2 \T, 3 \G} val))
 
 
-(defn tally-loses-head
-  "Same caller interface as tally-keeps-head, but it uses same memory as weird-tally-loses-head."
-  [things]
-  (tally-loses-head-helper {} things))
+(def code-val-to-dna-char {0 \A, 1 \C, 2 \T, 3 \G})
+
+
+(defn dna-str-to-key
+  [s]
+  ;; Accessing a local let binding is much faster than accessing a var
+  (let [dna-char-to-code-val dna-char-to-code-val]
+    (loop [key 0
+	   offset (int 0)]
+      (if (= offset (count s))
+	key
+	(let [c (nth s offset)
+	      new-key (+ (bit-shift-left key 2) (dna-char-to-code-val c))]
+	  (recur new-key (inc offset)))))))
+
+
+(defn key-to-dna-str
+  [k len]
+  (apply str (map code-val-to-dna-char
+		  (map (fn [pos] (bit-and 3 (bit-shift-right k pos)))
+		       (range (* 2 (dec len)) -1 -2)))))
+
+
+(defn tally-dna-subs-with-len
+  [len dna-str]
+  (let [left-shift-amount (int (* 2 (dec len)))
+	dna-char-to-code-val dna-char-to-code-val]
+    (loop [offset (int (- (count dna-str) len))
+	   key (dna-str-to-key (subs dna-str offset (+ offset len)))
+	   tally {key 1}]
+      (if (zero? offset)
+	tally
+	(let [new-offset (dec offset)
+	      new-first-char-code (int (dna-char-to-code-val
+					(nth dna-str new-offset)))
+	      new-key (+ (bit-shift-right key 2)
+			 (bit-shift-left new-first-char-code left-shift-amount))
+	      new-tally (assoc tally new-key (inc (get tally new-key 0)))]
+	  (recur new-offset new-key new-tally))))))
 
 
 (defn all-tally-to-str
-  [tally]
+  [tally fn-key-to-str]
   (with-out-str
     (let [total (reduce + (vals tally))]
       (doseq [k (sort #(>= (tally %1) (tally %2))  ; sort by tally, largest first
                       (keys tally))]
-        (println (format "%s %.3f" k
+        (println (format "%s %.3f" (fn-key-to-str k)
                          (double (* 100 (/ (tally k) total)))))))))
 
 
 (defn one-tally-to-str
-  [key tally]
-  (format "%d\t%s" (get tally key 0) key))
+  [dna-str tally]
+  (format "%d\t%s" (get tally (dna-str-to-key dna-str) 0) dna-str))
 
 
 (defn compute-one-part
   [dna-str part]
   (condp = part
-    0 (all-tally-to-str (tally-loses-head (all-equal-len-subs 1 dna-str)))
-    1 (all-tally-to-str (tally-loses-head (all-equal-len-subs 2 dna-str)))
+    0 (all-tally-to-str (tally-dna-subs-with-len 1 dna-str)
+			(fn [k] (key-to-dna-str k 1)))
+    1 (all-tally-to-str (tally-dna-subs-with-len 2 dna-str)
+			(fn [k] (key-to-dna-str k 2)))
     2 (one-tally-to-str "GGT"
-			(tally-loses-head (all-equal-len-subs 3 dna-str)))
+			(tally-dna-subs-with-len 3 dna-str))
     3 (one-tally-to-str "GGTA"
-			(tally-loses-head (all-equal-len-subs 4 dna-str)))
+			(tally-dna-subs-with-len 4 dna-str))
     4 (one-tally-to-str "GGTATT"
-			(tally-loses-head (all-equal-len-subs 6 dna-str)))
+			(tally-dna-subs-with-len 6 dna-str))
     5 (one-tally-to-str "GGTATTTTAATT"
-			(tally-loses-head (all-equal-len-subs 12 dna-str)))
+			(tally-dna-subs-with-len 12 dna-str))
     6 (one-tally-to-str "GGTATTTTAATTTATAGT"
-			(tally-loses-head (all-equal-len-subs 18 dna-str)))))
+			(tally-dna-subs-with-len 18 dna-str))))
 
 
-;; Oddly enough, this program runs *faster* on my 2-core Intel Core 2
-;; Duo Mac if I use 'map' instead of 'pmap' below.  Perhaps running 4
-;; threads in parallel (pmap currently runs 2 more in parallel than
-;; there are physical cores) causes the working set to not fit into
-;; the processor cache any more, and thus it is slower?
+(defn modified-pmap
+  "Like pmap from Clojure 1.1, but with only as much parallelism as
+  there are available processors."
+  [f coll & n]
+  (let [n (or (first n) (.. Runtime getRuntime availableProcessors))
+	rets (map #(future (f %)) coll)
+	step (fn step [[x & xs :as vs] fs]
+	       (lazy-seq
+		(if-let [s (seq fs)]
+		  (cons (deref x) (step xs (rest s)))
+		  (map deref vs))))]
+    (step rets (drop n rets))))
 
-;; I should try to reduce the amount of garbage generated by modifying
-;; the code, and then compare with and without parallelism again.
-
-;; with pmap, on the input file that is the output of the fasta
-;; benchmark with N=1,000,000:
-
-;; real	1m57.244s
-;; user	3m27.638s
-;; sys	0m4.911s
-
-;; with map, same input file and everything else:
-
-;; real	1m6.626s
-;; user	1m34.041s
-;; sys	0m1.553s
 
 (with-open [br (java.io.BufferedReader. *in*)]
   (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
-	results (reverse (pmap #(compute-one-part dna-str %)
-			       (reverse (range 7))))]
+	results (reverse (map #(compute-one-part dna-str %)
+			      (reverse (range 7))))]
     (doseq [r results]
       (println r)
       (flush))))

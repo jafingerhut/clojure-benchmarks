@@ -26,20 +26,6 @@
 ;;(set! *warn-on-reflection* true)
 
 
-;; The shell script clj-run.sh always sends the program name as the
-;; first command line argument.
-(def prog-name (first *command-line-args*))
-(def args (rest *command-line-args*))
-
-(when (not= (count args) 2)
-  (println (format "usage: %s input-file output-file" prog-name))
-  (flush)
-  (. System (exit 1)))
-
-(def input-fname (nth args 0))
-(def output-fname (nth args 1))
-
-
 (defn fasta-description-line
   "Return true when the line l is a FASTA description line"
   [l]
@@ -162,14 +148,12 @@
     (step rets (drop n rets))))
 
 
-(with-open [fr (java.io.FileReader. input-fname)
-            br (java.io.BufferedReader. fr)]
-  (binding [*out* (java.io.FileWriter. output-fname)]
-    (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
-	  results (reverse (map #(compute-one-part dna-str %)
-				(reverse (range 7))))]
-      (doseq [r results]
-	(println r)
-	(flush)))))
+(with-open [br (java.io.BufferedReader. *in*)]
+  (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
+	results (reverse (map #(compute-one-part dna-str %)
+			      (reverse (range 7))))]
+    (doseq [r results]
+      (println r)
+      (flush))))
 
 (. System (exit 0))
