@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Read input from stdin
 # Write output to stdout

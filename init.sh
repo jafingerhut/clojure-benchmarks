@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Some of the input and expected output files are quite large.  Rather
 # than waste space on github, it seems best to use one of the

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Find files that are automatically generated as output of runs, or by
 # init.sh, to get a directory tree "distribution clean".

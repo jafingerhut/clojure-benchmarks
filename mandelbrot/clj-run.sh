@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # usage: ./clj-run.sh <size>
 

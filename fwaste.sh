@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # Find files that are outputs of compilation runs, to make it easier to
 # clean up afterwards.
