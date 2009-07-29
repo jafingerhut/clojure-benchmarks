@@ -64,7 +64,8 @@ andy_fingerhut@alum.wustl.edu
 
 
 ----------------------------------------------------------------------
-On a Mac OS X machine, download and install MacPorts from here:
+On a Mac OS X machine (tested on 10.5.7 at least), download and install
+MacPorts from here:
 
 http://www.macports.org
 
@@ -86,3 +87,56 @@ of my benchmark results:
 The following ports are currently installed:
   ghc @6.10.1_8+darwin_9_i386 (active)
   sbcl @1.0.24_0+darwin_9_i386+html+test+threads (active)
+
+% java -version
+java version "1.6.0_13"
+Java(TM) SE Runtime Environment (build 1.6.0_13-b03-211)
+Java HotSpot(TM) 64-Bit Server VM (build 11.3-b02-83, mixed mode)
+
+% javac -version
+javac 1.6.0_13
+
+% sbcl --version
+SBCL 1.0.29
+
+% ghc --version
+The Glorious Glasgow Haskell Compilation System, version 6.10.1
+
+----------------------------------------------------------------------
+
+I've also done some testing of this set of scripts on an Ubuntu 9.04
+Desktop i386 installation, in a VMWare Fusion virtual machine running
+on my Mac.
+
+I've tried it with these versions of packages installed using Ubuntu's
+Synaptic Package Manager.
+
+sun-java6-jdk 6-14-0ubuntu1.9.04
+sbcl 1.0.18.0-2
+ghc 6.8.2dfsg1-1ubuntu1
+
+
+% java -version
+java version "1.6.0_14"
+Java(TM) SE Runtime Environment (build 1.6.0_14-b08)
+Java HotSpot(TM) Client VM (build 14.0-b16, mixed mode, sharing)
+
+% javac -version
+javac 1.6.0_14
+
+% sbcl --version
+SBCL 1.0.18.debian
+
+% ghc --version
+The Glorious Glasgow Haskell Compilation System, version 6.8.2
+
+Apparently the Haskell k-nucleotide program requires GHC 6.10 or
+later, and gives a compilation error with GHC 6.8.x, as is currently
+the latest available through Ubuntu's distribution system.  If you
+really want to run that benchmark, you could try installing GHC 6.10
+yourself.  This web page may provide the right recipe for doing so.  I
+haven't tried it myself.
+
+http://www.johnmacfarlane.net/Gitit%20on%20Ubuntu
+
+----------------------------------------------------------------------
