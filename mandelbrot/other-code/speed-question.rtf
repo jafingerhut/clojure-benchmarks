@@ -1,0 +1,217 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf460
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue0;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+
+\f0\b\fs28 \cf2 From: 
+\b0 \cf3 Dmitri <dmitri.sotnikov@gmail.com>\
+
+\b \cf2 Date: 
+\b0 \cf3 April 1, 2009 6:40:19 PM PDT\
+
+\b \cf2 To: 
+\b0 \cf3 Clojure <clojure@googlegroups.com>\
+
+\b \cf2 Subject: \cf3 speed question\
+\cf2 Reply-To: 
+\b0 \cf3 clojure@googlegroups.com\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+
+\fs24 \cf3 \
+\pard\pardeftab720\ql\qnatural
+
+\fs28 \cf3 \
+I've been playing around with rendering a mandelbrot set, and using\
+pure java it renders about 2 seconds on my machine, however it runs\
+about 10 times as slow in clojure, I was curious if I'm doing anything\
+obviously wrong, or if it's just life :) I do run it with the -server\
+flag, which does improve it a bit. I've got the java and clojure\
+source below:\
+\
+import java.awt.Canvas;\
+import java.awt.Color;\
+import java.awt.Dimension;\
+import java.awt.Graphics;\
+import java.awt.image.BufferStrategy;\
+import java.awt.image.ImageObserver;\
+import javax.swing.JFrame;\
+import javax.swing.JPanel;\
+\
+public class Mandelbrot extends Canvas \'a0implements ImageObserver \{\
+\
+	public static final int WIDTH = 640;\
+	public static final int HEIGHT = 640;\
+	private static int BAILOUT = 4;\
+	private static int MAX_ITERATIONS = 32;\
+\
+	public BufferStrategy strategy;\
+\
+	public Mandelbrot () \{\
+		setBounds(0,0,WIDTH,HEIGHT);\
+		setBackground(Color.BLACK);\
+\
+		JPanel panel = new JPanel();\
+		panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));\
+		panel.setLayout(null);\
+\
+		panel.add(this);\
+\
+		JFrame frame = new JFrame("Mandelbrot");\
+		frame.add(panel);\
+\
+		frame.setBounds(0,0,WIDTH, HEIGHT);\
+		frame.setResizable(false);\
+		frame.setVisible(true);\
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\
+\
+		//create a double buffer\
+		createBufferStrategy(2);\
+		strategy = getBufferStrategy();\
+		requestFocus();\
+	\}\
+\
+	private int checkBounds(float x, float y) \{\
+		float cr = x;\
+		float ci = y;\
+		float zi = 0.0f;\
+		float zr = 0.0f;\
+		int i = 0;\
+\
+		while (true) \{\
+			i++;\
+			float temp = zr * zi;\
+			float zr2 = zr * zr;\
+			float zi2 = zi * zi;\
+			zr = zr2 - zi2 + cr;\
+			zi = temp + temp + ci;\
+			if (zi2 + zr2 > BAILOUT)\
+				return i;\
+			if (i > MAX_ITERATIONS)\
+				return 0;\
+		\}\
+	\}\
+\
+	private void draw() \{\
+		float x = -2.1f, y = -1.5f, z = 3.0f;\
+		int i, j;\
+\
+		Graphics g = strategy.getDrawGraphics();\
+		g.clearRect(0, 0, getWidth(), getHeight());\
+		for (i = \'a00; i < HEIGHT; i++) \{\
+			for (j = 0; j < WIDTH; j++) \{\
+\
+				int value = checkBounds((x + z*(i/(float)WIDTH)), (y + z*(j/(float)\
+HEIGHT)));\
+\
+				if (value > 0) \{\
+					g.setColor(new Color(value*255/MAX_ITERATIONS));\
+					g.drawRect(i, j, 0, 0);\
+				\}\
+			\}\
+			strategy.show();\
+		\}\
+		strategy.show();\
+	\}\
+\
+	public static void main(String args[]) \{\
+\
+		Mandelbrot m = new Mandelbrot();\
+		long startTime = System.currentTimeMillis();\
+		m.draw();\
+		System.out.println((System.currentTimeMillis() - startTime)/1000);\
+	\}\
+\}\
+\
+Clojure:\
+\
+(ns main\
+\'a0(:import (java.awt Color Container Graphics Canvas Dimension)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(javax.swing JPanel JFrame)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(java.awt.image BufferedImage BufferStrategy)))\
+\
+(def *width* 640)\
+(def *height* 640)\
+(def *max-steps* 32)\
+\
+(defn on-thread [f] (doto (new Thread f) (.start)))\
+\
+(defn check-bounds [x y]\
+\'a0\'a0\'a0(loop [px x\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0py y\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0zx 0.0\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0zy 0.0\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0zx2 0.0\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0zy2 0.0\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0value 0]\
+\'a0\'a0\'a0\'a0\'a0\'a0(if (and (< value *max-steps*) (< (+ zx2 zy2)\
+4.0))\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(let [new-zy (+ (* 2.0 zx zy) py)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0new-zx (+ (- zx2 zy2) px)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0new-zx2 (* new-zx new-zx)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0new-zy2 (* new-zy new-zy)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(recur px py new-zx new-zy new-zx2 new-zy2 (inc\
+value)))\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(if (== value *max-steps*) 0 value))))\
+\
+(defn draw-line [g y]\
+\'a0\'a0\'a0(let [dy (- 1.25 (* 2.5 (/ y *height*)))]\
+\'a0\'a0\'a0\'a0\'a0(doseq [x (range 0 *width*)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0(let [dx (- (* 2.5 (/ x *width*)) 2.0)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(let [value (check-bounds dx dy)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(if (> value \'a00)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(doto g\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(. setColor (Color. (* value (/ 255 *max-\
+steps*))))\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(. drawRect x y 0 0))))))))\
+\
+(defn draw-lines\
+\'a0\'a0\'a0([buffer g] (draw-lines buffer g *height*))\
+\'a0\'a0\'a0([buffer g y]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(doseq [y (range 0 y)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(draw-line g y)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0;(on-thread (draw-line g y))\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(. buffer show))))\
+\
+\
+(defn draw [canvas]\
+\'a0\'a0\'a0(let [buffer (. canvas getBufferStrategy)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0g \'a0\'a0\'a0\'a0\'a0\'a0\'a0(. buffer getDrawGraphics)]\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(draw-lines buffer g)))\
+\
+(defn main []\
+\
+\'a0(let [panel (JPanel.)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0canvas (Canvas.)\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0frame (JFrame. "Mandelbrot")]\
+\
+\'a0\'a0\'a0(doto panel\
+\'a0\'a0\'a0\'a0\'a0(.setPreferredSize (Dimension. *width* *height*))\
+\'a0\'a0\'a0\'a0\'a0(.setLayout nil)\
+\'a0\'a0\'a0\'a0\'a0(.add canvas))\
+\
+\'a0\'a0\'a0(doto frame\
+\'a0\'a0\'a0\'a0\'a0(.setDefaultCloseOperation JFrame/\
+EXIT_ON_CLOSE)\
+\'a0\'a0\'a0\'a0\'a0(.setBounds 0,0,*width* *height*)\
+\'a0\'a0\'a0\'a0\'a0(.setResizable false)\
+\'a0\'a0\'a0\'a0\'a0(.add panel)\
+\'a0\'a0\'a0\'a0\'a0(.setVisible true))\
+\
+\'a0\'a0\'a0(doto canvas\
+\'a0\'a0\'a0\'a0\'a0(.setBounds 0,0,*width* *height*)\
+\'a0\'a0\'a0\'a0\'a0(.setBackground (Color/BLACK))\
+\'a0\'a0\'a0\'a0\'a0(.createBufferStrategy 2)\
+\'a0\'a0\'a0\'a0\'a0(.requestFocus))\
+\
+\'a0\'a0\'a0(draw canvas)))\
+\
+(time (main))\
+--~--~---------~--~----~------------~-------~--~----~\
+You received this message because you are subscribed to the Google Groups "Clojure" group.\
+To post to this group, send email to clojure@googlegroups.com\
+To unsubscribe from this group, send email to clojure+unsubscribe@googlegroups.com\
+For more options, visit this group at http://groups.google.com/group/clojure?hl=en\
+-~----------~----~----~----~------~----~------~--~---\
+\
+\
+}

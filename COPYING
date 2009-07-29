@@ -1,0 +1,178 @@
+Here is a list of all files, and the license they fall under.
+
+The abbreviations used in the file list below are defined here:
+
+----------------------------------------------------------------------
+B - Computer Language Benchmarks Game Revised BSD license
+----------------------------------------------------------------------
+
+http://shootout.alioth.debian.org/u32q/miscfile.php?file=license&title=revised%20BSD%20license
+
+This is a specific instance of the Open Source Initiative (OSI) BSD
+license template.
+
+http://www.opensource.org/licenses/bsd-license.php
+
+
+Copyright © 2004-2009 Brent Fulgham
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of "The Computer Language Benchmarks Game" nor
+      the name of "The Computer Language Shootout Benchmarks" nor the
+      names of its contributors may be used to endorse or promote
+      products derived from this software without specific prior
+      written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------------
+A - Copyright 2009 Andy Fingerhut - Revised BSD license
+----------------------------------------------------------------------
+This is a specific instance of the Open Source Initiative (OSI) BSD
+license template.
+
+http://www.opensource.org/licenses/bsd-license.php
+
+
+Copyright (c) 2009, John Andrew Fingerhut
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+
+    * The name of John Andrew Fingerhut may not be used to endorse or
+      promote products derived from this software without specific
+      prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+----------------------------------------------------------------------
+
+A COPYING
+A env.sh
+A fasta/batch.sh
+B fasta/fasta.ghc-2.ghc
+B fasta/fasta.java-2.java
+B fasta/fasta.perl-4.perl
+B fasta/fasta.sbcl
+B fasta/fasta.sbcl_compile
+B fasta/fasta.sbcl_run
+B fasta/ghc-compile.sh
+B fasta/ghc-run.sh
+A fasta/java-compile.sh
+A fasta/java-run.sh
+A fasta/sbcl-compile.sh
+A fasta/sbcl-run.sh
+A fclean.sh
+A fwaste.sh
+A init.sh
+A knuc/batch.sh
+A knuc/clj-run.sh
+B knuc/ghc-compile.sh
+B knuc/ghc-run.sh
+A knuc/java-compile.sh
+A knuc/java-run.sh
+B knuc/knucleotide.andys.java
+A knuc/knucleotide.clj
+A knuc/knucleotide.clj-2.clj
+A knuc/knucleotide.clj-3.clj
+A knuc/knucleotide.clj-4.clj
+B knuc/knucleotide.ghc-3.ghc
+B knuc/knucleotide.java-3.java
+B knuc/knucleotide.perl-2.perl
+B knuc/knucleotide.sbcl-3.sbcl
+B knuc/knucleotide.sbcl-3.sbcl_compile
+B knuc/knucleotide.sbcl-3.sbcl_run
+A knuc/sbcl-compile.sh
+A knuc/sbcl-run.sh
+A mandelbrot/batch.sh
+A mandelbrot/clj-run.sh
+B mandelbrot/ghc-compile.sh
+B mandelbrot/ghc-run.sh
+A mandelbrot/java-compile.sh
+A mandelbrot/java-run.sh
+B mandelbrot/mandelbrot.andys.java
+A mandelbrot/mandelbrot.clj
+A mandelbrot/mandelbrot.conses-too-much1.clj
+A mandelbrot/mandelbrot.conses-too-much2.clj
+B mandelbrot/mandelbrot.ghc-2.ghc
+B mandelbrot/mandelbrot.java-3.java
+B mandelbrot/mandelbrot.no-threads.java
+B mandelbrot/mandelbrot.no-threads.perl
+B mandelbrot/mandelbrot.perl
+B mandelbrot/mandelbrot.sbcl
+B mandelbrot/mandelbrot.sbcl_compile
+B mandelbrot/mandelbrot.sbcl_run
+  mandelbrot/other-code/speed-question.rtf
+O mandelbrot/other-code/speed06.clj
+O mandelbrot/other-code/speed07.clj
+O mandelbrot/other-code/speed08.clj
+O mandelbrot/other-code/speed09.clj
+O mandelbrot/other-code/speed10.clj
+A mandelbrot/sbcl-compile.sh
+A mandelbrot/sbcl-run.sh
+A misc/cat-n.clj
+A misc/clj-batch.sh
+  misc/in.txt
+A misc/notes.txt
+  misc/perl-batch.sh
+  misc/post2.txt
+  misc/sbcl-batch.sh
+  misc/test-sbcl-input.lisp
+  misc/tiny-fasta-input.txt
+A misc/too-much-memory.clj
+A misc/try.clj
+A misc/try.sh
+A rcomp/batch.sh
+A rcomp/java-compile.sh
+A rcomp/java-run.sh
+B rcomp/revcomp.java-4.java
+B rcomp/revcomp.perl-2.perl
+B rcomp/revcomp.sbcl
+B rcomp/revcomp.sbcl_compile
+B rcomp/revcomp.sbcl_run
+A rcomp/sbcl-compile.sh
+A rcomp/sbcl-run.sh
+A README
+A RESULTS
+  thread-ring/re-threadring-benchmark.rtf
+  thread-ring/thread-ring.clj

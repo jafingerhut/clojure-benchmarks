@@ -1,0 +1,106 @@
+iMac specs:
+
+2.16 GHz Intel Core 2 Duo (2 cores)
+2 GB RAM  667 MHz DDR2 SDRAM
+Running Mac OS X 10.5.7
+
+"The Computer Language Benchmarks Game" web site benchmark machine:
+
+Quad-core 2.4Ghz Intel Q6600
+4GB RAM
+250GB SATA II disk drive
+Ubuntu (TM) 9.04 Linux Kernel 2.6.28-11-generic
+
+
+Times are real / user / sys on my iMac
+
+        |  sbcl  |  perl  |   ghc  |  java  |   clj
+-----------------------------------------------------
+           noT      noT            |  noT
+long test on my iMac:
+rcomp   |   8.3  |  11.9  |        |   8.5  | no implementation yet
+        |   4.8  |   7.9  |        |   3.6  |
+        |   2.1  |   2.3  |        |   1.4  |
+
+long test on my iMac:
+mand-   | wrong  | out of |  32.7  |  28.6  | 340.4
+elbrot  | output | mem    |  59.3  |  54.4  | 350.5
+        |        | (?)    |   0.8  |   0.4  |   4.7
+
+           noT      noT            |    T
+long test on my iMac:
+k-nuc-  | 190.9  | 306.0  |  90.5  |  52.4  | 1677.6 (27m 57.6s)
+leotide | 187.9  | 302.7  | 130.8  |  89.6  | 2245.1 (37m 25.1s)
+        |   2.4  |   1.9  |   4.6  |   1.8  |   24.2 (    24.2s)
+
+Disappointing result: Replacing dna-char-to-code-val with a macro did
+not speed things up, and may have slowed them down:
+                                            | 1800.0 (30m  0.0s)
+                                            | 2317.0 (38m 37.0s)
+                                            |   30.6 (    30.6s)
+
+k-nucleotide long test on benchmark shootout machine:
+        | 164.9  | 249.8  |  52.0  |  20.6  |
+        | 164.9  | 246.7  | 112.5  |  58.8  |
+        |     ?  |     ?  |     ?  |     ?  |
+
+k-nucleotide medium test on my iMac:
+        |   8.6  |  12.7  |   3.9  |   3.9  |   64.2 / 69.6 / 69.1 / 67.1
+        |   7.9  |  12.5  |   5.4  |   5.7  |   98.4 / 92.9 / 93.1 / 88.1
+        |   0.6  |   0.1  |   0.3  |   0.2  |    1.5 /  1.6 /  1.6 /  1.7
+
+k-nucleotide medium test, all clj, modified-pmap with specified number
+of parallel threads, on my iMac:
+        |   1    |   2    |   3    |   4    |   5    |   6    |
+        |  74.9  |  70.7  |  77.2  |  76.8  |  82.5  |  77.8  |
+        | 125.9  | 122.1  | 134.6  | 134.0  | 143.4  | 134.0  |
+        |   2.5  |   2.8  |   2.8  |   2.3  |   3.1  |   2.3  |
+
+fasta
+
+thread-ring
+
+
+mandelbrot notes:
+
+sbcl version implemented with threads.  I run it with only 1 thread.
+I haven't debugged why it produces the wrong output yet.
+
+perl version implemented with threads, but my Perl implementation
+doesn't have threads, so I made a slight modification for a 1-thread
+version that doesn't use them at all.
+
+There are at least two versions of Java source code on shootout web
+site.  I'm using the one that uses threads, not the other one that
+avoids using threads.
+
+----------------------------------------------------------------------
+Hardware and software used
+
+iMac with Intel Core 2 Duo, 2.16 GHz, 2 GB RAM, Mac OS X 10.5.7
+
+% /opt/local/bin/sbcl --version
+SBCL 1.0.24
+% /opt/local/bin/perl -v
+
+This is perl, v5.8.9 built for darwin-2level
+
+Copyright 1987-2008, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+% java -version
+java version "1.6.0_13"
+Java(TM) SE Runtime Environment (build 1.6.0_13-b03-211)
+Java HotSpot(TM) 64-Bit Server VM (build 11.3-b02-83, mixed mode)
+
+% javac -version
+javac 1.6.0_13
+
+user> (clojure-version)
+"1.1.0-alpha-SNAPSHOT"

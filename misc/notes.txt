@@ -1,0 +1,39 @@
+About to create tally for length 1 substrings
+appeared after 0:58 - rsize=1.31GB
+
+With weird-tally, and only calculating the hash table for k=1, it
+finished!  It never went over about 1190M RSIZE according to top, and
+here is the output from 'time':
+      268.28 real       226.57 user         3.84 sys
+
+weird-tally has a kind of strange interface to the caller, needing to
+pass in an empty map.  weird-tally2 is a dead-simple wrapper around
+weird-tally that avoids the need for the caller to pass in a hash map
+at all.
+
+(defn weird-tally2
+  [things]
+  (weird-tally {} things))
+
+Its run time is even slightly better than weird-tally:
+      251.88 real       212.13 user         3.51 sys
+
+But, why does weird-tally2 avoid "keeping the head" of things, but
+tally does keep the head?
+
+If I added another line of code to weird-tally2 at the end that used
+the argument things, it would keep the head of things during the
+execution of weird-tally, right?  So how does Clojure "know" that
+'things' won't be used again in weird-tally2, but it doesn't "know"
+that 'things' won't be used again in tally?
+
+----------------------------------------------------------------------
+
+How much memory do Java strings take?  Is it 2 bytes per character,
+plus a few bytes of overhead per string?
+
+The following web page says that in the Hotspot 6 JVM, it is 2 bytes
+per character, plus 38 bytes, then round up to the next larger
+multiple of 8 bytes.
+
+http://www.javamex.com/tutorials/memory/string_memory_usage.shtml

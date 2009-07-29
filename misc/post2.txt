@@ -1,0 +1,42 @@
+Berlin:
+
+I've got a start at programs for solving two of the problems solved in many other languages on "The Computer Language Benchmarks Game" web site:
+
+http://shootout.alioth.debian.org
+
+In particular, the k-nucleotide problem has as a significant part of its computation time a similar task to what you have done -- tallying the number of times each unique item appears in a collection, using a map (which most programs on the web site implement with a mutable hash table, not a persistent map like in Clojure).
+
+I also have adapted some solutions for calculating complex numbers in the Mandelbrot set from a discussion in this group from several months back, and addded a bit of code so the input/output match what is expected for the Mandelbrot benchmark.  I don't have Clojure implementations for the other problems on the web site, yet (I'd be happy to add them to my collection if you'd like to send them to me).  Here are some comparisons of run times on my iMac with 2.2 GHz Intel Core 2 Duo, 2 GB RAM.  I make no claims that these are the best Clojure implementations that could be made, but I have done several versions that were slower and/or didn't finish due to running out of memory, before getting to the Clojure versions I have now.  This is intended to be viewed in a fixed width font.  You can also look at the RESULTS file in the zip/tar.gz files linked below, where you can get the full programs and test inputs I used.
+
+Times are real / user / sys on my iMac.  real means elapsed time from start to finish, which can be less than (user+sys) in the cases where the program explicitly uses both processor cores.
+
+        |  sbcl  |  perl  |   ghc  |  java  |   clj
+-----------------------------------------------------
+mand-   | wrong  | out of |  32.7  |  28.6  | 340.4
+elbrot  | output | mem    |  59.3  |  54.4  | 350.5
+        |        | (?)    |   0.8  |   0.4  |   4.7
+
+k-nuc-  | 190.9  | 306.0  |  90.5  |  52.4  | 1677.6 (27m 57.6s)
+leotide | 187.9  | 302.7  | 130.8  |  89.6  | 2245.1 (37m 25.1s)
+        |   2.4  |   1.9  |   4.6  |   1.8  |   24.2 (    24.2s)
+
+For these two programs at least, the Clojure implementations have a total CPU time (the sum of the 2nd and 3rd numbers reported above) of 6.5 times more for Clojure vs. Java on the mandelbrot program, and 25 times more for Clojure vs. Java on the k-nucleotide program.
+
+Here are links to zip and .tar.gz files containing the programs and input files used to produce these results.  They've been tested in Mac OS X, but I suspect they ought to work on Linux with little or no modification.  Windows users would need to do a little more to run the programs, but it shouldn't be difficult.  Sorry, they are each about 75 Mbytes, primarily because a few of the sample input and expected output files are quite large.
+
+http://homepage.mac.com/jafingerhut/files/language-shootout.tar.gz
+http://homepage.mac.com/jafingerhut/files/language-shootout.zip
+
+For the k-nucleotide program, I think this may be a fundamental issue with persistent implementations of maps / hash tables, but I'd be happy to find a better implementation of them, if that would help similar Clojure programs to speed up.  I haven't read Chris Okasaki's book on functional data structures yet, but I suspect a good understanding of its contents might lead to some improvements.  I've read that Okasaki's book doesn't spell out an implementation for hash tables, but leaves it as an exercise for the reader, so don't rush off and buy the book expecting to have a quick job of translating some pseudo-ML into Java.
+
+I thought it was interesting that even the Haskell entry to the k-nucleotide benchmark uses a *mutable* hash table (at least, I think they are from the discussion on the Wiki page linked below -- my Haskell knowledge isn't extensive enough to understand all of their code).  I don't think that is idiomatic Haskell, but the people writing the Haskell entry are apparently willing to forego pure functional programming when they can get significantly better performance from a mutable data structure.
+
+http://www.haskell.org/haskellwiki/Shootout/Knucleotide
+
+In terms of what instructions the processor is running every time a mutable hash table is updated, it is roughly "calculate the hash function, look up the corresponding entry in the hash table, compare the keys for exactness and perhaps traverse more entries looking for the exact match, then add 1 to the count when you find the matching entry".
+
+Clojure's persistent hash map is calculating the hash function, then I believe the basic idea is looking that hash value up in a tree of nodes, each of which is a Java array of 32 elements.  When it finds the matching entry in that tree, doing the "assoc" to "modify" the count of an entry involves copying that array of 32 elements, with one element in the copy different than the original, and then going back up the tree to the root, creating new copies of arrays of 32 elements, each with one element different than the original, pointing at the new copied child.  I'm sure there are special cases for small maps, but I think that is the behavior for sufficiently large hash maps.  If so, then it is pretty easy to see that the processor is doing significantly more work for each map update, i.e. assoc call, than any implementation that uses mutable hash tables.
+
+Of course, Clojure makes it easy to call Java code implementing mutable hash tables, if performance is all-important for such a task, and you realize the issues with having a mutable data structure vs. Clojure's persistent data structures.
+
+Andy

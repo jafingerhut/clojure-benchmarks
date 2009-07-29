@@ -1,0 +1,6 @@
+(with-open-file (in "in.txt")
+  (let (ln
+	(count 0))
+    (while (not (eql :eof (setf ln (read-line in nil :eof))))
+      (incf count))
+    (format t "Read ~D lines.~%" count)))
