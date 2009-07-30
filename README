@@ -10,8 +10,10 @@ distributed.
 
 I only have Clojure implementations for these benchmarks so far:
 
+fannkuch (preliminary, doesn't produce matching output yet)
 k-nucleotide (in directory knuc)
 mandelbrot
+reverse-complement (in directory rcomp -- but see rcomp/README)
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X
@@ -80,7 +82,7 @@ this command:
 sudo port install sbcl@+threads
 
 
-Here are the versions I currently have installed used to produce someo
+Here are the versions I currently have installed used to produce some
 of my benchmark results:
 
 % port installed ghc sbcl

@@ -9,8 +9,7 @@ BENCHMARK="fannkuch"
 
 # No Clojure version created yet.
 
-#ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_LANGUAGES="sbcl perl ghc java"
+ALL_LANGUAGES="sbcl perl ghc java clj"
 ALL_TESTS="quick long"
 
 LANGUAGES=""
@@ -19,7 +18,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|long) TESTS="$TESTS $1"
 	    ;;

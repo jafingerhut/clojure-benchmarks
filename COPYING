@@ -91,6 +91,8 @@ A CHANGELOG
 A COPYING
 A env.sh
 A fannkuch/batch.sh
+A fannkuch/clj-run.sh
+A fannkuch/fannkuch.clj-1.clj
 B fannkuch/fannkuch.ghc-5.ghc
 B fannkuch/fannkuch.java
 B fannkuch/fannkuch.perl
