@@ -1,0 +1,11 @@
+Jul 29, 2009
+
+Added some Clojure programs for the reverse-complement benchmark.  See
+rcomp/README for some memory issues I'm still trying to solve.
+
+Found a significant speedup for the Clojure program for the
+k-nucleotide problem.  Lesson: If you want to use the same constant
+map like a function many times, assign it to a Var once, and let-bind
+it where it is used to a name.  Don't just have the map there in the
+first element of a form -- Clojure will recreate a new map each time
+before calling it.

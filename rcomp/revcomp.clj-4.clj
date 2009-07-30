@@ -1,6 +1,19 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Jul 29, 2009
 
+;; I don't see why revcomp.clj-2.clj is using so much memory.  My next
+;; idea is to memory map the input file, and only copy small parts of
+;; it at a time into other buffers, reversed and complemented, for
+;; writing.  Not necessarily very Clojure-ish, but the input data is
+;; too big for the most straightforward kinds of solutions.
+
+;; Unfortunately, I don't think we can memory-map standard input.
+
+;; The next most memory-efficient thing I can think of is to slurp in
+;; part of the input file at a time -- only one DNA sequence's worth
+;; at a time, not a as a sequence of lines, but as a string or byte
+;; array.
+
 
 ;;(set! *warn-on-reflection* true)
 
@@ -8,6 +21,17 @@
   "Return true when the line l is a FASTA description line"
   [l]
   (= \> (first (seq l))))
+
+
+(defn split-with-2
+  [pred coll]
+  (loop [s (seq coll)
+	 reversed-take-while '()]
+    (if s
+      (if (pred (first s))
+	(recur (next s) (cons (first s) reversed-take-while))
+	[(reverse reversed-take-while) s])
+      [(reverse reversed-take-while) '()])))
 
 
 ;; TBD: Try avoiding the use of when-let, in case it might be causing
@@ -21,8 +45,8 @@
 				 lines))]
       (when lines
 	(let [[lines-before-next-desc next-desc-line-onwards]
-	      (split-with (fn [l] (not (fasta-description-line l)))
-			  (rest lines))]
+	      (split-with-2 (fn [l] (not (fasta-description-line l)))
+		            (rest lines))]
 	  (cons [(first lines) (apply str lines-before-next-desc)]
 		(fasta-desc-dna-str-pairs next-desc-line-onwards)))))))
 
@@ -38,8 +62,8 @@
 				 lines)]
       (when-let [lines (seq lines)]
 	(let [[lines-before-next-desc next-desc-line-onwards]
-	      (split-with (fn [l] (not (fasta-description-line l)))
-			  (rest lines))]
+	      (split-with-2 (fn [l] (not (fasta-description-line l)))
+		            (rest lines))]
 	  (cons [(first lines) (apply str lines-before-next-desc)]
 		(fasta-desc-dna-str-pairs next-desc-line-onwards)))))))
 )
@@ -102,9 +126,9 @@
 	bw (java.io.BufferedWriter. *out*)]
     (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
       (println-string-to-buffered-writer bw desc)
-      (println-string-to-buffered-writer bw dna-seq)
-;;      (print-reverse-complement-of-str-in-lines bw dna-seq
-;;						max-dna-chars-per-line)
+;;      (println-string-to-buffered-writer bw dna-seq)
+      (print-reverse-complement-of-str-in-lines bw dna-seq
+						max-dna-chars-per-line)
       (. bw flush))
     ))
 

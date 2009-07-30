@@ -1,0 +1,30 @@
+July 29, 2009
+
+revcomp.clj-4.clj is the best I've got so far, but it runs out of
+memory on the full size benchmark.
+
+long-input.txt contains 3 DNA sequences in FASTA format.  The first is
+50,000,000 characters long, the second is 75,000,000 characters long,
+and the third is 125,000,000 characters long.  Each needs to be
+reversed, have each character replaced with a different one, and
+printed out, so we need to store each of the strings one at a time,
+but it is acceptable to deallocate/garbage-collect the previous one
+when starting on the next.  I think my code should be doing that, but
+I don't know how to verify that.
+
+I've read that a Java String takes 2 bytes per character, plus about
+38 bytes of overhead per string.  That is about 250 Mbytes for the
+longest one.  I also read in a seq of lines, and these long strings
+are split into lines with 60 characters (plus a newline) each.  Thus
+the string's data needs to be stored at least twice temporarily --
+once for the many 60-character strings, plus the final long one.
+Also, the Java StringBuilder that Clojure's (str ...) function uses
+probably needs to be copied and reallocated periodically as it
+outgrows its current allocation.  So I could imagine needing about 3 *
+250 Mbytes temporarily, but that doesn't explain why my 1536 Mbytes of
+JVM memory are being exhausted.
+
+It would be possible to improve things by not creating all of the
+separate strings, one for each line, and then concatenating them
+together.  But first I'd like to explain why it is using so much,
+because I must be missing something.
