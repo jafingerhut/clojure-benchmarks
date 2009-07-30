@@ -1,0 +1,140 @@
+{-# OPTIONS -fglasgow-exts -O2 -optc-O3 #-}
+
+-- The Computer Language Benchmarks Game
+-- http://shootout.alioth.debian.org/
+-- contributed by Don Stewart, translation from the C version
+-- Parallelized by Reid Barton
+
+import Control.Concurrent
+import Control.Monad
+import Data.List
+import Foreign
+import System
+import GHC.Base
+import GHC.Ptr
+import GHC.IOBase
+
+main = do
+    n <- getArgs >>= return . read . head
+    when (n <= 1) $ putStrLn "Pfannkuchen(1) = 0" >> exitWith ExitSuccess
+    fannkuchSmall n
+    chan <- newChan :: IO (Chan Int)
+    -- The C version ignores permutations ending in n-1,
+    -- so let's do so even more efficiently.
+    forM_ [ (l1, l2)
+          | l2 <- [0..n-2]
+          , l1 <- [0..n-1]
+          , l1 /= l2 ]
+          $ \(l1, l2) -> forkIO (fannkuch n l1 l2 >>= writeChan chan)
+    k <- (maximum . take ((n-1)^2)) `fmap` getChanContents chan
+    putStrLn $ "Pfannkuchen(" ++ show n ++ ") = " ++ show (k - 1)
+
+-- Separate loop to print the small values
+fannkuchSmall n@(I# n#) = do
+    perm            <- mallocArray n       :: IO (Ptr Int)
+    (Ptr c#)        <- mallocArray n       :: IO (Ptr Int)
+    perm1@(Ptr p1#) <- newArray [0 .. n-1] :: IO (Ptr Int)
+    (Ptr rP)        <- newArray [n]        :: IO (Ptr Int)
+
+    let go didpr = when (didpr < (30 :: Int)) $ do
+            ppr 0 n perm1 >> putStr "\n"
+
+            IO $ \s ->
+                case readIntOffAddr# rP 0# s of
+                    (# s, r# #) -> case setcount c# r# s of
+                        (# s, _ #) -> case writeIntOffAddr# rP 0# 1# s of
+                            s -> (# s, () #)
+
+            done <- IO $ \s -> rot rP n# p1# c# s
+            if done then return () else go (didpr+1)
+    go 0
+
+fannkuch n@(I# n#) l1 l2 = do       -- Only consider permutations ending with l1 l2.
+    let startArray = ([0..n-1] \\ [l1, l2]) ++ [l1, l2]
+    perm            <- mallocArray n       :: IO (Ptr Int)
+    (Ptr c#)        <- mallocArray n       :: IO (Ptr Int)
+    perm1@(Ptr p1#) <- newArray startArray :: IO (Ptr Int)
+    (Ptr rP)        <- newArray [n]        :: IO (Ptr Int)
+    (Ptr flipsMaxP) <- newArray [0]        :: IO (Ptr Int)
+
+    let go = do
+            IO $ \s ->
+                case readIntOffAddr# rP 0# s of
+                    (# s, r# #) -> case setcount c# r# s of
+                        (# s, _ #) -> case writeIntOffAddr# rP 0# 1# s of
+                            s -> (# s, () #)
+
+            t <- IO $ \s ->
+                case readIntOffAddr# p1# 0# s of
+                    (# s, p1 #) -> (# s, not (p1 ==# 0#) #)
+
+            when t $ exchange n perm perm1 flipsMaxP
+
+            fm   <- IO $ \s -> case readIntOffAddr# flipsMaxP 0# s of
+                                (# s, x #) -> (# s, I# x #)
+            done <- IO $ \s -> rot rP (n# -# 2#) p1# c# s
+            if done then return fm else go
+    go
+
+------------------------------------------------------------------------
+
+exchange n p@(Ptr a) p1@(Ptr b) fm = do
+    copyArray (p `advancePtr` 1) (p1 `advancePtr` 1) (n-1)
+    IO $ \s ->
+        case readIntOffAddr# b 0# s  of { (# s, k #) ->
+        case doswap k a 0# s         of { (# s, f #) ->
+        case readIntOffAddr# fm 0# s of { (# s, m #) ->
+        if m <# f then case writeIntOffAddr# fm 0# f s of s -> (# s, () #)
+                  else (# s, () #)
+        } } }
+{-# INLINE exchange #-}
+
+doswap k a f s =
+    case swap 1# (k -# 1#) a s    of { (# s, _ #) ->
+    case readIntOffAddr# a k s    of { (# s, j #) ->
+    case writeIntOffAddr# a k k s of { s          ->
+    if k /=# 0# then doswap j a (f +# 1#) s else (# s, (f +# 1#) #)
+    } } }
+{-# INLINE doswap #-}
+
+swap i j a s =
+    if i <# j then case readIntOffAddr#  a i s   of { (# s, x #) ->
+                   case readIntOffAddr#  a j s   of { (# s, y #) ->
+                   case writeIntOffAddr# a j x s of { s          ->
+                   case writeIntOffAddr# a i y s of { s          ->
+                   swap (i +# 1#) (j -# 1#) a s
+                   } } } }
+              else (# s, () #)
+{-# INLINE swap #-}
+
+loop r i a s =
+    if i <# r then case readIntOffAddr# a (i +# 1#) s of
+                    (# s, x #) -> case writeIntOffAddr# a i x s of
+                        s -> loop r (i +# 1#) a s
+              else (# s, () #)
+{-# INLINE loop #-}
+
+setcount p r s =
+    if r ==# 1# then (# s, () #)
+                else case writeIntOffAddr# p (r -# 1#) r s of
+                        s -> setcount p (r -# 1#) s
+{-# INLINE setcount #-}
+
+rot rP n a cp s =
+  case readIntOffAddr# rP 0# s of { (# s, r #) ->
+  if r ==# n then (# s, True #)
+             else case readIntOffAddr# a 0# s             of { (# s, p0 #) ->
+                  case loop r 0# a s                      of { (# s, _ #)  ->
+                  case writeIntOffAddr# a r p0 s          of { s           ->
+                  case readIntOffAddr# cp r s             of { (# s, cr #) ->
+                  case writeIntOffAddr# cp r (cr -# 1#) s of { s           ->
+                  if cr -# 1# ># 0# then (# s, False #)
+                                    else case inc s of s -> rot rP n a cp s
+  } } } } } }
+  where inc s = case readIntOffAddr# rP 0# s of
+                  (# s, x #) -> writeIntOffAddr# rP 0# (x +# 1#) s
+{-# INLINE rot #-}
+
+ppr i n p = when (i < n) $ do
+    putStr . show . (+1) =<< peek (p `advancePtr` i)
+    ppr (i+1) n p
