@@ -87,8 +87,24 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 
+A CHANGELOG
 A COPYING
 A env.sh
+A fannkuch/batch.sh
+B fannkuch/fannkuch.ghc-5.ghc
+B fannkuch/fannkuch.java
+B fannkuch/fannkuch.perl
+B fannkuch/fannkuch.sbcl-2.sbcl
+B fannkuch/fannkuch.sbcl-2.sbcl_compile
+B fannkuch/fannkuch.sbcl-2.sbcl_run
+B fannkuch/ghc-compile.sh
+B fannkuch/ghc-run.sh
+A fannkuch/java-compile.sh
+A fannkuch/java-run.sh
+B fannkuch/long-expected-output.txt
+B fannkuch/quick-expected-output.txt
+A fannkuch/sbcl-compile.sh
+A fannkuch/sbcl-run.sh
 A fasta/batch.sh
 B fasta/fasta.ghc-2.ghc
 B fasta/fasta.java-2.java
@@ -112,10 +128,11 @@ B knuc/ghc-run.sh
 A knuc/java-compile.sh
 A knuc/java-run.sh
 B knuc/knucleotide.andys.java
-A knuc/knucleotide.clj
 A knuc/knucleotide.clj-2.clj
 A knuc/knucleotide.clj-3.clj
 A knuc/knucleotide.clj-4.clj
+A knuc/knucleotide.clj-5.clj
+A knuc/knucleotide.clj-6.clj
 B knuc/knucleotide.ghc-3.ghc
 B knuc/knucleotide.java-3.java
 B knuc/knucleotide.perl-2.perl
@@ -160,8 +177,17 @@ A misc/too-much-memory.clj
 A misc/try.clj
 A misc/try.sh
 A rcomp/batch.sh
+A rcomp/clj-run.sh
+B rcomp/ghc-compile.sh
+B rcomp/ghc-run.sh
 A rcomp/java-compile.sh
 A rcomp/java-run.sh
+A rcomp/README
+A rcomp/revcomp.clj-1.clj
+A rcomp/revcomp.clj-2.clj
+A rcomp/revcomp.clj-3.clj
+A rcomp/revcomp.clj-4.clj
+B rcomp/revcomp.ghc-2.ghc
 B rcomp/revcomp.java-4.java
 B rcomp/revcomp.perl-2.perl
 B rcomp/revcomp.sbcl
@@ -171,5 +197,6 @@ A rcomp/sbcl-compile.sh
 A rcomp/sbcl-run.sh
 A README
 A RESULTS
+A run-all.sh
   thread-ring/re-threadring-benchmark.rtf
   thread-ring/thread-ring.clj
