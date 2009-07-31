@@ -5,11 +5,16 @@ source ../env.sh
 OUTPUT_DIR=./output
 mkdir $OUTPUT_DIR
 
-BENCHMARK="fasta"
+BENCHMARK="regex-dna"
 
-#ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_LANGUAGES="sbcl perl ghc java"
-ALL_TESTS="quick medium long"
+# I need to figure out a way to get CL-PPCRE available in SBCL,
+# preferably with additional installation instructions for people
+# retrieving this and trying it out for themselves.
+
+# Also how to get module Text.Regex.PCRE available in GHC.
+
+ALL_LANGUAGES="perl java clj"
+ALL_TESTS="quick long"
 
 LANGUAGES=""
 TESTS=""
@@ -19,7 +24,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|knuc|medium|regexdna|long) TESTS="$TESTS $1"
+	quick|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -47,18 +52,6 @@ echo "TESTS=$TESTS"
 
 for T in $TESTS
 do
-    case $T in
-	quick)    N=1000
-	    ;;
-	knuc)     N=10000
-	    ;;
-	medium)   N=1000000
-	    ;;
-	regexdna) N=5000000
-	    ;;
-	long)     N=25000000
-	    ;;
-    esac
     for L in $LANGUAGES
     do
 	case $L in
@@ -70,20 +63,21 @@ do
 	    sbcl) CMD=./sbcl-run.sh
 		( ./sbcl-compile.sh ) >& ${OUTPUT_DIR}/sbcl-compile-log.txt
 		;;
-	    perl) CMD="$PERL fasta.perl-4.perl"
+	    perl) CMD="$PERL regexdna.perl-4.perl"
 		;;
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
 	esac
-
+	
 	echo
 	echo "benchmark: $BENCHMARK"
 	echo "language: $L"
 	echo "test: $T"
+	IN=${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
+	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
 	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done

@@ -1,0 +1,11 @@
+(proclaim
+ '(optimize
+   (speed 3)
+   (safety 0)
+   (debug 0)
+   (compilation-speed 0)
+   (space 0)))
+
+(main)
+
+(quit)

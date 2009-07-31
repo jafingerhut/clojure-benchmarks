@@ -1,0 +1,170 @@
+{-# LANGUAGE ForeignFunctionInterface, BangPatterns #-}
+{-# OPTIONS_GHC -O2 #-}
+
+-- The Computer Language Benchmarks Game
+-- http://shootout.alioth.debian.org/
+--
+-- contributed by Sergei Matusevich 2007
+-- modified by Tim Newsham
+-- modified by Stephen Blackheath 2009, v1.0
+
+-- Compile command: ghc -o regex regex.hs -threaded --make
+-- Run command:     ./regex +RTS -N4       (quad core)
+--                  ./regex                (single core)
+
+
+import Control.Concurrent
+import Control.Parallel
+import Control.Parallel.Strategies
+import Control.Monad
+import Foreign.Storable
+import Foreign.Marshal.Alloc
+import Foreign.Marshal.Array
+import Foreign.Ptr
+import Foreign.ForeignPtr
+import Foreign.C.Types
+import Text.Regex.PCRE          -- requires haskell-regex-pcre-builtin
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Internal as BI
+import System.IO.Unsafe
+import Data.Array
+import Debug.Trace
+import Data.List
+import Data.Word
+
+variants = [
+  "agggtaaa|tttaccct",
+  "[cgt]gggtaaa|tttaccc[acg]",
+  "a[act]ggtaaa|tttacc[agt]t",
+  "ag[act]gtaaa|tttac[agt]ct",
+  "agg[act]taaa|ttta[agt]cct",
+  "aggg[acg]aaa|ttt[cgt]ccct",
+  "agggt[cgt]aa|tt[acg]accct",
+  "agggta[cgt]a|t[acg]taccct",
+  "agggtaa[cgt]|[acg]ttaccct" ]
+
+subs = [
+    ("B", "(c|g|t)"),
+    ("D", "(a|g|t)"),
+    ("H", "(a|c|t)"),
+    ("K", "(g|t)"),
+    ("M", "(a|c)"),
+    ("N", "(a|c|g|t)"),
+    ("R", "(a|g)"),
+    ("S", "(c|g)"),
+    ("V", "(a|c|g)"),
+    ("W", "(a|t)"),
+    ("Y", "(c|t)")]
+
+main = do
+  file <- B.getContents
+  let [s1,s2,s3] = map (B.concat . tail) $
+                groupBy notHeader $ B.split (BI.c2w '\n') file
+      showVars r = r ++ ' ' : show ((s2 =~ r :: Int) + (s3 =~ r :: Int))
+      results = map showVars variants ++ [
+                  "",
+                  show $ B.length file,
+                  show $ B.length s1 + B.length s2 + B.length s3]
+      r2 = flip map (zip [1..] results) $ \(idx, a) ->
+          trace ("start "++show idx) () `seq` (a `using` rnf) `seq` trace ("end "++show idx) () `seq` a
+  -- Ensure that the data blocks are fully evaluated before we start
+  -- executing things in parallel, since they all depend on them
+  return $! (s1 `par` s2 `par` s3) `seq` s1 `seq` s2 `seq` s3
+  mapM_ putStrLn $ parList rnf results `seq` results
+
+  let chunks = fragment 5000 s2  -- break into chunks to parallelize, which
+                                 -- is possible as our regexes are 1 char long
+  chunks' <- parallel $ map substituteAll chunks  -- do regex substitutions
+  print $ B.length s1 + B.length s3 + B.length (B.concat chunks')
+  where notHeader _ s = B.null s || B.head s /= (BI.c2w '>')
+
+-- Drop in replacement for sequence
+parallel :: [IO a] -> IO [a]
+parallel actions = do
+    vars <- forM actions $ \action -> do
+        var <- newEmptyMVar
+        forkIO $ do
+            answer <- action
+            return $! answer
+            putMVar var answer
+        return var
+    forM vars takeMVar
+
+fragment :: Int -> B.ByteString -> [B.ByteString]
+fragment chunkSize bs =
+    let (start, rem) = B.splitAt chunkSize bs
+    in  if B.null rem
+            then [start]
+            else start : fragment chunkSize rem
+
+-- Precompile regexes
+subRegexes :: [(Regex, B.ByteString)]
+subRegexes = flip map subs $ \(pattern, sub) ->
+    (makeRegex pattern :: Regex, B.pack (map BI.c2w sub))
+
+substituteAll :: B.ByteString -> IO B.ByteString
+substituteAll !txt = do
+    let BI.PS srcFP srcOff srcLen = txt
+    withForeignPtr srcFP $ \src0 -> do
+        let src = src0 `plusPtr` srcOff
+            -- Capacity of -1 guarantees that a new buffer will be allocated
+        (dst, dstLen, _) <- foldM substitute_ (src, srcLen, -1) subRegexes
+        dstFP <- newForeignPtr finalizerFree dst
+        return $ BI.PS dstFP 0 dstLen
+
+foreign import ccall unsafe "string.h memmove" memmove
+    :: Ptr Word8 -> Ptr Word8 -> CSize -> IO (Ptr Word8)
+
+-- A function that does nothing
+foreign import ccall unsafe "static unistd.h &getpid" c_null_finalizer
+    :: FunPtr (Ptr Word8 -> IO ())
+
+-- Do a single regex substitution, returning the modified string
+substitute_ :: (Ptr Word8, Int, Int) -> (Regex, B.ByteString) -> IO (Ptr Word8, Int, Int)
+substitute_ (src, srcLen, srcCap) (regex, sub) = do
+    -- Make a new string given the input string, regex match positions, and
+    -- string to substitute
+    -- Turn the source buffer into a byte string to pass to 'match'
+    srcFP <- newForeignPtr c_null_finalizer src
+    let srcBS = BI.PS srcFP 0 srcLen
+        am :: Array Int (MatchOffset, MatchLength)
+        AllMatches am = match regex srcBS
+        (start, end) = bounds am
+        matches = end + 1
+        BI.PS subFP subOff subLen = sub
+        newLength = srcLen + matches * (subLen - 1)
+    withForeignPtr subFP $ \sub0 -> do
+        let sub = sub0 `plusPtr` subOff
+        (dst, dstCap) <-
+            if newLength > srcCap
+                then do
+                    let dstCap = if srcCap < 0
+                            then srcLen * 2
+                            else srcCap * 2
+                    dst <- mallocBytes dstCap
+                    return (dst, dstCap)
+                else
+                    return (src, srcCap)
+
+        let copy :: Int -> Int -> Int -> IO ()
+            copy idx sOff dOff | idx < 0 = do
+                let chunkLen = sOff
+                when (dst /= src) $
+                    BI.memcpy dst src (fromIntegral chunkLen)
+
+            copy idx sOff dOff = do
+                let (matchOff, _) = am ! idx
+                    sOff' = matchOff + 1
+                    chunkLen =  sOff - sOff'
+                    dOff' = dOff - chunkLen
+                memmove (dst `plusPtr` dOff') (src `plusPtr` sOff')
+                        (fromIntegral chunkLen)
+                let dOff'' = dOff' - subLen
+                    sOff'' = sOff' - 1
+                BI.memcpy (dst `plusPtr` dOff'') sub
+                        (fromIntegral subLen)
+                copy (idx-1) sOff'' dOff''
+
+        copy end srcLen newLength
+        when (dst /= src && srcCap >= 0) $ free src
+        return (dst, newLength, dstCap)

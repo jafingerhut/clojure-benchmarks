@@ -31,13 +31,13 @@ do_java_runs () {
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
 do_java_runs mandelbrot quick medium long
-do_java_runs fasta quick knuc medium long
+do_java_runs fasta quick knuc medium regexdna long
 
 # k-nucleotide (knuc) and reverse-complement (rcomp) have input files
 # that are produced as output from the fasta benchmark programs.
 cd knuc
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-mv ../fasta/knuc-expected-output.txt quick-input.txt
+ln -s ../fasta/knuc-expected-output.txt quick-input.txt
 ln -s ../fasta/medium-expected-output.txt medium-input.txt
 ln -s ../fasta/long-expected-output.txt long-input.txt
 cd ..
@@ -57,8 +57,14 @@ cd rlines
 sed -n -e '/^>THREE/,$p' ../fasta/long-expected-output.txt >| long-input.txt
 cd ..
 
+cd regex-dna
+ln -s ../fasta/knuc-expected-output.txt quick-input.txt
+ln -s ../fasta/regexdna-expected-output.txt long-input.txt
+cd ..
+
 do_java_runs knuc quick medium long
 do_java_runs rcomp quick medium long
 do_java_runs rlines long
+do_java_runs regex-dna quick long
 
 exit 0

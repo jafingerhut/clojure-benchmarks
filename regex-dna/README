@@ -1,0 +1,5 @@
+July 31, 2009
+
+I'm surprised that regexdna.clj-1.clj is noticeably faster than
+regexdna.clj-2.clj.  Perhaps using a function as the second arg to
+re-gsub is significantly slower?
