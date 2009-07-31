@@ -28,3 +28,56 @@ It would be possible to improve things by not creating all of the
 separate strings, one for each line, and then concatenating them
 together.  But first I'd like to explain why it is using so much,
 because I must be missing something.
+
+
+----------------------------------------------------------------------
+
+Jul 30, 2009
+
+Using jconsole, I was able to determine that when doing this run:
+
+./batch.sh clj long
+
+with clj-run.sh using revcomp.clj-5.clj
+
+Size of the 3 FASTA DNA sequences in the long-input.txt file:
+
+>ONE Homo sapiens alu
+lines: 833,334, 60 characters each except for last
+total characters: 50,000,000
+>TWO IUB ambiguity codes
+lines: 1,250,000, 60 chars each
+total characters: 75,000,000
+>THREE Homo sapiens frequency
+lines: 2083334, 60 characters each except for last
+total characters: 125,000,000
+
+During processing of the first FASTA DNA sequence, the long term
+heap usage was always at least 300 Mbytes.  Why not closer to 100
+Mbytes?
+
+During processing of the second FASTA DNA sequence, the long term heap
+usage was always at least about 500 Mbytes.
+
+During the third, it goes up to around 900 Mbytes, and spends way way
+too much time garbage collecting, at least with these parameters on
+the 'java' command line:
+
+----------------------------------------
+JAVA=java
+JVM_MEM_OPTS="-Xmx1536m -XX:NewRatio=2 -XX:+UseParallelGC"
+JMX_MONITORING=-Dcom.sun.management.jmxremote
+JAVA_PROFILING=
+CLOJURE_JAR_DIR=/Users/andy/.clojure
+CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar
+CLJ_PROG=revcomp.clj-5.clj
+
+$JAVA -server $JVM_MEM_OPTS $JMX_MONITORING ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main $CLJ_PROG "$@"
+----------------------------------------
+
+Why does it generate *so much* garbage?  By comparison, the program
+batchcat.clj-1.clj runs in this much time on long-input.txt.
+
+real	2m32.357s
+user	1m23.952s
+sys	0m14.407s

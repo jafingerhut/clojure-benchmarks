@@ -2,4 +2,6 @@
 
 source ../env.sh
 
-$JAVA -server -Xmx2048m revcomp "$@"
+JVM_OPTS="-client -Xmx544m"
+
+$JAVA $JVM_OPTS revcomp "$@"

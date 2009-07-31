@@ -48,7 +48,17 @@ ln -s ../fasta/medium-expected-output.txt medium-input.txt
 ln -s ../fasta/long-expected-output.txt long-input.txt
 cd ..
 
+# rlines isn't one of the benchmarks from the shootout web site.  I
+# created it as a simplified version of reverse-complement, to try to
+# figure out why Clojure was using so much memory for one of my
+# earlier solution attempts.  I'm keeping it around for future
+# reference.
+cd rlines
+sed -n -e '/^>THREE/,$p' ../fasta/long-expected-output.txt >| long-input.txt
+cd ..
+
 do_java_runs knuc quick medium long
 do_java_runs rcomp quick medium long
+do_java_runs rlines long
 
 exit 0
