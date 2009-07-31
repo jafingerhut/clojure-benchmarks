@@ -1,5 +1,9 @@
 July 31, 2009
 
+There isn't a whole lot that is Clojure-specific to this test -- most
+of it is exercising the Java regular expression libraries, although
+with Clojure-specific interfaces to them.
+
 I'm surprised that regexdna.clj-1.clj is noticeably faster than
 regexdna.clj-2.clj.  Perhaps using a function as the second arg to
 re-gsub is significantly slower?

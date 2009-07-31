@@ -87,6 +87,16 @@ sys	0m14.407s
 
 July 31, 2009
 
+revcomp.clj-6.clj is the best I've got so far.  It doesn't allocate
+memory very quickly at all, especially compared to revcomp.clj-5.clj,
+improving performance dramatically.
+
+Probably the best improvement that could be made now is not to read in
+the input file using line-seq, but something more like slurp, except
+that is specific to FASTA format files, so that it can stop and return
+each DNA sequence as a big long string.  That could significantly
+reduce the memory required.
+
 This is a very useful program for determining where your heap memory
 is going:
 
