@@ -18,9 +18,9 @@ Times are real / user / sys on my iMac
 -----------------------------------------------------
            noT      noT            |  noT
 long test on my iMac:
-rcomp   |   8.3  |  11.9  |        |   8.5  | current
-        |   4.8  |   7.9  |        |   3.6  | implementation
-        |   2.1  |   2.3  |        |   1.4  | crashes on long test
+rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |  55.0
+        |   4.8  |   7.9  |   5.0  |   3.9  |  74.0  clj =
+        |   2.1  |   2.3  |   4.1  |   1.3  |   4.3  15.1 x java
 
 long test on my iMac:
 mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
@@ -69,8 +69,8 @@ mins benchmark test language
   3       knuc long sbcl
   2 mandelbrot long sbcl
   1.5     knuc long ghc
+  1.3    rcomp long clj
   0.9     knuc long java
-  ?      rcomp long clj (runs out of memory or crahes with IOException)
 
 
 

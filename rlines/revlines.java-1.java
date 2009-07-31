@@ -1,5 +1,8 @@
-// Purpose: Contrast library LinkedList with the manual solutions.
-//          The link management infrastructure is completely hidden.
+// Author: J. Andrew Fingerhut
+// July 31, 2009
+
+// Inspired by a program from the Internet labeled as follows, but
+// significantly modified since then.
 // Author : Fred Swartz, 21 Feb 2006, placed in the public domain.
 
 import java.io.*;

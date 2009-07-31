@@ -13,7 +13,7 @@ I only have Clojure implementations for these benchmarks so far:
 fannkuch (preliminary, doesn't produce matching output yet)
 k-nucleotide (in directory knuc)
 mandelbrot
-reverse-complement (in directory rcomp -- but see rcomp/README)
+reverse-complement (in directory rcomp)
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X

@@ -189,6 +189,8 @@ A rcomp/revcomp.clj-1.clj
 A rcomp/revcomp.clj-2.clj
 A rcomp/revcomp.clj-3.clj
 A rcomp/revcomp.clj-4.clj
+A rcomp/revcomp.clj-5.clj
+A rcomp/revcomp.clj-6.clj
 B rcomp/revcomp.ghc-2.ghc
 B rcomp/revcomp.java-4.java
 B rcomp/revcomp.perl-2.perl
@@ -199,6 +201,12 @@ A rcomp/sbcl-compile.sh
 A rcomp/sbcl-run.sh
 A README
 A RESULTS
+A rlines/batch.sh
+A rlines/clj-run.sh
+A rlines/java-compile.sh
+A rlines/java-run.sh
+A rlines/revlines.clj-1.clj
+A rlines/revlines.java-1.java
 A run-all.sh
   thread-ring/re-threadring-benchmark.rtf
   thread-ring/thread-ring.clj

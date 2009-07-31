@@ -81,3 +81,47 @@ batchcat.clj-1.clj runs in this much time on long-input.txt.
 real	2m32.357s
 user	1m23.952s
 sys	0m14.407s
+
+
+----------------------------------------------------------------------
+
+July 31, 2009
+
+This is a very useful program for determining where your heap memory
+is going:
+
+jmap -histo <java_process_id>
+
+Or put a -F before -histo if the first attempt fails.
+
+Also, jconsole is very nice to attach to a running program to get an
+idea of how fast it is allocating memory, and garbage collecting.
+
+I learned that Clojure's cons and LazyPersistentList are 48 bytes per
+element, which for revcomp.clj-6.clj is one for each line of the
+current DNA sequence.  That turns out to be almost as much memory as
+the DNA sequence data itself in the input file!  Also it looks like
+Java Strings are 2 bytes per character, plus 40 bytes of overhead per
+String.  It all adds up pretty quickly.  Let's look at the memory
+required for the longest of the three DNA sequences in the long input
+file:
+
+>THREE Homo sapiens frequency
+lines: 2083334, 60 characters each except for last
+total characters: 125,000,000
+
+125,000,000 characters * (2 bytes/char) = 300,000,000 bytes
+
+2,083,334 lines * (2 Clojure cons/line) * (48 bytes/cons) = 200,000,064 bytes
+That much more for the LazyPersistentList = 200,000,064 bytes
+
+(One is for the lines in the original order, the other for the
+reversed version.  I don't know yet why there are 2 more per line.)
+
+2,083,334 Java Strings * (40 bytes/string) = 83,333,360 bytes
+
+Grand total = 747 Mbytes
+
+Obviously I could save quite a bit if I just stored a DNA sequence as
+an array of Java bytes, with no lists or lazy sequences involved.
+That would get it down to about 150 Mbytes.
