@@ -1,9 +1,9 @@
 #! /bin/bash
 
-MAKE_EXPECTED_OUTPUT_FILES=1
+MAKE_EXPECTED_OUTPUT_FILES=0
 if [ $# -eq 1 ]
 then
-    MAKE_EXPECTED_OUTPUT_FILES=0
+    MAKE_EXPECTED_OUTPUT_FILES=1
 fi
 
 # Some of the input and expected output files are quite large.  Rather
