@@ -22,9 +22,15 @@ mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
 elbrot  | output | mem    |  59.3  |  54.4  | 326.1  clj (user+sys) = 
         |        | (?)    |   0.8  |   0.4  |   3.2  6.01 x java (user+sys)
 
+                                                clj-4
 n-      |  39.3  |        |        |  25.9  | 3751.1
 body    |  39.1  |        |        |  25.9  | 3752.8  clj (user+sys) = 
         |   0.1  |        |        |   0.1  |   34.0  146 x java (user+sys)
+
+                                                clj-5
+n-      |        |        |        |        | 3560.2
+body    |        |        |        |        | 3562.1  clj (user+sys) =
+        |        |        |        |        |   34.0  138.3 x java (user+sys)
 
 regex-  |        |  74.0  |        |  24.6  |  52.3
 dna     |        |  73.3  |        |  40.1  |  52.9  clj (user+sys) =
