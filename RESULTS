@@ -17,6 +17,19 @@ the tests, unless otherwise stated.
 
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
+
+mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
+elbrot  | output | mem    |  59.3  |  54.4  | 326.1  clj (user+sys) = 
+        |        | (?)    |   0.8  |   0.4  |   3.2  6.01 x java (user+sys)
+
+n-      |  39.3  |        |        |  25.9  | 3751.1
+body    |  39.1  |        |        |  25.9  | 3752.8  clj (user+sys) = 
+        |   0.1  |        |        |   0.1  |   34.0  146 x java (user+sys)
+
+regex-  |        |  74.0  |        |  24.6  |  52.3
+dna     |        |  73.3  |        |  40.1  |  52.9  clj (user+sys) =
+        |        |   0.6  |        |   1.3  |   1.2  1.3 x java (user+sys)
+
            noT      noT            |  noT
                                                 clj-6
 rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |  55.0
@@ -27,14 +40,6 @@ rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |  55.0
 rcomp   |        |        |        |        |  53.8
         |        |        |        |        |  51.3  clj (user+sys) =
         |        |        |        |        |   2.1  10.3 x java (user+sys)
-
-regex-  |        |  74.0  |        |  24.6  |  52.3
-dna     |        |  73.3  |        |  40.1  |  52.9  clj (user+sys) =
-        |        |   0.6  |        |   1.3  |   1.2  1.3 x java (user+sys)
-
-mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
-elbrot  | output | mem    |  59.3  |  54.4  | 326.1  clj (user+sys) = 
-        |        | (?)    |   0.8  |   0.4  |   3.2  6.01 x java (user+sys)
 
            noT      noT            |    T
 k-nuc-  | 190.9  | 306.0  |  90.5  |  53.5  | 1286.4 (21m 26.4s)
