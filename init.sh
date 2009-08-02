@@ -84,5 +84,6 @@ do_java_runs knuc quick medium long
 do_java_runs rcomp quick medium long
 do_java_runs rlines long
 do_java_runs regex-dna quick long
+do_java_runs n-body quick medium long
 
 exit 0
