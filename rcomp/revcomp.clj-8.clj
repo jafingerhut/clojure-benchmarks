@@ -150,12 +150,11 @@
       ;; complement-dna-char-fn, but when I tested that, the program
       ;; spent a lot of time running the hashCode method on
       ;; characters.  I'm hoping this is faster.
-      complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
-      complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
+      complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)]
   (loop [[desc-str dna-seq-str more] (fasta-slurp-br br)]
     (println-string-to-buffered-writer bw desc-str)
     (print-reverse-complement-of-str-in-lines bw dna-seq-str
-					      complement-dna-char-fn
+					      complement-dna-char-vec
 					      max-dna-chars-per-line)
     (when more
       (recur (fasta-slurp-br br))))
