@@ -1,5 +1,11 @@
 #! /bin/bash
 
+MAKE_EXPECTED_OUTPUT_FILES=1
+if [ $# -eq 1 ]
+then
+    MAKE_EXPECTED_OUTPUT_FILES=0
+fi
+
 # Some of the input and expected output files are quite large.  Rather
 # than waste space on github, it seems best to use one of the
 # benchmark programs to generate them, where possible.  I'll pick
@@ -28,9 +34,10 @@ do_java_runs () {
     cd ..
 }
 
-# These don't have input files, just command line parameters that vary
-# for the different "size" tests.
-do_java_runs mandelbrot quick medium long
+# Make all input files
+
+# There are no fasta input files, but its output files are the input
+# files for several other benchmarks.
 do_java_runs fasta quick knuc medium regexdna long
 
 # k-nucleotide (knuc) and reverse-complement (rcomp) have input files
@@ -61,6 +68,17 @@ cd regex-dna
 ln -s ../fasta/knuc-expected-output.txt quick-input.txt
 ln -s ../fasta/regexdna-expected-output.txt long-input.txt
 cd ..
+
+if [ $MAKE_EXPECTED_OUTPUT_FILES == 0 ]
+then
+    exit 0
+fi
+
+# Make all expected input files
+
+# These don't have input files, just command line parameters that vary
+# for the different "size" tests.
+do_java_runs mandelbrot quick medium long
 
 do_java_runs knuc quick medium long
 do_java_runs rcomp quick medium long
