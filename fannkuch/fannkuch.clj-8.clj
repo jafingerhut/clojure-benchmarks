@@ -136,6 +136,10 @@
   (into-array Integer/TYPE s))
 
 
+;; This is copied from clojure.contrib.combinatorics/iter-perm, and
+;; then modified so that the parameter is a Java int array, and this
+;; procedure modifies it in place.
+
 (defn next-lex-permutation!
   "Modify the parameter a, expected to be a Java array of int'sso that it becomes the next permutation in lexicographic order.  Return the array, or nil if the input array was the last one in lexicographic order."
   [#^ints a]

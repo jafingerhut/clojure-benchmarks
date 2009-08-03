@@ -18,16 +18,15 @@ the tests, unless otherwise stated.
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
 
-                                                clj-6
-fann-   |  81.0  |    .   | 103.4  |  ??.   | 7792.0 
-kuch    |  80.8  |    .   | 199.1  |  69.2  | 7812.7  clj (user+sys) = 
-        |   0.1  |    .   |   0.7  |   0.2  |  532.7  120 x java (user+sys)
+                                                clj-8 uses mutable Java arrays
+fann-   |  81.0  |    .   | 103.4  |  59.3  | 4777.7 
+kuch    |  80.8  |    .   | 199.1  |  69.2  | 4719.1  clj (user+sys) = 
+        |   0.1  |    .   |   0.7  |   0.2  |   16.7  68 x java (user+sys)
 
-medium test on MacBook Pro:
-                                                clj-6
-fann-   |   0.6  |    .   |   0.8  |   0.9  | 112.7 
-kuch    |   0.5  |    .   |   1.1  |   0.8  |  91.6   clj (user+sys) = 
-        |   0.0  |    .   |   0.0  |   0.1  |   6.0   108 x java (user+sys)
+                                                clj-6 only Clojure data structs
+fann-   |        |        |        |        | 7792.0 
+kuch    |        |        |        |        | 7812.7  clj (user+sys) = 
+        |        |        |        |        |  532.7  120 x java (user+sys)
 
 mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
 elbrot  | output | mem    |  59.3  |  54.4  | 326.1  clj (user+sys) = 
