@@ -1,15 +1,10 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: July, 2009
 
-;; TBD: clojure.contrib.combinatorics's lex-permutations returns the
-;; permutations in a different order than that needed by this
-;; benchmark for printing the first 30 permutations.  Need to replace
-;; that with a modified version.
+;; This version is fairly slow.  Would be nice to speed it up without
+;; getting too crazy in the implementation.
 
-;; This version is also fairly slow.  Would be nice to speed it up
-;; without getting too crazy in the implementation.
-
-(set! *warn-on-reflection* true)
+;;(set! *warn-on-reflection* true)
 
 (ns clojure.benchmark.fannkuch
   (:use [clojure.contrib.combinatorics :only (lex-permutations)])
@@ -91,9 +86,6 @@
 
 
 (defn fannkuch [N]
-  (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
-    (doseq [p (take 30 fannkuch-order-perms)]
-      (println (apply str p))))
   (let [perms (lex-permutations (range 1 (inc N)))]
     (loop [s (seq perms)
 	   maxflips (int 0)]
@@ -106,6 +98,12 @@
 	;; else
 	maxflips))))
 
+
+;; This is quick compared to iterating through all permutations, so do
+;; it separately.
+(let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
+  (doseq [p (take 30 fannkuch-order-perms)]
+    (println (apply str p))))
 
 (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
 
