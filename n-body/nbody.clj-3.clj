@@ -95,14 +95,10 @@
                       :y (double (*  1.62824170038242295e-03 DAYS-PER-YEAR))
                       :z (double (* -9.51592254519715870e-05 DAYS-PER-YEAR))}}
           ]]
-    ;; TBD: Someone on the Clojure group once asked about macros for a
-    ;; cleaner syntax of replacing a single value embedded in a nested
-    ;; structure.  Look for that to see if it would help much here.
     (let [sun-index 0
           init-sun-velocity (vec-times-scalar (offset-momentum bodies)
                                               (double (/ -1.0 SOLAR-MASS)))]
-      (assoc bodies sun-index
-             (assoc (bodies sun-index) :velocity init-sun-velocity)))))
+      (assoc-in bodies [sun-index :velocity] init-sun-velocity))))
 
 
 (defn kinetic-energy-1 [body]
