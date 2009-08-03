@@ -8,14 +8,22 @@ http://shootout.alioth.debian.org
 See the file COPYING for the licenses under which these files are
 distributed.
 
-I have Clojure implementations for these benchmarks so far:
+So far I have Clojure implementations for the benchmarks marked with
+an asterisk (*) below:
 
-fannkuch
-k-nucleotide (in directory knuc)
-mandelbrot
-n-body
-regex-dna
-reverse-complement (in directory rcomp)
+* n-body
+  meteor-contest
+  spectral-norm
+* fannkuch
+* k-nucleotide (in directory knuc)
+* mandelbrot
+  fasta
+  thread-ring
+  chameneos-redux
+* regex-dna
+  pidigits
+  binary-trees
+* reverse-complement (in directory rcomp)
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X
