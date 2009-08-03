@@ -1,10 +1,12 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: July, 2009
 
-;; This version is fairly slow.  Would be nice to speed it up without
-;; getting too crazy in the implementation.
+;; This version is only slightly faster than fannkuch.clj-6.clj, if at
+;; all.  I should probably try another version that uses mutable Java
+;; arrays for iterating through the sequence of permutations, instead
+;; of using lex-permutations.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (ns clojure.benchmark.fannkuch
   (:use [clojure.contrib.combinatorics :only (lex-permutations)])
@@ -74,63 +76,46 @@
             (permutations-in-fannkuch-order-helper n init-perm init-count)))))
 
 
-(defn reverse-first-n-restricted
-  "This version of reverse-first-n assumes that 1 <= n <= (count coll).  No guarantees are made of its correctness if this condition is violated.  It does this merely to avoid checking a few conditions, and thus perhaps be a bit faster."
-  [n coll]
-  (loop [accum-reverse ()
-         n (int (dec n))
-         remaining (seq coll)]
-    (if (zero? n)
-      (concat (cons (first remaining) accum-reverse)
-              (next remaining))
-      (recur (cons (first remaining) accum-reverse)
-             (dec n)
-             (next remaining)))))
+(defn reverse-first-n!
+  "This procedure assumes that 1 <= n <= (alength java-arr).  No guarantees are made of its correctness if this condition is violated.  It does this merely to avoid checking a few conditions, and thus perhaps be a bit faster."
+  [n java-arr]
+  (let [n (int n)
+        limit (int (quot (inc n) 2))
+        n-1 (int (dec n))]
+    (loop [i (int 0)]
+      (when (<= i limit)
+        (let [temp (aget java-arr i)
+              n-1-i (int (- n-1 i))]
+          (aset java-arr i (aget java-arr n-1-i))
+          (aset java-arr n-1-i temp))))))
 
 
 (defn fannkuch-of-permutation [perm]
-  (loop [perm perm
-	 flips (int 0)]
-    (let [first-num (first perm)]
-      (if (== 1 first-num)
-	flips
-	(let [flipped-perm (reverse-first-n-restricted first-num perm)]
-	  (recur flipped-perm (inc flips)))))))
-
-
-;; Adapted from function of the same name in Paul Graham's "On Lisp".
-;; I changed the arguments and return value of the function parameter,
-;; so changed the name, too.
-
-(defn best-by-f
-  "f should take one argument, an element of sequence s, and should
-return a value that implements Comparable as a 'rank' of the
-element (e.g. an integer).  The earliest element that has a value of f
-strictly larger than any earlier element is returned.  nil is returned
-if s is empty."
-  [f s]
-  (let [s (seq s)]
-    (if (nil? s)
-      nil
-      (loop [wins (first s)
-             f-wins (f wins)
-             s (next s)]
-        (if s
-          (let [obj (first s)
-                f-obj (f obj)]
-            (if (> f-obj f-wins)
-              (recur obj f-obj (next s))
-              (recur wins f-wins (next s))))
-          wins)))))
+  (if (== 1 (first perm))
+    ;; Handle this special case without bothering to create a Java
+    ;; array.
+    0
+    (let [perm-arr (into-array Integer/TYPE perm)]
+      (loop [flips (int 0)]
+        (let [first-num (aget perm-arr 0)]
+          (if (== 1 first-num)
+            flips
+            (do
+              (reverse-first-n! first-num perm-arr)
+              (recur (inc flips)))))))))
 
 
 (defn fannkuch [N]
-  (reduce max (map #(fannkuch-of-permutation %)
-                   (lex-permutations (range 1 (inc N))))))
-
-;;(defn fannkuch-perm-with-most-flips [N]
-;;  (best-by-f #(fannkuch-of-permutation %)
-;;             (lex-permutations (range 1 (inc N)))))
+  (let [perms (lex-permutations (range 1 (inc N)))]
+    (loop [s (seq perms)
+	   maxflips (int 0)]
+      (if s
+	(let [perm (first s)]
+	  (let [curflips (int (fannkuch-of-permutation perm))]
+	    (recur (seq (rest s))
+                   (int (max maxflips curflips)))))
+	;; else
+	maxflips))))
 
 
 ;; This is quick compared to iterating through all permutations, so do
@@ -140,10 +125,5 @@ if s is empty."
     (println (apply str p))))
 
 (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
-
-;;(let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
-;;  (println (format "Pfannkuchen(%d) = %d  %s" N
-;;                   (fannkuch-of-permutation max-fannkuch-perm)
-;;                   (str (seq max-fannkuch-perm)))))
 
 (. System (exit 0))
