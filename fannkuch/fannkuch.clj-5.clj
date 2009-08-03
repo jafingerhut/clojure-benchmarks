@@ -79,14 +79,30 @@
             (permutations-in-fannkuch-order-helper n init-perm init-count)))))
 
 
+(defn reverse-first-n [n coll]
+  (if (< n 2)
+    coll
+    (loop [accum-reverse ()
+           n (int (dec n))
+           remaining (seq coll)]
+      (if remaining
+        (if (zero? n)
+          (concat (cons (first remaining) accum-reverse)
+                  (next remaining))
+          (recur (cons (first remaining) accum-reverse)
+                 (dec n)
+                 (next remaining)))
+        ;; else
+        accum-reverse))))
+
+
 (defn fannkuch-of-permutation [perm]
   (loop [perm perm
 	 flips (int 0)]
     (let [first-num (first perm)]
       (if (== 1 first-num)
 	flips
-	(let [flipped-perm (into (vec (reverse (subvec perm 0 first-num)))
-				 (subvec perm first-num))]
+	(let [flipped-perm (reverse-first-n first-num perm)]
 	  (recur flipped-perm (inc flips)))))))
 
 

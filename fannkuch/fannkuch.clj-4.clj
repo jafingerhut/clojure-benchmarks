@@ -9,7 +9,7 @@
 ;; This version is also fairly slow.  Would be nice to speed it up
 ;; without getting too crazy in the implementation.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (ns clojure.benchmark.fannkuch
   (:use [clojure.contrib.combinatorics :only (lex-permutations)])
@@ -85,8 +85,12 @@
     (let [first-num (first perm)]
       (if (== 1 first-num)
 	flips
-	(let [flipped-perm (into (vec (reverse (subvec perm 0 first-num)))
-				 (subvec perm first-num))]
+	(let [flipped-perm
+;              (into (vec (reverse (subvec perm 0 first-num)))
+;                    (subvec perm first-num))
+              (concat (reverse (take first-num perm))
+                      (drop first-num perm))
+              ]
 	  (recur flipped-perm (inc flips)))))))
 
 

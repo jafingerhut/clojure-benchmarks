@@ -18,6 +18,17 @@ the tests, unless otherwise stated.
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
 
+                                                clj-6
+fann-   |    .   |    .   |    .   |    .   |    .  
+kuch    |    .   |    .   |    .   |    .   |    .    clj (user+sys) = 
+        |    .   |    .   |    .   |    .   |    .    ? x java (user+sys)
+
+medium test on MacBook Pro:
+                                                clj-6
+fann-   |   0.6  |    .   |   0.8  |   0.9  | 112.7 
+kuch    |   0.5  |    .   |   1.1  |   0.8  |  91.6   clj (user+sys) = 
+        |   0.0  |    .   |   0.0  |   0.1  |   6.0   ? x java (user+sys)
+
 mand-   | wrong  | out of |  32.7  |  28.6  | 325.0
 elbrot  | output | mem    |  59.3  |  54.4  | 326.1  clj (user+sys) = 
         |        | (?)    |   0.8  |   0.4  |   3.2  6.01 x java (user+sys)

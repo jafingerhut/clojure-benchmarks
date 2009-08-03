@@ -79,14 +79,27 @@
             (permutations-in-fannkuch-order-helper n init-perm init-count)))))
 
 
+(defn reverse-first-n-restricted
+  "This version of reverse-first-n assumes that 1 <= n <= (count coll).  No guarantees are made of its correctness if this condition is violated.  It does this merely to avoid checking a few conditions, and thus perhaps be a bit faster."
+  [n coll]
+  (loop [accum-reverse ()
+         n (int (dec n))
+         remaining (seq coll)]
+    (if (zero? n)
+      (concat (cons (first remaining) accum-reverse)
+              (next remaining))
+      (recur (cons (first remaining) accum-reverse)
+             (dec n)
+             (next remaining)))))
+
+
 (defn fannkuch-of-permutation [perm]
   (loop [perm perm
 	 flips (int 0)]
     (let [first-num (first perm)]
       (if (== 1 first-num)
 	flips
-	(let [flipped-perm (into (vec (reverse (subvec perm 0 first-num)))
-				 (subvec perm first-num))]
+	(let [flipped-perm (reverse-first-n-restricted first-num perm)]
 	  (recur flipped-perm (inc flips)))))))
 
 

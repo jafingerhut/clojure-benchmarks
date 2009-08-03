@@ -9,7 +9,7 @@
 ;; This version is also fairly slow.  Would be nice to speed it up
 ;; without getting too crazy in the implementation.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (ns clojure.benchmark.fannkuch
   (:use [clojure.contrib.combinatorics :only (lex-permutations)])
@@ -100,8 +100,9 @@
       (if s
 	(let [perm (first s)]
 	  (let [curflips (int (fannkuch-of-permutation perm))]
-	    (recur (seq (rest s))
-                   (int (max maxflips curflips)))))
+            (if (> curflips maxflips)
+              (recur (seq (rest s)) curflips)
+              (recur (seq (rest s)) maxflips))))
 	;; else
 	maxflips))))
 

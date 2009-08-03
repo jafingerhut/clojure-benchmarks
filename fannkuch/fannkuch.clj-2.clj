@@ -94,11 +94,11 @@
   (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
     (doseq [p (take 30 fannkuch-order-perms)]
       (println (apply str p))))
-  (let [perms (lex-permutations (range 1 (inc N)))]
+  (let [perms (permutations-in-fannkuch-order N)]
     (loop [s (seq perms)
 	   maxflips (int 0)]
       (if s
-	(let [perm (first s)]
+	(let [perm (vec (first s))]
 	  (let [curflips (int (fannkuch-of-permutation perm))]
 	    (recur (seq (rest s))
                    (int (max maxflips curflips)))))

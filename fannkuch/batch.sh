@@ -10,7 +10,7 @@ BENCHMARK="fannkuch"
 # No Clojure version created yet.
 
 ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_TESTS="quick long"
+ALL_TESTS="quick medium long"
 
 LANGUAGES=""
 TESTS=""
@@ -20,7 +20,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|long) TESTS="$TESTS $1"
+	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -50,6 +50,8 @@ for T in $TESTS
 do
     case $T in
 	quick)  N=7
+	    ;;
+	medium) N=10
 	    ;;
 	long)   N=12
 	    ;;
