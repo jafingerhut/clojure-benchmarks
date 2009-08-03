@@ -79,6 +79,7 @@ fi
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
 do_java_runs mandelbrot quick medium long
+do_java_runs fannkuch quick medium long
 
 do_java_runs knuc quick medium long
 do_java_runs rcomp quick medium long

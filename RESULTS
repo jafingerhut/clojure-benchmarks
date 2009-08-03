@@ -19,9 +19,9 @@ the tests, unless otherwise stated.
 -----------------------------------------------------
 
                                                 clj-6
-fann-   |    .   |    .   |    .   |    .   |    .  
-kuch    |    .   |    .   |    .   |    .   |    .    clj (user+sys) = 
-        |    .   |    .   |    .   |    .   |    .    ? x java (user+sys)
+fann-   |  81.0  |    .   | 103.4  |  ??.   |    .  
+kuch    |  80.8  |    .   | 199.1  |  69.2  |    .    clj (user+sys) = 
+        |   0.1  |    .   |   0.7  |   0.2  |    .    ? x java (user+sys)
 
 medium test on MacBook Pro:
                                                 clj-6

@@ -10,7 +10,7 @@ distributed.
 
 I have Clojure implementations for these benchmarks so far:
 
-fannkuch (preliminary, doesn't produce matching output yet)
+fannkuch
 k-nucleotide (in directory knuc)
 mandelbrot
 n-body
