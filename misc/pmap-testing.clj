@@ -107,6 +107,8 @@
   (doall (mapper fn (range n))))
 
 
+(let [p (.. Runtime getRuntime availableProcessors)]
+  (println (str "availableProcessors=" p "  parallelism used by pmap=" (+ 2 p))))
 (println (str "(maptest " num-jobs " modified-pmap2 spin-int):"))
 (time (maptest num-jobs modified-pmap2 spin-int))
 ;(println (str "(maptest " num-jobs " modified-pmap1 spin-int):"))
