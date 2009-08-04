@@ -40,7 +40,7 @@
      (when (>= (count args) 2)
        (when (not (re-matches #"^\d+$" (nth args 1)))
          (usage 1))
-       (let [n (. Integer valueOf (nth args 0) 10)]
+       (let [n (. Integer valueOf (nth args 1) 10)]
          (when (< n 1)
            (usage 1))
          n)))
@@ -133,7 +133,7 @@
       (compute-row x-vals y))))
 
 
-(defn main [size print-in-text-format]
+(defn main [size num-threads print-in-text-format]
   (let [rows (compute-rows size num-threads)]
     (println "P4")
     (println (format "%d %d" size size))
@@ -150,6 +150,6 @@
     (flush)))
 
 
-(main size print-in-text-format)
+(main size num-threads print-in-text-format)
 
 (. System (exit 0))
