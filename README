@@ -8,22 +8,38 @@ http://shootout.alioth.debian.org
 See the file COPYING for the licenses under which these files are
 distributed.
 
-So far I have Clojure implementations for the benchmarks marked with
-an asterisk (*) below:
+So far I have Clojure implementations for the benchmarks noted in the
+table below.
 
-* n-body
-  meteor-contest
-  spectral-norm
-* fannkuch
-* k-nucleotide (in directory knuc)
-* mandelbrot
-  fasta
-  thread-ring
-  chameneos-redux
-* regex-dna
-  pidigits
-  binary-trees
-* reverse-complement (in directory rcomp)
+                               Amenable to
+                    Sequential parallel    Parallel
+                    Clojure    implement-  Clojure
+Benchmark           program?   ation?      program?
+------------------- ---------- ----------- --------
+n-body               yes          no         no
+meteor-contest        no           ?         no
+spectral-norm         no         yes         no
+------------------- ---------- ----------- --------
+fannkuch             yes         yes         no
+k-nucleotide         yes         yes         no
+  (directory knuc)
+mandelbrot           yes         yes         no
+------------------- ---------- ----------- --------
+fasta                 no          no         no
+thread-ring          N/A         yes         no
+chameneos-redux      N/A         yes         no
+------------------- ---------- ----------- --------
+regex-dna            yes         (1)         no
+pidigits              no          no         no
+binary-trees          no           ?         no
+reverse-complement   yes          no         no
+  (directory rcomp)
+------------------- ---------- ----------- --------
+
+(1) Several entries to the language shootout web site are parallel,
+but I don't yet know how they try to take advantage of parallelism for
+this problem.
+
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X

@@ -73,7 +73,7 @@ do
 	case $L in
 	    sbcl) EXTRA_LANG_ARGS="1"
 		;;
-	    *) EXTRA_LANG_ARGS=""
+	    clj)  EXTRA_LANG_ARGS="1"
 		;;
 	esac
 
