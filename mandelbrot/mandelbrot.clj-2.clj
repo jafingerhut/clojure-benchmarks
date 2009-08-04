@@ -127,10 +127,10 @@
         x-offset (double -1.5)
         y-offset (double -1.0)
         x-vals (map #(index-to-val % two-over-size x-offset) (range size))]
-    (for [y (modified-pmap #(index-to-val % two-over-size y-offset)
-                           (range size)
-                           (first nthreads))]
-      (compute-row x-vals y))))
+    (modified-pmap #(compute-row x-vals
+                                 (index-to-val % two-over-size y-offset))
+                   (range size)
+                   (first nthreads))))
 
 
 (defn main [size num-threads print-in-text-format]
