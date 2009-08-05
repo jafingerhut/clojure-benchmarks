@@ -1,4 +1,49 @@
-Results for different numbers of threads, i.e. the last argument to
-modified-pmap in mandelbrot.clj-2.clj
+Results for different numbers of threads, the value of the
+*modified-pmap-num-threads* Var in mandelbrot.clj-2.clj
 
-These results are on my MacBook Pro
+The 1-thread test uses the sequential function map over pixel rows.
+The tests with 2 or more threads use my function modified-pmap, which
+I have some experimental evidence never run more than the specified
+number of threads at a time, and only have fewer threads running for a
+small fraction of the time, after noticing one has finished, and
+before starting up the next one.
+
+----------------------------------------------------------------------
+These were all produced on my iMac, whose specs are given in the
+RESULTS file.
+
+threads: 1
+
+threads: 2
+
+threads: 3
+
+threads: 4
+
+
+----------------------------------------------------------------------
+Results running mandelbrot.clj-2.clj on my MacBook Pro with these
+specs:
+
+2.2 GHz Intel Core 2 Duo (2 cores)
+2 GB 667 MHz DDR2 SDRAM
+Mac OS X 10.5.7
+
+I'm surprised that the user time is so much higher for 2 or more
+threads, vs. the 1-thread case, at least for the long test.  I'd like
+to know why that happens.
+
+                         Threads
+Test             1          2          3
+------       ---------  ---------  ---------
+quick   real 0m 2.093s  0m 2.062s  0m 2.014s
+	user 0m 2.860s	0m 2.860s  0m 2.779s
+	sys  0m 0.276s	0m 0.274s  0m 0.278s
+				   	 
+medium  real 0m 7.184s	0m 5.524s  0m 5.822s
+	user 0m 7.761s	0m 8.768s  0m 9.344s
+	sys  0m 0.598s	0m 0.707s  0m 0.681s
+				   	 
+long    real 7m 2.059s	4m52.300s  4m56.908s
+	user 6m58.475s	8m48.858s  8m46.856s
+	sys  0m 4.015s	0m 6.903s  0m 7.267s

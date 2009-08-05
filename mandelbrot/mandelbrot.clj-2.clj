@@ -19,32 +19,38 @@
 
 ;;(set! *warn-on-reflection* true)
 
-(def prog-name "mandelbrot")
-(def args *command-line-args*)
+(def *default-modified-pmap-num-threads*
+     (+ 2 (.. Runtime getRuntime availableProcessors)))
 
 (defn usage [exit-code]
   (println (format "usage: %s size [num-threads [print-in-text-format]]"
-                   prog-name))
-  (println (format "    size and num-threads must be positive integers"))
-  (println (format "    num-threads defaults to the number of available processors if not specified"))
+                   *file*))
+  (println (format "    size must be a positive integer"))
+  (println (format "    num-threads is the maximum threads to use at once"))
+  (println (format "        during the computation.  If 0 or not given, it"))
+  (println (format "        defaults to the number of available cores plus 2,"))
+  (println (format "        which is %d"
+                   *default-modified-pmap-num-threads*))
   (. System (exit exit-code)))
 
-(when (or (< (count args) 1) (> (count args) 3))
+(when (or (< (count *command-line-args*) 1) (> (count *command-line-args*) 3))
   (usage 1))
-(when (not (re-matches #"^\d+$" (nth args 0)))
+(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
   (usage 1))
-(def size (. Integer valueOf (nth args 0) 10))
+(def size (. Integer valueOf (nth *command-line-args* 0) 10))
 (when (< size 1)
   (usage 1))
 (def num-threads
-     (when (>= (count args) 2)
-       (when (not (re-matches #"^\d+$" (nth args 1)))
-         (usage 1))
-       (let [n (. Integer valueOf (nth args 1) 10)]
-         (when (< n 1)
+     (if (>= (count *command-line-args*) 2)
+       (do
+         (when (not (re-matches #"^\d+$" (nth *command-line-args* 1)))
            (usage 1))
-         n)))
-(def print-in-text-format (= (count args) 3))
+         (let [n (. Integer valueOf (nth *command-line-args* 1) 10)]
+           (if (== n 0)
+             *default-modified-pmap-num-threads*
+             n)))
+       *default-modified-pmap-num-threads*))
+(def print-in-text-format (= (count *command-line-args*) 3))
 
 
 (def max-iterations 50)
@@ -108,29 +114,56 @@
 	(conj result (byte (bit-shift-left b (- 8 num-filled-bits))))))))
 
 
+(defn my-lazy-map
+  [f coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (cons (f (first s)) (my-lazy-map f (rest s))))))
+
+
 (defn modified-pmap
   "Like pmap from Clojure 1.1, but with only as much parallelism as
-  there are available processors."
-  [f coll & n]
-  (let [n (or (first n) (.. Runtime getRuntime availableProcessors))
-	rets (map #(future (f %)) coll)
-	step (fn step [[x & xs :as vs] fs]
-	       (lazy-seq
-		(if-let [s (seq fs)]
-		  (cons (deref x) (step xs (rest s)))
-		  (map deref vs))))]
-    (step rets (drop n rets))))
+  there are available processors.  Uses my-lazy-map instead of map
+  from core.clj, since that version of map can use unwanted additional
+  parallelism for chunked collections, like ranges."
+  ([num-threads f coll]
+     (if (== num-threads 1)
+       (map f coll)
+       (let [n (if (>= num-threads 2) (dec num-threads) 1)
+             rets (my-lazy-map #(future (f %)) coll)
+             step (fn step [[x & xs :as vs] fs]
+                    (lazy-seq
+                      (if-let [s (seq fs)]
+                        (cons (deref x) (step xs (rest s)))
+                        (map deref vs))))]
+         (step rets (drop n rets)))))
+  ([num-threads f coll & colls]
+     (let [step (fn step [cs]
+                  (lazy-seq
+                    (let [ss (my-lazy-map seq cs)]
+                      (when (every? identity ss)
+                        (cons (my-lazy-map first ss) (step (my-lazy-map rest ss)))))))]
+       (modified-pmap num-threads #(apply f %) (step (cons coll colls))))))
+  
+
+;;(defn noisy-compute-row [x-vals y-val-ind two-over-size y-offset]
+;;  (println (str "noisy-compute-row begin " y-val-ind))
+;;  (let [ret-val (compute-row x-vals
+;;                             (index-to-val y-val-ind two-over-size y-offset))]
+;;    (println (str "noisy-compute-row end " y-val-ind))
+;;    ret-val))
 
 
-(defn compute-rows [size & nthreads]
+(defn compute-rows [size num-threads]
   (let [two-over-size (double (/ 2.0 size))
         x-offset (double -1.5)
         y-offset (double -1.0)
         x-vals (map #(index-to-val % two-over-size x-offset) (range size))]
-    (modified-pmap #(compute-row x-vals
+    (modified-pmap num-threads
+                   #(compute-row x-vals
                                  (index-to-val % two-over-size y-offset))
-                   (range size)
-                   (first nthreads))))
+;;                   #(noisy-compute-row x-vals % two-over-size y-offset)
+                   (range size))))
 
 
 (defn main [size num-threads print-in-text-format]
