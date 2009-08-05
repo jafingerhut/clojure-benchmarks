@@ -23,7 +23,7 @@ spectral-norm         no         yes         no
 fannkuch             yes         yes         no
 k-nucleotide         yes         yes         no
   (directory knuc)
-mandelbrot           yes         yes         no
+mandelbrot           yes         yes        yes
 ------------------- ---------- ----------- --------
 fasta                 no          no         no
 thread-ring          N/A         yes         no

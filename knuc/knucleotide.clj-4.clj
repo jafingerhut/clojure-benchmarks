@@ -1,9 +1,6 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Jul 9, 2009
 
-;; Anyone is allowed to use this source code, in original or modified
-;; form, in any way they wish.
-
 ;; Clojure program intended for submission to the "Computer Language
 ;; Benchmarks Game" web site, for the k-nucleotide problem, described
 ;; briefly on the bottom of this web page.
