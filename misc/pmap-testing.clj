@@ -29,7 +29,7 @@
   (usage 1))
 (def job-size
      (let [temp (BigInteger. (nth *command-line-args* 1))]
-       (cond (not= temp (inc temp)) (do
+       (cond (not= temp (int temp)) (do
                                       (println (str "job-size " (nth *command-line-args* 1) " is too big to fit in Java int, so it won't work for Clojure dotimes"))
                                       (usage 1))
              (== temp 0) *default-repetitions*
