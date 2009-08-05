@@ -77,3 +77,12 @@ fannkuch.clj-8.clj
 Like clj-7, but also uses Java mutable arrays to generate the sequence
 of permutations, instead of lex-permutations, like most previous
 implementations have.
+
+----------------------------------------------------------------------
+fannkuch.clj-9.clj
+
+Does not use any Java mutable arrays.  Most like clj-6, except
+modified to use the recently-added transient/assoc!/persistent!
+functions in reverse-first-n-restricted and next-lex-permutation.  It
+is significantly faster than clj-6, but at least on medium test seems
+slightly slower than clj-8.  Need to run the long test to compare.
