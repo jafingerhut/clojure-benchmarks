@@ -28,6 +28,11 @@ fann-   |        |        |        |        | 8299.9
 kuch    |        |        |        |        | 8995.6  clj (user+sys) = 
         |        |        |        |        |  302.4  134 x java (user+sys)
 
+                                                clj-9 uses transient/assoc!/persistent!
+fann-   |        |        |        |        | 5067.9
+kuch    |        |        |        |        | 5030.8  clj (user+sys) = 
+        |        |        |        |        |   52.3  73 x java (user+sys)
+
 mand-   | wrong  | out of |  32.7  |  28.6  |  325.0
 elbrot  | output | mem    |  59.3  |  54.4  |  326.1  clj (user+sys) = 
         |        | (?)    |   0.8  |   0.4  |    3.2  6.0 x java (user+sys)
