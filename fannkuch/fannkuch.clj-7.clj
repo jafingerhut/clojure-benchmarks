@@ -6,7 +6,7 @@
 ;; arrays for iterating through the sequence of permutations, instead
 ;; of using lex-permutations.
 
-(set! *warn-on-reflection* true)
+;;(set! *warn-on-reflection* true)
 
 (ns clojure.benchmark.fannkuch
   (:use [clojure.contrib.combinatorics :only (lex-permutations)])

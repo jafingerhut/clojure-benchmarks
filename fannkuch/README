@@ -1,0 +1,79 @@
+----------------------------------------------------------------------
+fannkuch.clj-1.clj
+
+Fairly straightforward Clojure implementation, using lex-permutations
+from clojure.contrib.combinatorics library to generate a sequence of
+all permutations of the numbers from 1 to n, which is used for
+iterating over them, computing the maximum number of flips any of them
+have before 1 is at the front of the sequence.
+
+----------------------------------------------------------------------
+fannkuch.clj-2.clj
+
+Minor variation on clj-1 to see if permutations-in-fannkuch-order in
+place of lex-permutations is faster.  It is slower.
+
+----------------------------------------------------------------------
+fannkuch.clj-3.clj
+
+Minor variation of clj-1 where I replace a call to max with an if.  I
+looked at some profiling data from clj-1 runs and saw reduce taking a
+significant fraction of the time.  I didn't know where it was coming
+from at the time, and assumed incorrectly it was the call to max.  It
+turns out to have been not there, but the call to into in
+fannkuch-of-permutation.
+
+----------------------------------------------------------------------
+fannkuch.clj-4.clj
+
+Minor variation of clj-1, where I changed the "reverse first N
+elements" implementation inside of fannkuch-of-permutation so that it
+uses sequence operations instead of vector-specific operations.
+
+I don't recall whether this was faster or slower than clj-1.
+
+----------------------------------------------------------------------
+fannkuch.clj-5.clj
+
+Bigger variation of clj-1 than clj-4.  This one has a new function
+reverse-first-n for reversing the first n elements.  It uses
+loop/recur and an accumulator for the reversed part of the list, in
+hopes of being faster.
+
+----------------------------------------------------------------------
+fannkuch.clj-6b.clj
+
+clj-5's reverse-first-n checked for some boundary conditions on its
+arguments that never occur in this program.  clj-6b replaces it with
+reverse-first-n-restricted that does not check these conditions, and
+is thus a bit faster.
+
+MacBook Pro run times for medium length test, multiple runs:
+real	1m12.593s  0m59.537s  0m56.020s
+user	1m12.967s  1m 1.349s  0m56.762s
+sys	0m 6.280s  0m 5.829s  0m 5.809s
+----------------------------------------------------------------------
+fannkuch.clj-6.clj
+
+Identical to clj-6b, except it replaces the loop in function fannkuch
+with an equivalent reduce / map expression.  It seems a bit faster
+than clj-6b, which surprises me.  Not much, though.
+
+MacBook Pro run times for medium length test, multiple runs:
+real	0m55.899s  0m47.597s  0m45.530s
+user	1m 0.501s  0m47.003s  0m45.682s
+sys	0m 3.307s  0m 1.288s  0m 1.241s
+----------------------------------------------------------------------
+fannkuch.clj-7.clj
+
+Like clj-6b, but fannkuch-of-permutation now uses a mutable Java array
+for doing its flipping, using a new function reverse-first-n!
+
+Not much faster than clj-6, if at all.
+
+----------------------------------------------------------------------
+fannkuch.clj-8.clj
+
+Like clj-7, but also uses Java mutable arrays to generate the sequence
+of permutations, instead of lex-permutations, like most previous
+implementations have.

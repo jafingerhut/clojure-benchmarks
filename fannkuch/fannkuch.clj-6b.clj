@@ -98,39 +98,26 @@
 	  (recur flipped-perm (inc flips)))))))
 
 
-;; Adapted from function of the same name in Paul Graham's "On Lisp".
-;; I changed the arguments and return value of the function parameter,
-;; so changed the name, too.
+;; fannkuch below is equivalent to this shorter implementation, but I
+;; want to verify whether there is a performance difference between
+;; them.
 
-;;(defn best-by-f
-;;  "f should take one argument, an element of sequence s, and should
-;;return a value that implements Comparable as a 'rank' of the
-;;element (e.g. an integer).  The earliest element that has a value of f
-;;strictly larger than any earlier element is returned.  nil is returned
-;;if s is empty."
-;;  [f s]
-;;  (let [s (seq s)]
-;;    (if (nil? s)
-;;      nil
-;;      (loop [wins (first s)
-;;             f-wins (f wins)
-;;             s (next s)]
-;;        (if s
-;;          (let [obj (first s)
-;;                f-obj (f obj)]
-;;            (if (> f-obj f-wins)
-;;              (recur obj f-obj (next s))
-;;              (recur wins f-wins (next s))))
-;;          wins)))))
+;;(defn fannkuch [N]
+;;  (reduce max (map #(fannkuch-of-permutation %)
+;;                   (lex-permutations (range 1 (inc N))))))
 
 
 (defn fannkuch [N]
-  (reduce max (map #(fannkuch-of-permutation %)
-                   (lex-permutations (range 1 (inc N))))))
-
-;;(defn fannkuch-perm-with-most-flips [N]
-;;  (best-by-f #(fannkuch-of-permutation %)
-;;             (lex-permutations (range 1 (inc N)))))
+  (let [perms (lex-permutations (range 1 (inc N)))]
+    (loop [s (seq perms)
+	   maxflips (int 0)]
+      (if s
+	(let [perm (first s)]
+	  (let [curflips (int (fannkuch-of-permutation perm))]
+	    (recur (seq (rest s))
+                   (int (max maxflips curflips)))))
+	;; else
+	maxflips))))
 
 
 ;; This is quick compared to iterating through all permutations, so do
@@ -140,10 +127,5 @@
     (println (apply str p))))
 
 (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
-
-;;(let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
-;;  (println (format "Pfannkuchen(%d) = %d  %s" N
-;;                   (fannkuch-of-permutation max-fannkuch-perm)
-;;                   (str (seq max-fannkuch-perm)))))
 
 (. System (exit 0))
