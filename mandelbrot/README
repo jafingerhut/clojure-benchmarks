@@ -1,5 +1,5 @@
-Results for different numbers of threads, the value of the
-*modified-pmap-num-threads* Var in mandelbrot.clj-2.clj
+Results for different numbers of threads, the first parameter of the
+function modified-pmap in mandelbrot.clj-2.clj
 
 The 1-thread test uses the sequential function map over pixel rows.
 The tests with 2 or more threads use my function modified-pmap, which
@@ -12,18 +12,24 @@ before starting up the next one.
 These were all produced on my iMac, whose specs are given in the
 RESULTS file.
 
-threads: 1
+                         Threads
+Test             1          2          3          4
+------       ---------  ---------  ---------  ---------
+quick   real 0m 2.783s  0m 2.188s  0m 2.036s  0m 2.060s
+	user 0m 2.945s	0m 2.994s  0m 2.797s  0m 2.844s
+	sys  0m 0.302s	0m 0.303s  0m 0.286s  0m 0.289s
 
-threads: 2
+medium  real 0m 7.394s	0m 5.688s  0m 5.786s  0m 5.994s
+	user 0m 8.089s	0m 9.188s  0m 9.095s  0m 9.746s
+	sys  0m 0.655s	0m 0.796s  0m 0.773s  0m 0.784s
 
-threads: 3
-
-threads: 4
+long    real 5m28.011s  3m 4.186s  3m 5.168s  3m 4.100s
+	user 5m27.926s	5m36.292s  5m34.456s  5m36.090s
+	sys  0m 3.024s	0m 4.824s  0m 4.825s  0m 4.852s
 
 
 ----------------------------------------------------------------------
-Results running mandelbrot.clj-2.clj on my MacBook Pro with these
-specs:
+Results on my MacBook Pro, with these specs:
 
 2.2 GHz Intel Core 2 Duo (2 cores)
 2 GB 667 MHz DDR2 SDRAM
