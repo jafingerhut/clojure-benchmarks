@@ -1,0 +1,123 @@
+JAVA PROFILE 1.0.1, created Thu Aug  6 02:02:37 2009
+
+Header for -agentlib:hprof (or -Xrunhprof) ASCII Output (JDK 5.0 JVMTI based)
+
+@(#)jvm.hprof.txt	1.5 06/01/28
+
+ Copyright (c) 2006 Sun Microsystems, Inc. All  Rights Reserved.
+
+WARNING!  This file format is under development, and is subject to
+change without notice.
+
+This file contains the following types of records:
+
+THREAD START
+THREAD END      mark the lifetime of Java threads
+
+TRACE           represents a Java stack trace.  Each trace consists
+                of a series of stack frames.  Other records refer to
+                TRACEs to identify (1) where object allocations have
+                taken place, (2) the frames in which GC roots were
+                found, and (3) frequently executed methods.
+
+HEAP DUMP       is a complete snapshot of all live objects in the Java
+                heap.  Following distinctions are made:
+
+                ROOT    root set as determined by GC
+                CLS     classes 
+                OBJ     instances
+                ARR     arrays
+
+SITES           is a sorted list of allocation sites.  This identifies
+                the most heavily allocated object types, and the TRACE
+                at which those allocations occurred.
+
+CPU SAMPLES     is a statistical profile of program execution.  The VM
+                periodically samples all running threads, and assigns
+                a quantum to active TRACEs in those threads.  Entries
+                in this record are TRACEs ranked by the percentage of
+                total quanta they consumed; top-ranked TRACEs are
+                typically hot spots in the program.
+
+CPU TIME        is a profile of program execution obtained by measuring
+                the time spent in individual methods (excluding the time
+                spent in callees), as well as by counting the number of
+                times each method is called. Entries in this record are
+                TRACEs ranked by the percentage of total CPU time. The
+                "count" field indicates the number of times each TRACE 
+                is invoked.
+
+MONITOR TIME    is a profile of monitor contention obtained by measuring
+                the time spent by a thread waiting to enter a monitor.
+                Entries in this record are TRACEs ranked by the percentage
+                of total monitor contention time and a brief description
+                of the monitor.  The "count" field indicates the number of 
+                times the monitor was contended at that TRACE.
+
+MONITOR DUMP    is a complete snapshot of all the monitors and threads in 
+                the System.
+
+HEAP DUMP, SITES, CPU SAMPLES|TIME and MONITOR DUMP|TIME records are generated 
+at program exit.  They can also be obtained during program execution by typing 
+Ctrl-\ (on Solaris) or by typing Ctrl-Break (on Win32).
+
+--------
+
+THREAD START (obj=50000138, id = 200001, name="main", group="main")
+THREAD START (obj=500006c9, id = 200005, name="pool-2-thread-1", group="main")
+THREAD START (obj=500006d0, id = 200006, name="pool-2-thread-2", group="main")
+THREAD START (obj=500006d3, id = 200007, name="pool-2-thread-3", group="main")
+THREAD END (id = 200005)
+THREAD END (id = 200001)
+TRACE 301347: (thread=200006)
+	java.lang.Double.valueOf(Double.java:492)
+	clojure.lang.Numbers$DoubleOps.inc(Numbers.java:778)
+	clojure.lang.Numbers.inc(Numbers.java:115)
+	user$spin_double__61.invoke(pmap-testing.clj:125)
+	user$modified_pmap__31$fn__33$fn__35.invoke(pmap-testing.clj:97)
+	clojure.lang.AFn.call(AFn.java:31)
+	java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:303)
+	java.util.concurrent.FutureTask.run(FutureTask.java:138)
+	java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
+	java.lang.Thread.run(Thread.java:637)
+TRACE 301349: (thread=200007)
+	java.lang.Double.valueOf(Double.java:492)
+	clojure.lang.Numbers$DoubleOps.inc(Numbers.java:778)
+	clojure.lang.Numbers.inc(Numbers.java:115)
+	user$spin_double__61.invoke(pmap-testing.clj:125)
+	user$modified_pmap__31$fn__33$fn__35.invoke(pmap-testing.clj:97)
+	clojure.lang.AFn.call(AFn.java:31)
+	java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:303)
+	java.util.concurrent.FutureTask.run(FutureTask.java:138)
+	java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
+	java.lang.Thread.run(Thread.java:637)
+TRACE 301346: (thread=200005)
+	java.lang.Double.valueOf(Double.java:492)
+	clojure.lang.Numbers$DoubleOps.inc(Numbers.java:778)
+	clojure.lang.Numbers.inc(Numbers.java:115)
+	user$spin_double__61.invoke(pmap-testing.clj:125)
+	user$modified_pmap__31$fn__33$fn__35.invoke(pmap-testing.clj:97)
+	clojure.lang.AFn.call(AFn.java:31)
+	java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:303)
+	java.util.concurrent.FutureTask.run(FutureTask.java:138)
+	java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
+	java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
+	java.lang.Thread.run(Thread.java:637)
+TRACE 300388: (thread=200001)
+	java.lang.Class.forName0(Class.java:Unknown line)
+	java.lang.Class.forName(Class.java:247)
+	clojure.lang.RT.loadClassForName(RT.java:1515)
+	clojure.lang.RT.load(RT.java:389)
+	clojure.lang.RT.load(RT.java:371)
+	clojure.lang.RT.doInit(RT.java:406)
+	clojure.lang.RT.<clinit>(RT.java:292)
+	clojure.main.<clinit>(main.java:20)
+CPU SAMPLES BEGIN (total = 36408) Thu Aug  6 02:06:28 2009
+rank   self  accum   count trace method
+   1 49.69% 49.69%   18091 301347 java.lang.Double.valueOf
+   2 31.20% 80.89%   11359 301349 java.lang.Double.valueOf
+   3 18.72% 99.61%    6816 301346 java.lang.Double.valueOf
+   4  0.01% 99.62%       4 300388 java.lang.Class.forName0
+CPU SAMPLES END

@@ -1,0 +1,38 @@
+availableProcessors=2  num-threads=1
+
+(maptest 16 modified-pmap double 1)
+spin-double begin x=0 reps=1000000000
+spin-double begin x=1 reps=1000000000
+spin-double begin x=2 reps=1000000000
+spin-double begin x=3 reps=1000000000
+spin-double begin x=4 reps=1000000000
+spin-double begin x=5 reps=1000000000
+spin-double begin x=6 reps=1000000000
+spin-double begin x=7 reps=1000000000
+spin-double begin x=8 reps=1000000000
+spin-double begin x=9 reps=1000000000
+spin-double begin x=10 reps=1000000000
+spin-double begin x=11 reps=1000000000
+spin-double begin x=12 reps=1000000000
+spin-double begin x=13 reps=1000000000
+spin-double begin x=14 reps=1000000000
+spin-double begin x=15 reps=1000000000
+"Elapsed time: 258659.424 msecs"
+Dumping CPU usage by sampling running threads ... done.
+real       263.28
+user       247.29
+sys         12.17
+  58454016  maximum resident set size
+         0  average shared memory size
+         0  average unshared data size
+         0  average unshared stack size
+     76063  page reclaims
+      1505  page faults
+         0  swaps
+        12  block input operations
+        41  block output operations
+         0  messages sent
+         0  messages received
+         0  signals received
+       823  voluntary context switches
+    511003  involuntary context switches

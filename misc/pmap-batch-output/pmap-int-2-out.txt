@@ -1,0 +1,86 @@
+availableProcessors=2  num-threads=2
+
+(maptest 64 modified-pmap int 2)
+spin-int begin x=0 reps=1000000000
+spin-int begin x=1 reps=1000000000
+spin-int begin x=2 reps=1000000000
+spin-int begin x=3 reps=1000000000
+spin-int begin x=5 reps=1000000000
+spin-int begin x=4 reps=1000000000
+spin-int begin x=6 reps=1000000000spin-int begin x=7 reps=1000000000
+
+spin-int begin x=8 reps=1000000000spin-int begin x=9 reps=1000000000
+
+spin-int begin x=10 reps=1000000000spin-int begin x=11 reps=1000000000
+
+spin-int begin x=12 reps=1000000000
+spin-int begin x=13 reps=1000000000
+spin-int begin x=14 reps=1000000000spin-int begin x=15 reps=1000000000
+
+spin-int begin x=16 reps=1000000000spin-int begin x=17 reps=1000000000
+
+spin-int begin x=18 reps=1000000000spin-int begin x=19 reps=1000000000
+
+spin-int begin x=20 reps=1000000000spin-int begin x=21 reps=1000000000
+
+spin-int begin x=22 reps=1000000000spin-int begin x=23 reps=1000000000
+
+spin-int begin x=24 reps=1000000000spin-int begin x=25 reps=1000000000
+
+spin-int begin x=26 reps=1000000000spin-int begin x=27 reps=1000000000
+
+spin-int begin x=28 reps=1000000000spin-int begin x=29 reps=1000000000
+
+spin-int begin x=30 reps=1000000000spin-int begin x=31 reps=1000000000
+
+spin-int begin x=32 reps=1000000000spin-int begin x=33 reps=1000000000
+
+spin-int begin x=34 reps=1000000000spin-int begin x=35 reps=1000000000
+
+spin-int begin x=36 reps=1000000000spin-int begin x=37 reps=1000000000
+
+spin-int begin x=38 reps=1000000000spin-int begin x=39 reps=1000000000
+
+spin-int begin x=40 reps=1000000000spin-int begin x=41 reps=1000000000
+
+spin-int begin x=43 reps=1000000000
+spin-int begin x=42 reps=1000000000
+spin-int begin x=44 reps=1000000000spin-int begin x=45 reps=1000000000
+
+spin-int begin x=47 reps=1000000000spin-int begin x=46 reps=1000000000
+
+spin-int begin x=48 reps=1000000000spin-int begin x=49 reps=1000000000
+
+spin-int begin x=50 reps=1000000000spin-int begin x=51 reps=1000000000
+
+spin-int begin x=52 reps=1000000000spin-int begin x=53 reps=1000000000
+
+spin-int begin x=54 reps=1000000000spin-int begin x=55 reps=1000000000
+
+spin-int begin x=56 reps=1000000000spin-int begin x=57 reps=1000000000
+
+spin-int begin x=58 reps=1000000000
+spin-int begin x=59 reps=1000000000
+spin-int begin x=60 reps=1000000000spin-int begin x=61 reps=1000000000
+
+spin-int begin x=62 reps=1000000000spin-int begin x=63 reps=1000000000
+
+"Elapsed time: 177428.626 msecs"
+Dumping CPU usage by sampling running threads ... done.
+real       179.14
+user       330.30
+sys         15.46
+  55111680  maximum resident set size
+         0  average shared memory size
+         0  average unshared data size
+         0  average unshared stack size
+     27073  page reclaims
+         8  page faults
+         0  swaps
+         0  block input operations
+         8  block output operations
+         0  messages sent
+         0  messages received
+         0  signals received
+         1  voluntary context switches
+    133189  involuntary context switches
