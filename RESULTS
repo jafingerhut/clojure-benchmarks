@@ -23,15 +23,15 @@ fann-   |  81.0  |    .   | 103.4  |  59.3  | 4777.7
 kuch    |  80.8  |    .   | 199.1  |  69.2  | 4719.1  clj (user+sys) = 
         |   0.1  |    .   |   0.7  |   0.2  |   16.7  68 x java (user+sys)
 
-                                                clj-6 only Clojure data structs
-fann-   |        |        |        |        | 8299.9
-kuch    |        |        |        |        | 8995.6  clj (user+sys) = 
-        |        |        |        |        |  302.4  134 x java (user+sys)
-
-                                                clj-9 uses transient/assoc!/persistent!
+                                                clj-9 (uses new transients)
 fann-   |        |        |        |        | 5067.9
 kuch    |        |        |        |        | 5030.8  clj (user+sys) = 
         |        |        |        |        |   52.3  73 x java (user+sys)
+
+                                                clj-6 (no transients)
+fann-   |        |        |        |        | 8299.9
+kuch    |        |        |        |        | 8995.6  clj (user+sys) = 
+        |        |        |        |        |  302.4  134 x java (user+sys)
 
 mand-   | wrong  | out of |  32.7  |  28.6  |  325.0
 elbrot  | output | mem    |  59.3  |  54.4  |  326.1  clj (user+sys) = 
@@ -46,36 +46,25 @@ regex-  |        |  74.0  |        |  24.6  |   52.3
 dna     |        |  73.3  |        |  40.1  |   52.9  clj (user+sys) =
         |        |   0.6  |        |   1.3  |    1.2  1.3 x java (user+sys)
 
-           noT      noT            |  noT
-                                                clj-6
-rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |   55.0
-        |   4.8  |   7.9  |   5.0  |   3.9  |   74.0  clj (user+sys) =
-        |   2.1  |   2.3  |   4.1  |   1.3  |    4.3  15.1 x java (user+sys)
+                                   |            clj-8
+rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |   53.8			    
+        |   4.8  |   7.9  |   5.0  |   3.9  |   51.3  clj (user+sys) =	    
+        |   2.1  |   2.3  |   4.1  |   1.3  |    2.1  10.3 x java (user+sys)
 
-                                                clj-8
-rcomp   |        |        |        |        |   53.8
-        |        |        |        |        |   51.3  clj (user+sys) =
-        |        |        |        |        |    2.1  10.3 x java (user+sys)
+                                                clj-6			    
+rcomp   |        |        |        |        |   55.0			    
+        |        |        |        |        |   74.0  clj (user+sys) =	    
+        |        |        |        |        |    4.3  15.1 x java (user+sys)
 
-           noT      noT            |    T       clj-6
-k-nuc-  | 190.9  | 306.0  |  90.5  |  53.5  | 1286.4 (21m 26.4s)
-leotide | 187.9  | 302.7  | 130.8  |  91.8  | 1118.1 (18m 38.1s) clj (user+sys) =
-        |   2.4  |   1.9  |   4.6  |   2.1  |   21.8 (    21.8s) 12.1 x java (user+sys)
+                                   |            clj-7 (uses new transients)
+k-nuc-  | 190.9  | 306.0  |  90.5  |  53.5  |  741.6			   
+leotide | 187.9  | 302.7  | 130.8  |  91.8  |  709.1  clj (user+sys) =	   
+        |   2.4  |   1.9  |   4.6  |   2.1  |   15.4  7.7 x java (user+sys)
 
-                         clj-7 (same as clj-6, except uses transient hash map)
-k-nuc-  |        |        |        |        |  741.6
-leotide |        |        |        |        |  709.1  clj (user+sys) =
-        |        |        |        |        |   15.4  7.7 x java (user+sys)
-
-k-nucleotide long test on benchmark shootout machine:
-        | 164.9  | 249.8  |  52.0  |  20.6  |
-        | 164.9  | 246.7  | 112.5  |  58.8  |
-        |     ?  |     ?  |     ?  |     ?  |
-
-k-nucleotide medium test on my iMac:
-        |   8.6  |  12.7  |   3.9  |   3.9  |   43.8
-        |   7.9  |  12.5  |   5.4  |   5.7  |   46.5  clj (user+sys) =
-        |   0.6  |   0.1  |   0.3  |   0.2  |    1.5  8.1 x java (user+sys)
+                                                clj-6 (no transients)
+k-nuc-  |        |        |        |        | 1286.4
+leotide |        |        |        |        | 1118.1  clj (user+sys) =
+        |        |        |        |        |   21.8  12.1 x java (user+sys)
 
 k-nucleotide medium test, all clj, modified-pmap with specified number
 of parallel threads, on my iMac (note, these are from
@@ -86,19 +75,14 @@ version):
         | 125.9  | 122.1  | 134.6  | 134.0  | 143.4  | 134.0  |
         |   2.5  |   2.8  |   2.8  |   2.3  |   3.1  |   2.3  |
 
-fasta
-
-thread-ring
-
 
 The longest few benchmark run on my iMac are:
 
 mins benchmark test language
 
-
 130   fannkuch long clj
 127 mandelbrot long perl
- 21       knuc long clj (21m 26.4s / 18m 38.1s / 21.8s)
+ 21       knuc long clj
   9      fasta long perl
   5 mandelbrot long clj
   5       knuc long perl
@@ -155,20 +139,3 @@ user> (clojure-version)
 "1.1.0-alpha-SNAPSHOT"
 
 ----------------------------------------------------------------------
-results of multiple clj-6 runs on iMac:
- 54.3 76.1 4.1
- 55.6 79.2 4.1
- 54.1 75.6 4.2
- 54.3 76.4 4.1
-
-results of multiple clj-7 runs on iMac:
- 61.5 59.9 2.3
- 64.4 61.1 2.3
- 62.7 61.0 2.3
- 63.6 61.7 2.3
-
-results of multiple clj-8 runs on iMac:
- 53.8 51.3 2.1
- 53.2 51.0 2.2
- 54.5 51.9 2.2
- 52.6 50.6 2.2
