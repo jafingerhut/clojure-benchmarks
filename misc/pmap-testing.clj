@@ -1,12 +1,17 @@
 ;;(set! *warn-on-reflection* true)
 
+(ns clojure.benchmark.pmap-testing
+  (:use [clojure.contrib.str-utils :only (str-join)]))
+
 (def *default-repetitions* 1000000000)
 (def *default-modified-pmap-num-threads*
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
+(def *allowed-types* ["int" "float-primitive" "double" "double-primitive"])
+
 (defn usage [exit-code]
   (println (format "usage: %s type num-jobs job-size num-threads" *file*))
-  (println (format "    type must be one of int or double"))
+  (println (format "    type must be one of: " (str-join "," *allowed-types*)))
   (println (format "    all other arguments must be integers >= 0"))
   (println (format "    num-jobs must be >= 1, and is the number of jobs in the list to perform"))
   (println (format "    job-size is the number of steps in each job"))
@@ -18,19 +23,18 @@
   (println (format "        1 means to use sequential map, guaranteeing no parallelism"))
   (. System (exit exit-code)))
 
-(declare spin-int spin-double)
-
 (when (not= 4 (count *command-line-args*))
   (println (str "Expected 4 args but found " (count *command-line-args*)))
   (usage 1))
 (def task-fn-specifier
-     (let [arg (nth *command-line-args* 0)]
-       (condp = arg
-         "int" "int"
-         "double" "double"
-         :else (do
-                 (println "type specified was " arg " but must be one of: int,double")
-                 (usage 1)))))
+     (let [arg (nth *command-line-args* 0)
+           temp ((into #{} *allowed-types*) arg)]
+       (if temp
+         temp
+         (do
+           (println "type specified was " arg " but must be one of: "
+                    (str-join "," *allowed-types*))
+           (usage 1)))))
 (def num-jobs
      (let [arg (nth *command-line-args* 1)]
        (when (not (re-matches #"^\d+$" arg))
@@ -117,12 +121,25 @@
       (inc 0))))
 
 
+(defn spin-float-primitive [x]
+  (let [reps job-size]
+    (println (str "spin-float-primitive begin x=" x " reps=" reps))
+    (dotimes [_ reps]
+      (inc (float 0.1)))))
+
+
 (defn spin-double [x]
   (let [reps job-size]
     (println (str "spin-double begin x=" x " reps=" reps))
     (dotimes [_ reps]
-;;      (inc (double 0.1))
       (inc 0.1))))
+
+
+(defn spin-double-primitive [x]
+  (let [reps job-size]
+    (println (str "spin-double-primitive begin x=" x " reps=" reps))
+    (dotimes [_ reps]
+      (inc (double 0.1)))))
 
 
 (defn maptest [n mapper fn & num-threads]
@@ -134,7 +151,9 @@
 (def task-fn
      (condp = task-fn-specifier
        "int" spin-int
-       "double" spin-double))
+       "float-primitive" spin-float-primitive
+       "double" spin-double
+       "double-primitive" spin-double-primitive))
 
 (let [p (.. Runtime getRuntime availableProcessors)]
   (println (str "availableProcessors=" p "  num-threads=" num-threads)))
