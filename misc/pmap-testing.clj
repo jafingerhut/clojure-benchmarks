@@ -1,47 +1,67 @@
 ;;(set! *warn-on-reflection* true)
 
-(def *default-repetitions* 250000000)
+(def *default-repetitions* 1000000000)
 (def *default-modified-pmap-num-threads*
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
 (defn usage [exit-code]
-  (println (format "usage: %s num-jobs job-size num-threads" *file*))
-  (println (format "    all arguments must be integers >= 0"))
+  (println (format "usage: %s type num-jobs job-size num-threads" *file*))
+  (println (format "    type must be one of int or double"))
+  (println (format "    all other arguments must be integers >= 0"))
   (println (format "    num-jobs must be >= 1, and is the number of jobs in the list to perform"))
   (println (format "    job-size is the number of steps in each job"))
   (println (format "        0 means to use the default number of steps: %d"
                    *default-repetitions*))
-  (println (format "    num-threads is the number of threads to run in parallel for the modified-pmap part of the test"))
+  (println (format "    num-threads is the number of threads to run in parallel"))
   (println (format "        0 means to use the default number of threads: %d"
                    *default-modified-pmap-num-threads*))
+  (println (format "        1 means to use sequential map, guaranteeing no parallelism"))
   (. System (exit exit-code)))
 
-(when (not= 3 (count *command-line-args*))
-  (usage 1))
+(declare spin-int spin-double)
 
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
+(when (not= 4 (count *command-line-args*))
+  (println (str "Expected 4 args but found " (count *command-line-args*)))
   (usage 1))
-(def num-jobs (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< num-jobs 1)
-  (usage 1))
-
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 1)))
-  (usage 1))
-(def job-size
-     (let [temp (BigInteger. (nth *command-line-args* 1))]
-       (cond (not= temp (int temp)) (do
-                                      (println (str "job-size " (nth *command-line-args* 1) " is too big to fit in Java int, so it won't work for Clojure dotimes"))
-                                      (usage 1))
-             (== temp 0) *default-repetitions*
-             :else temp)))
-
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 2)))
-  (usage 1))
-(def num-threads
-     (let [temp (. Integer valueOf (nth *command-line-args* 2) 10)]
-       (if (== temp 0)
-         *default-modified-pmap-num-threads*
+(def task-fn-specifier
+     (let [arg (nth *command-line-args* 0)]
+       (condp = arg
+         "int" "int"
+         "double" "double"
+         :else (do
+                 (println "type specified was " arg " but must be one of: int,double")
+                 (usage 1)))))
+(def num-jobs
+     (let [arg (nth *command-line-args* 1)]
+       (when (not (re-matches #"^\d+$" arg))
+         (println "num-jobs specified was " arg " but must be an integer")
+         (usage 1))
+       (let [temp (. Integer valueOf arg 10)]
+         (when (< temp 1)
+           (usage 1))
          temp)))
+(def job-size
+     (let [arg (nth *command-line-args* 2)]
+       (when (not (re-matches #"^\d+$" arg))
+         (println "job-size specified was " arg " but must be an integer")
+         (usage 1))
+       (let [temp (BigInteger. arg)]
+         (cond (not= temp (int temp))
+               (do
+                 (println (str "job-size " arg " is too big to fit in Java int,"
+                               " so it won't work for Clojure dotimes"))
+                 (usage 1))
+               (== temp 0) *default-repetitions*
+               :else temp))))
+(def num-threads
+     (let [arg (nth *command-line-args* 3)]
+       (when (not (re-matches #"^\d+$" arg))
+         (println "num-threads specified was " arg " but must be an integer")
+         (usage 1))
+       (let [temp (. Integer valueOf arg 10)]
+         (if (== temp 0)
+           *default-modified-pmap-num-threads*
+           temp))))
 
 
 (defn my-lazy-map
@@ -91,24 +111,18 @@
 
 
 (defn spin-int [x]
-;  (println (str "spin-int begin " x))
   (let [reps job-size]
-    (println (str "spin-int begin reps=" reps))
+    (println (str "spin-int begin x=" x " reps=" reps))
     (dotimes [_ reps]
-      (inc 0)))
-;  (println (str "spin-int end " x))
-  )
+      (inc 0))))
 
 
 (defn spin-double [x]
-;  (println (str "spin-double begin " x))
   (let [reps job-size]
+    (println (str "spin-double begin x=" x " reps=" reps))
     (dotimes [_ reps]
 ;;      (inc (double 0.1))
-      (inc 0.1)
-      ))
-;  (println (str "spin-double end " x))
-  )
+      (inc 0.1))))
 
 
 (defn maptest [n mapper fn & num-threads]
@@ -117,22 +131,16 @@
     (doall (mapper fn (range n)))))
 
 
+(def task-fn
+     (condp = task-fn-specifier
+       "int" spin-int
+       "double" spin-double))
+
 (let [p (.. Runtime getRuntime availableProcessors)]
-  (println (str "availableProcessors=" p "  parallelism used by pmap=" (+ 2 p))))
-(println (str "parallelism requested for modified-pmap=" num-threads
-              " threads"))
+  (println (str "availableProcessors=" p "  num-threads=" num-threads)))
 (println)
 
-(println (str "(maptest " num-jobs " modified-pmap spin-int):"))
-(time (maptest num-jobs modified-pmap spin-int num-threads))
-;;(println (str "(maptest " num-jobs " map spin-int):"))
-;;(time (maptest num-jobs map spin-int))
-;;(println (str "(maptest " num-jobs " pmap spin-int):"))
-;;(time (maptest num-jobs pmap spin-int))
-
-;(println (str "(maptest " num-jobs " spin-double):"))
-;(time (maptest num-jobs spin-double))
-;(println (str "(pmaptest " num-jobs " spin-double):"))
-;(time (pmaptest num-jobs spin-double))
+(println (str "(maptest " num-jobs " modified-pmap " task-fn-specifier " " num-threads ")"))
+(time (maptest num-jobs modified-pmap task-fn num-threads))
 
 (. System (exit 0))
