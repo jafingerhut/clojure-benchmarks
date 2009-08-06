@@ -62,7 +62,7 @@ k-nuc-  | 190.9  | 306.0  |  90.5  |  53.5  | 1286.4 (21m 26.4s)
 leotide | 187.9  | 302.7  | 130.8  |  91.8  | 1118.1 (18m 38.1s) clj (user+sys) =
         |   2.4  |   1.9  |   4.6  |   2.1  |   21.8 (    21.8s) 12.1 x java (user+sys)
 
-                                                clj-7
+                         clj-7 (same as clj-6, except uses transient hash map)
 k-nuc-  |        |        |        |        |  741.6
 leotide |        |        |        |        |  709.1  clj (user+sys) =
         |        |        |        |        |   15.4  7.7 x java (user+sys)
