@@ -33,10 +33,15 @@ fann-   |        |        |        |        | 8299.9
 kuch    |        |        |        |        | 8995.6  clj (user+sys) = 
         |        |        |        |        |  302.4  134 x java (user+sys)
 
-                                                clj-3
-mand-   | wrong  | out of |  32.7  |  28.6  |   88.0
-elbrot  | output | mem    |  59.3  |  54.4  |  160.9  clj (user+sys) = 
-        |        | (?)    |   0.8  |   0.4  |    2.6  3.0 x java (user+sys)
+                                                clj-3 (1 thread)
+mand-   | wrong  | out of |  32.7  |  28.6  |  148.3
+elbrot  | output | mem    |  59.3  |  54.4  |  152.0  clj (user+sys) = 
+        |        | (?)    |   0.8  |   0.4  |    1.7  2.8 x java (user+sys)
+
+                                                clj-3 (4 parallel threads)
+mand-   |        |        |        |        |   88.0
+elbrot  |        |        |        |        |  160.9  clj (user+sys) = 
+        |        |        |        |        |    2.6  3.0 x java (user+sys)
 
                                                 clj-5
 n-      |  39.3  |        |        |  25.9  | 3560.2

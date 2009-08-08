@@ -74,10 +74,11 @@ do
 	    sbcl) EXTRA_LANG_ARGS="1"
 		;;
 	    # Put a number between the double quotes to make
-	    # mandelbrot.clj-2.clj use the specified number of threads
-	    # in parallel.  With an empty string, the default is 2
-	    # more threads than the number of available processors.
-	    clj)  EXTRA_LANG_ARGS=""
+	    # mandelbrot.clj-2.clj (or clj-3) use the specified number
+	    # of threads in parallel.  With an empty string, the
+	    # default is 2 more threads than the number of available
+	    # processors.
+	    clj)  EXTRA_LANG_ARGS="1"
 		;;
 	esac
 
