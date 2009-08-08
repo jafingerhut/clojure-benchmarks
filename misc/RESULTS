@@ -1,0 +1,89 @@
+In all cases, the number of times run through the inner loop in one
+"job", called job-size or jobSize, is 10^10.  See the bottom for the
+definitions of the functions involved.
+
+             spin-double1 (1)     NewDoubleTest.run()  (2)
+
+             real 330.48 (A)       321.08 (D)
+sequential   user 311.40 (B)       299.55 (E)
+	     sys   15.81 (C)        16.11 (F)
+
+             real 283.52 86% of A  277.24 86% of D
+parallel     user 476.85  1.5 x    461.86  1.5 x
+	     sys   15.10  (B+C)     15.20  (E+F)
+
+             spin-double2 (3)     DoubleTest.run()  (4)
+
+             real  96.21 (G)        31.87 (J)
+sequential   user  87.70 (H)        28.90 (K)
+	     sys    1.97 (I)         0.65 (L)
+
+             real  47.14 49% of G   15.77 49% of J
+parallel     user  86.39  0.98 x    28.55  0.98 x
+	     sys    1.25  (H+I)      0.43  (K+L)
+
+Notes:
+
+(1) Probably causes a 'new Double' on every inner loop iteration.
+(2) Definitely causes a 'new Double' on every inner loop iteration.
+
+(3) Probably does not cause a 'new Double' on every inner loop iteration.
+(4) Definitely does not cause a 'new Double' on every inner loop iteration.
+
+spin-double1 and NewDoubleTest.run() definitely don't take advantage
+of 2 cores in parallel very well, given that their elapsed times when
+using 2 parallel threads is 86% of the elapsed times when using only 1
+thread, and the total user+sys CPU time is 1.5 times higher.
+
+spin-double2 and DoubleTest.run() scale from 1 to 2 cores like we
+would expect for an embarrassingly parallel computation: about half of
+the elapsed time, and total CPU usage is about the same.
+
+
+Source code of the "inner loops":
+
+Full Clojure source in pmap-testing.clj, batch script in pmap-batch.sh
+
+(defn spin-double1 [x]
+  (let [reps (long job-size)]
+    (println (str "spin-double1 begin x=" x " reps=" reps))
+    (println (str
+              (loop [i (long 0)]
+                (when (< i reps)
+                  (inc 0.1)
+                  (recur (unchecked-inc i))))))))
+
+(defn spin-double2 [x]
+  (let [reps (long job-size)]
+    (println (str "spin-double2 begin x=" x " reps=" reps))
+    (println (str
+              (loop [i (long 0)
+                     c (double 0.0)]
+                (if (< i reps)
+                  (recur (unchecked-inc i) (inc c))
+                  c))))))
+
+Full Java source in ParallelTest.java, batch script in
+paralleltest-batch.sh
+
+    public static class NewDoubleTest implements Runnable {
+        // ... minor code removed here ...
+	public void run() {
+	    result = new Double(0.0);
+	    for (long i = 0L; i < jobSize; i++) {
+		result = new Double(result.doubleValue() + 1.0);
+	    }
+	    System.out.println(result);
+	}
+    }
+
+    public static class DoubleTest implements Runnable {
+        // ... minor code removed here ...
+	public void run() {
+	    result = 0.0;
+	    for (long i = 0L; i < jobSize; i++) {
+		result = result + 1.0;
+	    }
+	    System.out.println(result);
+	}
+    }
