@@ -4,4 +4,4 @@
 
 source ../env.sh
 
-$JAVA -server -Xmx768m ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main mandelbrot.clj-2.clj "$@"
+$JAVA -server -Xmx768m ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main mandelbrot.clj-3.clj "$@"
