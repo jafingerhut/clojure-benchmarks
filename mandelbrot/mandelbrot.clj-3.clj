@@ -9,6 +9,7 @@
 ;; Paul Stadig (paul@stadig.name)
 ;; michael.messinides@invista.com
 ;; David Sletten
+;; John Harrop
 
 
 ;; clj-run.sh sends the command line arguments, not including the
