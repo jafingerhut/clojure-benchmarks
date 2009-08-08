@@ -11,7 +11,7 @@ TIME="/usr/bin/time -lp"
 HPROF_OPTS="cpu=samples,depth=20,thread=y"
 
 #for TYPE in int long float-primitive double double2 double-primitive
-for TYPE in double2
+for TYPE in double1 double2
 do
     JOB_SIZE=1000000000
     case $TYPE in
@@ -19,7 +19,7 @@ do
 	    ;;
 	float*)   NUM_JOBS=16
 	    ;;
-	double2)  NUM_JOBS=2
+	double1|double2)  NUM_JOBS=2
 	    JOB_SIZE=10000000000
 	    ;;
 	double*)  NUM_JOBS=16

@@ -7,7 +7,7 @@
 (def *default-modified-pmap-num-threads*
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
-(def *allowed-types* ["int" "long" "float-primitive" "double" "double2" "double-primitive"])
+(def *allowed-types* ["int" "long" "float-primitive" "double" "double1" "double2" "double-primitive"])
 
 (defn usage [exit-code]
   (println (format "usage: %s type num-jobs job-size num-threads" *file*))
@@ -143,6 +143,16 @@
       (inc 0.1))))
 
 
+(defn spin-double1 [x]
+  (let [reps (long job-size)]
+    (println (str "spin-double1 begin x=" x " reps=" reps))
+    (println (str
+              (loop [i (long 0)]
+                (when (< i reps)
+                  (inc 0.1)
+                  (recur (unchecked-inc i))))))))
+
+
 (defn spin-double2 [x]
   (let [reps (long job-size)]
     (println (str "spin-double2 begin x=" x " reps=" reps))
@@ -150,7 +160,7 @@
               (loop [i (long 0)
                      c (double 0.0)]
                 (if (< i reps)
-                  (recur (inc i) (inc c))
+                  (recur (unchecked-inc i) (inc c))
                   c))))))
 
 
@@ -173,6 +183,7 @@
        "long" spin-long
        "float-primitive" spin-float-primitive
        "double" spin-double
+       "double1" spin-double1
        "double2" spin-double2
        "double-primitive" spin-double-primitive))
 
