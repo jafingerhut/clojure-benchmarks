@@ -31,3 +31,10 @@ for representing the mass, position, and velocities of the bodies.
 Uses loop/recur everywhere in the inner loop that clj-6 does.
 
 Surprisingly, it isn't nearly as fast as clj-6.  I wonder why.
+
+
+clj-8
+
+OK, very little change from the source of clj-7, but a big improvement
+in performance.  Don't use aset-double.  Use aset and type hints to
+avoid reflection.
