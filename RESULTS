@@ -13,15 +13,21 @@ Ubuntu (TM) 9.04 Linux Kernel 2.6.28-11-generic
 
 
 Times are real / user / sys on my iMac, with the "long" versions of
-the tests, unless otherwise stated.
+the tests, unless otherwise stated.  "real" is elapsed time from start
+to finish, so if it is significantly less than (user+sys), it is a
+sign that the program is using more than one processor core.
+
+When a Clojure benchmark is described as being "5 x java", for
+example, it means that the total of the Clojure "user + sys" time is 5
+times more than the total of the Java "user + sys" time.
 
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
 
                                                 clj-8 uses mutable Java arrays
-fann-   |  81.0  |    .   | 103.4  |  59.3  | 1696.9
-kuch    |  80.8  |    .   | 199.1  |  69.2  | 1691.0  clj (user+sys) = 
-        |   0.1  |    .   |   0.7  |   0.2  |   10.0  24.5 x java (user+sys)
+fann-   |  80.6  |    .   | 103.4  |  38.7  | 1571.6
+kuch    |  80.3  |    .   | 199.1  |  69.2  | 1565.0
+        |   0.1  |    .   |   0.7  |   0.2  |    9.4  22.7 x java
 
            clj-9    clj-6
        (transients)
@@ -32,19 +38,19 @@ kuch    | 5030.8 | 8995.6 |        |        |
            java     java
 
                                                 clj-3 (1 thread)
-mand-   | wrong  | out of |  32.7  |  28.6  |  148.3
-elbrot  | output | mem    |  59.3  |  54.4  |  152.0  clj (user+sys) = 
-        |        | (?)    |   0.8  |   0.4  |    1.7  2.8 x java (user+sys)
+mand-   |   90.2 | out of |  32.7  |  28.8  |  148.3
+elbrot  |   89.6 | mem    |  59.3  |  53.9  |  151.4
+        |    0.3 | (?)    |   0.8  |   0.4  |    1.7  2.8 x java
 
                                                 clj-3 (4 parallel threads)
 mand-   |        |        |        |        |   88.0
-elbrot  |        |        |        |        |  160.9  clj (user+sys) = 
-        |        |        |        |        |    2.6  3.0 x java (user+sys)
+elbrot  |        |        |        |        |  160.9
+        |        |        |        |        |    2.6  3.0 x java
 
                                                 clj-8 (uses mutable Java arrays)
 n-      |  39.3  |        |        |  25.9  |  278.0
-body    |  39.1  |        |        |  25.9  |  277.6  clj (user+sys) =
-        |   0.1  |        |        |   0.1  |    3.6  10.8 x java (user+sys)
+body    |  39.1  |        | crash  |  25.9  |  277.6
+        |   0.1  |        |        |   0.1  |    3.6  10.8 x java
 
            clj-6    clj-7    clj-5
 n-      |  965.2 | 2992.6 | 3560.2 |        |        |
@@ -53,29 +59,29 @@ body    |  948.7 | 2982.8 | 3562.1 |        |        |
             37 x    115 x    138 x
             java    java     java
 
-regex-  |        |  74.0  |        |  24.6  |   52.3
-dna     |        |  73.3  |        |  40.1  |   52.9  clj (user+sys) =
-        |        |   0.6  |        |   1.3  |    1.2  1.3 x java (user+sys)
+regex-  | needs  |  75.0  | needs  |  23.8  |   52.0
+dna     | regex  |  73.3  | regex  |  38.0  |   52.3
+        |  lib   |   0.6  |  lib   |   1.4  |    1.3  1.4 x java
 
                                    |            clj-8
-rcomp   |   8.3  |  11.4  |  18.0  |  11.0  |   53.8			    
-        |   4.8  |   7.9  |   5.0  |   3.9  |   51.3  clj (user+sys) =	    
-        |   2.1  |   2.3  |   4.1  |   1.3  |    2.1  10.3 x java (user+sys)
+rcomp   |   8.3  |  11.4  |  10.1  |   9.0  |   53.8
+        |   4.8  |   7.9  |   5.1  |   3.9  |   51.3
+        |   2.1  |   2.3  |   4.0  |   1.3  |    2.1  10.3 x java
 
-                                                clj-6			    
-rcomp   |        |        |        |        |   55.0			    
-        |        |        |        |        |   74.0  clj (user+sys) =	    
-        |        |        |        |        |    4.3  15.1 x java (user+sys)
+                                                clj-6
+rcomp   |        |        |        |        |   55.0
+        |        |        |        |        |   74.0
+        |        |        |        |        |    4.3  15.1 x java
 
                                    |            clj-7 (uses new transients)
-k-nuc-  | 190.9  | 306.0  |  90.5  |  53.5  |  741.6			   
-leotide | 187.9  | 302.7  | 130.8  |  91.8  |  709.1  clj (user+sys) =	   
-        |   2.4  |   1.9  |   4.6  |   2.1  |   15.4  7.7 x java (user+sys)
+k-nuc-  | 190.9  | 306.0  |  80.9  |  51.4  |  697.9
+leotide | 187.9  | 302.7  | 130.2  |  90.5  |  690.9
+        |   2.4  |   1.9  |   4.5  |   1.6  |   15.4  7.7 x java
 
                                                 clj-6 (no transients)
 k-nuc-  |        |        |        |        | 1286.4
-leotide |        |        |        |        | 1118.1  clj (user+sys) =
-        |        |        |        |        |   21.8  12.1 x java (user+sys)
+leotide |        |        |        |        | 1118.1
+        |        |        |        |        |   21.8  12.1 x java
 
 k-nucleotide medium test, all clj, modified-pmap with specified number
 of parallel threads, on my iMac (note, these are from
@@ -91,17 +97,18 @@ The longest few benchmark run on my iMac are:
 
 mins benchmark test language
 
-130   fannkuch long clj
-127 mandelbrot long perl
- 21       knuc long clj
-  9      fasta long perl
-  5 mandelbrot long clj
-  5       knuc long perl
-  3       knuc long sbcl
-  2 mandelbrot long sbcl
-  1.5     knuc long ghc
-  1.3    rcomp long clj
-  0.9     knuc long java
+127   mandelbrot long perl
+ 28     fannkuch long clj
+ 12         knuc long clj
+  9        fasta long perl
+  5         knuc long perl
+  5       n-body long clj
+  3         knuc long sbcl
+  2.6 mandelbrot long clj
+  2   mandelbrot long sbcl
+  1.5       knuc long ghc
+  0.9      rcomp long clj
+  0.9       knuc long java
 
 
 
