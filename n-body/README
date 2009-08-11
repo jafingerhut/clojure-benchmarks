@@ -57,3 +57,11 @@ bodies-update-velocities!
   most 2 operands per mathematical operation rather than the 3
   operands they had before.  This reduced run time to 1/3 of what it
   was before.  Huge improvement.
+
+
+clj-10
+
+Same as clj-9, but change the bodies parameter to advance! and its
+call children to a Java array of java.lang.Object's, instead of a
+Clojure vector.  Only about 7% less run time than clj-9, but it is
+noticeable.
