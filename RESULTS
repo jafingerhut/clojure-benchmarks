@@ -43,10 +43,16 @@ mand-   |        |        |        |        |   88.0
 elbrot  |        |        |        |        |  160.9  clj (user+sys) = 
         |        |        |        |        |    2.6  3.0 x java (user+sys)
 
-                                                clj-5
-n-      |  39.3  |        |        |  25.9  | 3560.2
-body    |  39.1  |        |        |  25.9  | 3562.1  clj (user+sys) =
-        |   0.1  |        |        |   0.1  |   34.0  138 x java (user+sys)
+                                                clj-7 (uses new transients,
+                     and lots more optimizations compared to clj-5 version)
+n-      |  39.3  |        |        |  25.9  |  965.2
+body    |  39.1  |        |        |  25.9  |  948.7  clj (user+sys) =
+        |   0.1  |        |        |   0.1  |   13.4  37 x java (user+sys)
+
+                                                clj-5 (no transients)
+n-      |        |        |        |        | 3560.2
+body    |        |        |        |        | 3562.1  clj (user+sys) =
+        |        |        |        |        |   34.0  138 x java (user+sys)
 
 regex-  |        |  74.0  |        |  24.6  |   52.3
 dna     |        |  73.3  |        |  40.1  |   52.9  clj (user+sys) =
