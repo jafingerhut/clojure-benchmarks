@@ -49,10 +49,12 @@ n-      |  39.3  |        |        |  25.9  |  965.2
 body    |  39.1  |        |        |  25.9  |  948.7  clj (user+sys) =
         |   0.1  |        |        |   0.1  |   13.4  37 x java (user+sys)
 
-                                                clj-5 (no transients)
-n-      |        |        |        |        | 3560.2
-body    |        |        |        |        | 3562.1  clj (user+sys) =
-        |        |        |        |        |   34.0  138 x java (user+sys)
+          clj-7     clj-5
+n-      |2992.6  | 3560.2 |        |        |
+body    |2982.8  | 3562.1 |        |        |
+        |  20.8  |   34.0 |        |        |
+          115 x     138 x
+          java      java
 
 regex-  |        |  74.0  |        |  24.6  |   52.3
 dna     |        |  73.3  |        |  40.1  |   52.9  clj (user+sys) =

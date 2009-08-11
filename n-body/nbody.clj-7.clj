@@ -3,7 +3,7 @@
 
 (ns clojure.benchmark.n-body)
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (defn usage [exit-code]
   (println (format "usage: %s n" *file*))
@@ -72,27 +72,58 @@
         (* v1z# v2z#))))
 
 
-(defn planet-construct [p]
-  [(:name p) (:mass p) (:pos p) (:velocity p)])
+(def +PLANET-IDX-MASS+ 0)
+(def +PLANET-IDX-POS-X+ 1)
+(def +PLANET-IDX-POS-Y+ 2)
+(def +PLANET-IDX-POS-Z+ 3)
+(def +PLANET-IDX-VEL-X+ 4)
+(def +PLANET-IDX-VEL-Y+ 5)
+(def +PLANET-IDX-VEL-Z+ 6)
 
-(defmacro planet-mass [p]     `(~p 1))
-(defmacro planet-pos [p]      `(~p 2))
-(def +PLANET-VELOCITY-INDEX+ 3)
-(defmacro planet-velocity [p] `(~p 3))
+(defmacro mass [p] `(double (aget ~p 0)))
+(defmacro posx [p] `(double (aget ~p 1)))
+(defmacro posy [p] `(double (aget ~p 2)))
+(defmacro posz [p] `(double (aget ~p 3)))
+(defmacro velx [p] `(double (aget ~p 4)))
+(defmacro vely [p] `(double (aget ~p 5)))
+(defmacro velz [p] `(double (aget ~p 6)))
+
+(defmacro set-mass! [p new-mass] `(aset-double ~p 0 ~new-mass))
+(defmacro set-posx! [p new-posx] `(aset-double ~p 1 ~new-posx))
+(defmacro set-posy! [p new-posy] `(aset-double ~p 2 ~new-posy))
+(defmacro set-posz! [p new-posz] `(aset-double ~p 3 ~new-posz))
+(defmacro set-velx! [p new-velx] `(aset-double ~p 4 ~new-velx))
+(defmacro set-vely! [p new-vely] `(aset-double ~p 5 ~new-vely))
+(defmacro set-velz! [p new-velz] `(aset-double ~p 6 ~new-velz))
+
+
+(defn planet-construct [p]
+  ;; Don't bother keeping the name around
+  (let [p-arr (make-array Double/TYPE 7)]
+    (set-mass! p-arr (:mass p))
+    (set-posx! p-arr ((:pos p) 0))
+    (set-posy! p-arr ((:pos p) 1))
+    (set-posz! p-arr ((:pos p) 2))
+    (set-velx! p-arr ((:velocity p) 0))
+    (set-vely! p-arr ((:velocity p) 1))
+    (set-velz! p-arr ((:velocity p) 2))
+    p-arr))
 
 
 (defn offset-momentum [bodies]
   (let [n (int (count bodies))]
-    (loop [momentum-vec (vec-times-scalar (planet-velocity (bodies 0))
-                                          (planet-mass (bodies 0)))
-           i (int 1)]
+    (loop [momx (double 0.0)
+           momy (double 0.0)
+           momz (double 0.0)
+           i (int 0)]
       (if (< i n)
-        (let [b (bodies i)]
-          (recur (vec-add momentum-vec
-                          (vec-times-scalar (planet-velocity b)
-                                            (planet-mass b)))
+        (let [b (bodies i)
+              m (mass b)]
+          (recur (+ momx (* m (velx b)))
+                 (+ momy (* m (vely b)))
+                 (+ momz (* m (velz b)))
                  (unchecked-inc i)))
-        momentum-vec))))
+        [momx momy momz]))))
 
 
 (defn n-body-system []
@@ -146,28 +177,36 @@
                        (double (*  1.62824170038242295e-03 DAYS-PER-YEAR))
                        (double (* -9.51592254519715870e-05 DAYS-PER-YEAR)))})
           ]]
-    (let [sun-index 0
-          init-sun-velocity (vec-times-scalar (offset-momentum bodies)
-                                              (double (/ -1.0 SOLAR-MASS)))]
-      (assoc-in bodies [sun-index +PLANET-VELOCITY-INDEX+] init-sun-velocity))))
+    (let [[momx momy momz] (offset-momentum bodies)
+          a (double (/ -1.0 SOLAR-MASS))
+          sun-index 0
+          sun (bodies sun-index)]
+      (set-velx! sun (* a momx))
+      (set-vely! sun (* a momy))
+      (set-velz! sun (* a momz))
+      (assoc bodies sun-index sun))))
 
 
-(defn kinetic-energy-1 [mass vel]
-  (* (double 0.5) mass
-     (vec-dot-product vel vel)))
+(defn kinetic-energy-1 [body]
+  (* (double 0.5) (mass body)
+     (+ (* (velx body) (velx body))
+        (* (vely body) (vely body))
+        (* (velz body) (velz body)))))
 
 
-(defn kinetic-energy [body-masses body-velocities]
+(defn kinetic-energy [bodies]
 ;;  (doall
-;;   (for [i (range (count body-masses))]
+;;   (for [i (range (count bodies))]
 ;;     (println (format "i=%d body[i] kinetic energy=%.9f"
-;;                      i (kinetic-energy-1 (body-masses i) (body-velocities i))))))
-  (reduce + (map kinetic-energy-1 body-masses body-velocities)))
+;;                      i (kinetic-energy-1 (bodies i))))))
+  (reduce + (map kinetic-energy-1 bodies)))
 
 
-(defn distance-between [pos1 pos2]
-  (let [delta-pos (vec-sub pos1 pos2)]
-    (Math/sqrt (vec-dot-product delta-pos delta-pos))))
+(defn distance-between [b1 b2]
+  (let [dx (double (- (posx b1) (posx b2)))
+        dy (double (- (posy b1) (posy b2)))
+        dz (double (- (posz b1) (posz b2)))]
+    (Math/sqrt (+ (* dx dx) (* dy dy) (* dz dz)))))
 
 
 (defn all-seq-ordered-pairs [s]
@@ -180,107 +219,86 @@
       pairs)))
 
 
-(defn potential-energy-body-pair [[[b1-mass b1-pos] [b2-mass b2-pos]]]
-  (let [distance (distance-between b1-pos b2-pos)]
-    (/ (* b1-mass b2-mass)
+(defn potential-energy-body-pair [[b1 b2]]
+  (let [distance (distance-between b1 b2)]
+    (/ (* (mass b1) (mass b2))
        distance)))
 
 
-(defn potential-energy [body-masses body-positions]
+(defn potential-energy [bodies]
   (- (reduce + (map potential-energy-body-pair
-                    (all-seq-ordered-pairs (map (fn [x y] [x y])
-                                                body-masses
-                                                body-positions))))))
+                    (all-seq-ordered-pairs bodies)))))
 
 
-(defn energy [body-masses body-positions body-velocities]
-;;  (println (format "kinetic-energy: %.9f"
-;;                   (kinetic-energy body-masses body-velocities)))
-;;  (println (format "potential-energy: %.9f" 
-;;                   (potential-energy body-masses body-positions)))
-  (+ (kinetic-energy body-masses body-velocities)
-     (potential-energy body-masses body-positions)))
+(defn energy [bodies]
+;;  (println (format "kinetic-energy: %.9f" (kinetic-energy bodies)))
+;;  (println (format "potential-energy: %.9f" (potential-energy bodies)))
+  (+ (kinetic-energy bodies) (potential-energy bodies)))
 
 
-(defn delta-velocities-for-body-pair [b1-mass b1-pos b2-mass b2-pos delta-t]
-  (let [delta-pos (vec-sub b1-pos b2-pos)
-        dist-squared (double (vec-dot-product delta-pos delta-pos))
-        dist (double (Math/sqrt dist-squared))
-        mag (double (/ delta-t dist-squared dist))
-        b1-delta-v (vec-times-scalar delta-pos (* (double -1.0) mag (double b2-mass)))
-        b2-delta-v (vec-times-scalar delta-pos (* mag (double b1-mass)))]
-    [ b1-delta-v b2-delta-v ]))
+(defmacro add-to-vel! [body delta-vx delta-vy delta-vz]
+  `(do
+     (set-velx! ~body (+ (velx ~body) ~delta-vx))
+     (set-vely! ~body (+ (vely ~body) ~delta-vy))
+     (set-velz! ~body (+ (velz ~body) ~delta-vz))))
 
 
-(defn bodies-new-velocities [body-masses body-positions body-velocities
-                             delta-t]
-;;  (println (str "bodies-new-velocities: " (count body-masses)
-;;                " " (count body-positions)
-;;                " " (count body-velocities)))
-  (let [n (int (count body-masses))
-        n-1 (int (dec n))
-        new-velocities (transient body-velocities)]
+(defn bodies-update-velocities! [bodies delta-t]
+  (let [n (int (count bodies))
+        n-1 (int (dec n))]
     (loop [i1 (int 0)]
       (if (< i1 n-1)
-        (do
+        (let [b1 (bodies i1)]
           (loop [i2 (int (inc i1))]
             (if (< i2 n)
-              (let [[delta-v1 delta-v2]
-                    (delta-velocities-for-body-pair
-                     (body-masses i1) (body-positions i1)
-                     (body-masses i2) (body-positions i2) delta-t)]
-                (assoc! new-velocities i1
-                        (vec-add (new-velocities i1) delta-v1))
-                (assoc! new-velocities i2
-                        (vec-add (new-velocities i2) delta-v2))
+              (let [b2 (bodies i2)
+                    delta-posx (double (- (posx b1) (posx b2)))
+                    delta-posy (double (- (posy b1) (posy b2)))
+                    delta-posz (double (- (posz b1) (posz b2)))
+                    dist-squared (double (+ (* delta-posx delta-posx)
+                                            (* delta-posy delta-posy)
+                                            (* delta-posz delta-posz)))
+                    dist (double (Math/sqrt dist-squared))
+                    mag (double (/ delta-t dist-squared dist))
+                    b1-scale (double (* (- mag) (mass b2)))
+                    dv1x (* delta-posx b1-scale)
+                    dv1y (* delta-posy b1-scale)
+                    dv1z (* delta-posz b1-scale)
+                    b2-scale (double (* mag (mass b1)))
+                    dv2x (* delta-posx b2-scale)
+                    dv2y (* delta-posy b2-scale)
+                    dv2z (* delta-posz b2-scale)]
+                (add-to-vel! (bodies i1) dv1x dv1y dv1z)
+                (add-to-vel! (bodies i2) dv2x dv2y dv2z)
                 (recur (unchecked-inc i2)))))
-          (recur (unchecked-inc i1)))
-        ;; else (== i1 n-1)
-        (persistent! new-velocities)))))
+          (recur (unchecked-inc i1)))))))
 
 
-(defn bodies-new-positions [body-positions body-velocities delta-t]
-  (let [n (int (count body-positions))
-        new-positions (transient [])
+(defn bodies-update-positions! [bodies delta-t]
+  (let [n (int (count bodies))
         delta-t (double delta-t)]
-    (loop [i (int 0)
-           new-positions (transient [])]
+    (loop [i (int 0)]
       (if (< i n)
-        (recur (unchecked-inc i)
-               (conj! new-positions
-                      (vec-add (body-positions i)
-                               (vec-times-scalar (body-velocities i) delta-t))))
-        (persistent! new-positions)))))
+        (let [b (bodies i)]
+          (set-posx! b (+ (posx b) (* (velx b) delta-t)))
+          (set-posy! b (+ (posy b) (* (vely b) delta-t)))
+          (set-posz! b (+ (posz b) (* (velz b) delta-t)))
+          (recur (unchecked-inc i)))))))
 
 
-(defn advance [body-masses body-positions body-velocities delta-t]
-  (let [new-velocities
-        (bodies-new-velocities body-masses body-positions body-velocities
-                               delta-t)]
-    [new-velocities
-     (bodies-new-positions body-positions new-velocities delta-t)]))
-
-
-(defn vec-of-masses [bodies] (vec (map (fn [b] (planet-mass b)) bodies)))
-(defn vec-of-positions [bodies] (vec (map (fn [b] (planet-pos b)) bodies)))
-(defn vec-of-velocities [bodies] (vec (map (fn [b] (planet-velocity b)) bodies)))
+(defn advance! [bodies delta-t]
+  (bodies-update-velocities! bodies delta-t)
+  (bodies-update-positions! bodies delta-t))
 
 
 (let [bodies (n-body-system)
-      planet-masses (vec-of-masses bodies)
-      planet-positions (vec-of-positions bodies)
-      planet-velocities (vec-of-velocities bodies)
       delta-t (double 0.01)
       all-ordered-body-index-pairs (all-seq-ordered-pairs
                                     (range (count bodies)))]
-  (println (format "%.9f"
-                   (energy planet-masses planet-positions planet-velocities)))
-  (loop [i (int n)
-         planet-velocities planet-velocities
-         planet-positions planet-positions]
+  (println (format "%.9f" (energy bodies)))
+  (loop [i (int n)]
     (if (zero? i)
-      (println (format "%.9f"
-                       (energy planet-masses planet-positions planet-velocities)))
-      (let [[new-velocities new-positions]
-            (advance planet-masses planet-positions planet-velocities delta-t)]
-        (recur (unchecked-dec i) new-velocities new-positions)))))
+      (println (format "%.9f" (energy bodies)))
+      (do
+        (advance! bodies delta-t)
+        (recur (unchecked-dec i))))))

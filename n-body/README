@@ -1,0 +1,33 @@
+clj-5
+
+Fairly straightforward Clojure version, using Clojure maps and
+vectors.  All immutable data structures, no Java data structs.
+
+
+clj-6
+
+Based on clj-5, with many speed improvements:
+
++ It uses the new transient/assoc!/conj!/persistent! functions for
+  Clojure vectors, so you need a pretty new copy of Clojure if you
+  want to run it yourself.
+
++ Make separate vectors for each "attribute" of a body in motion, i.e.
+  a separate vector of positions, a vector of velocities, etc.,
+  instead of using maps.
+
++ Use loop/recur almost everywhere it makes sense.  I still have a few
+  map calls in the function 'energy' and the functions it calls, and
+  maybe in the init code, but that is only done twice and once during
+  the whole execution, respectively, versus advance which is called
+  50,000,000 times in the long version of the benchmark.
+
+
+clj-7
+
+Fairly similar to clj-6, except it uses mutable Java arrays of doubles
+for representing the mass, position, and velocities of the bodies.
+
+Uses loop/recur everywhere in the inner loop that clj-6 does.
+
+Surprisingly, it isn't nearly as fast as clj-6.  I wonder why.
