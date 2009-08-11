@@ -19,19 +19,17 @@ the tests, unless otherwise stated.
 -----------------------------------------------------
 
                                                 clj-8 uses mutable Java arrays
-fann-   |  81.0  |    .   | 103.4  |  59.3  | 4777.7
-kuch    |  80.8  |    .   | 199.1  |  69.2  | 4719.1  clj (user+sys) = 
-        |   0.1  |    .   |   0.7  |   0.2  |   16.7  68 x java (user+sys)
+fann-   |  81.0  |    .   | 103.4  |  59.3  | 1696.9
+kuch    |  80.8  |    .   | 199.1  |  69.2  | 1691.0  clj (user+sys) = 
+        |   0.1  |    .   |   0.7  |   0.2  |   10.0  24.5 x java (user+sys)
 
-                                                clj-9 (uses new transients)
-fann-   |        |        |        |        | 5067.9
-kuch    |        |        |        |        | 5030.8  clj (user+sys) = 
-        |        |        |        |        |   52.3  73 x java (user+sys)
-
-                                                clj-6 (no transients)
-fann-   |        |        |        |        | 8299.9
-kuch    |        |        |        |        | 8995.6  clj (user+sys) = 
-        |        |        |        |        |  302.4  134 x java (user+sys)
+           clj-9    clj-6
+       (transients)
+fann-   | 5067.9 | 8299.9 |        |        |
+kuch    | 5030.8 | 8995.6 |        |        |
+        |   52.3 |  302.4 |        |        |
+           73 x     134 x
+           java     java
 
                                                 clj-3 (1 thread)
 mand-   | wrong  | out of |  32.7  |  28.6  |  148.3

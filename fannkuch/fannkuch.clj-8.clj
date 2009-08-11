@@ -6,11 +6,11 @@
 ;; possible, in hopes of speeding it up.  I was hoping that would
 ;; speed it up more than it did.
 
-;;(set! *warn-on-reflection* true)
-
 (ns clojure.benchmark.fannkuch
 ;;  (:use [clojure.contrib.combinatorics :only (lex-permutations)])
   )
+
+(set! *warn-on-reflection* true)
 
 
 (defn usage [exit-code]
@@ -86,8 +86,8 @@
       (when (< i n-to-swap)
         (let [temp (aget a i)
               n-1-i (int (- n-1 i))]
-          (aset-int a i (aget a n-1-i))
-          (aset-int a n-1-i temp))
+          (aset a i (aget a n-1-i))
+          (aset a n-1-i temp))
         (recur (inc i))))))
 
 
@@ -153,15 +153,15 @@
             vj (int (aget a j)),
 	    l (int (loop [i (dec len)]
                      (if (< vj (aget a i)) i (recur (dec i)))))]
-        (aset-int a j (aget a l))
-        (aset-int a l vj)
+        (aset a j (aget a l))
+        (aset a l vj)
 	(loop [k (int (inc j)),
                l (int (dec len))]
 	  (if (< k l)
             (do
               (let [temp (aget a k)]
-                (aset-int a k (aget a l))
-                (aset-int a l temp))
+                (aset a k (aget a l))
+                (aset a l temp))
               (recur (inc k) (dec l)))
 	    a))))))
 
