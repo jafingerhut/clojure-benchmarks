@@ -30,7 +30,9 @@ for representing the mass, position, and velocities of the bodies.
 
 Uses loop/recur everywhere in the inner loop that clj-6 does.
 
-Surprisingly, it isn't nearly as fast as clj-6.  I wonder why.
+Surprisingly, it isn't nearly as fast as clj-6.  It turns out
+aset-double is slow.  See changes made from this to clj-8 version, and
+the dramatic speedup it provides.
 
 
 clj-8
@@ -38,3 +40,20 @@ clj-8
 OK, very little change from the source of clj-7, but a big improvement
 in performance.  Don't use aset-double.  Use aset and type hints to
 avoid reflection.
+
+
+clj-9
+
+Same as clj-8, but with a few small tweaks inside of function
+bodies-update-velocities!
+
++ Added let binding for delta-t with type hint (doublt delta-t).  This
+  didn't make any noticeable difference in run time.
+
++ Removed lots of (double ...) type hints from the inner let.  No
+  noticeable difference in run time.
+
++ Changed expressions for dist-squared and mag so that they used at
+  most 2 operands per mathematical operation rather than the 3
+  operands they had before.  This reduced run time to 1/3 of what it
+  was before.  Huge improvement.

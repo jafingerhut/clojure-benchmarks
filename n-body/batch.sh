@@ -22,7 +22,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|medium|long) TESTS="$TESTS $1"
+	quick|medium|medium2|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -54,6 +54,8 @@ do
 	quick)    N=1000
 	    ;;
 	medium)   N=500000
+	    ;;
+	medium2)  N=5000000
 	    ;;
 	long)     N=50000000
 	    ;;
