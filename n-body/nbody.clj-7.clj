@@ -22,64 +22,6 @@
          temp)))
 
 
-(defn vec-construct [x y z]
-  [(double x) (double y) (double z)])
-
-
-(defmacro vec-add [v1 v2]
-  `(let [v1x# (double (~v1 0))
-         v1y# (double (~v1 1))
-         v1z# (double (~v1 2))
-         v2x# (double (~v2 0))
-         v2y# (double (~v2 1))
-         v2z# (double (~v2 2))]
-     [(+ v1x# v2x#)
-      (+ v1y# v2y#)
-      (+ v1z# v2z#)]))
-
-
-(defmacro vec-sub [v1 v2]
-  `(let [v1x# (double (~v1 0))
-         v1y# (double (~v1 1))
-         v1z# (double (~v1 2))
-         v2x# (double (~v2 0))
-         v2y# (double (~v2 1))
-         v2z# (double (~v2 2))]
-     [(- v1x# v2x#)
-      (- v1y# v2y#)
-      (- v1z# v2z#)]))
-
-
-(defmacro vec-times-scalar [v scalar]
-  `(let [vx# (double (~v 0))
-         vy# (double (~v 1))
-         vz# (double (~v 2))
-         scalar# (double ~scalar)]
-     [(* scalar# vx#)
-      (* scalar# vy#)
-      (* scalar# vz#)]))
-
-
-(defmacro vec-dot-product [v1 v2]
-  `(let [v1x# (double (~v1 0))
-         v1y# (double (~v1 1))
-         v1z# (double (~v1 2))
-         v2x# (double (~v2 0))
-         v2y# (double (~v2 1))
-         v2z# (double (~v2 2))]
-     (+ (* v1x# v2x#)
-        (* v1y# v2y#)
-        (* v1z# v2z#))))
-
-
-(def +PLANET-IDX-MASS+ 0)
-(def +PLANET-IDX-POS-X+ 1)
-(def +PLANET-IDX-POS-Y+ 2)
-(def +PLANET-IDX-POS-Z+ 3)
-(def +PLANET-IDX-VEL-X+ 4)
-(def +PLANET-IDX-VEL-Y+ 5)
-(def +PLANET-IDX-VEL-Z+ 6)
-
 (defmacro mass [p] `(double (aget ~p 0)))
 (defmacro posx [p] `(double (aget ~p 1)))
 (defmacro posy [p] `(double (aget ~p 2)))
@@ -134,48 +76,44 @@
         [ (planet-construct
            {:name "sun"
             :mass SOLAR-MASS
-            :pos (vec-construct 0 0 0)
-            :velocity (vec-construct 0 0 0)})
+            :pos [0 0 0]
+            :velocity [0 0 0]})
           (planet-construct
            {:name "jupiter"
             :mass (double (* 9.54791938424326609e-04 SOLAR-MASS))
-            :pos (vec-construct (double  4.84143144246472090e+00)
-                                (double -1.16032004402742839e+00)
-                                (double -1.03622044471123109e-01))
-            :velocity (vec-construct
-                       (double (*  1.66007664274403694e-03 DAYS-PER-YEAR))
+            :pos [(double  4.84143144246472090e+00)
+                  (double -1.16032004402742839e+00)
+                  (double -1.03622044471123109e-01)]
+            :velocity [(double (*  1.66007664274403694e-03 DAYS-PER-YEAR))
                        (double (*  7.69901118419740425e-03 DAYS-PER-YEAR))
-                       (double (* -6.90460016972063023e-05 DAYS-PER-YEAR)))})
+                       (double (* -6.90460016972063023e-05 DAYS-PER-YEAR))]})
           (planet-construct
            {:name "saturn"
             :mass (double (* 2.85885980666130812e-04 SOLAR-MASS))
-            :pos (vec-construct (double  8.34336671824457987e+00)
-                                (double  4.12479856412430479e+00)
-                                (double -4.03523417114321381e-01))
-            :velocity (vec-construct
-                       (double (* -2.76742510726862411e-03 DAYS-PER-YEAR))
+            :pos [(double  8.34336671824457987e+00)
+                  (double  4.12479856412430479e+00)
+                  (double -4.03523417114321381e-01)]
+            :velocity [(double (* -2.76742510726862411e-03 DAYS-PER-YEAR))
                        (double (*  4.99852801234917238e-03 DAYS-PER-YEAR))
-                       (double (*  2.30417297573763929e-05 DAYS-PER-YEAR)))})
+                       (double (*  2.30417297573763929e-05 DAYS-PER-YEAR))]})
           (planet-construct
            {:name "uranus"
             :mass (double (* 4.36624404335156298e-05 SOLAR-MASS))
-            :pos (vec-construct (double  1.28943695621391310e+01)
-                                (double -1.51111514016986312e+01)
-                                (double -2.23307578892655734e-01))
-            :velocity (vec-construct
-                       (double (*  2.96460137564761618e-03 DAYS-PER-YEAR))
+            :pos [(double  1.28943695621391310e+01)
+                  (double -1.51111514016986312e+01)
+                  (double -2.23307578892655734e-01)]
+            :velocity [(double (*  2.96460137564761618e-03 DAYS-PER-YEAR))
                        (double (*  2.37847173959480950e-03 DAYS-PER-YEAR))
-                       (double (* -2.96589568540237556e-05 DAYS-PER-YEAR)))})
+                       (double (* -2.96589568540237556e-05 DAYS-PER-YEAR))]})
           (planet-construct
            {:name "neptune"
             :mass (double (* 5.15138902046611451e-05 SOLAR-MASS))
-            :pos (vec-construct (double  1.53796971148509165e+01)
-                                (double -2.59193146099879641e+01)
-                                (double  1.79258772950371181e-01))
-            :velocity (vec-construct
-                       (double (*  2.68067772490389322e-03 DAYS-PER-YEAR))
+            :pos [(double  1.53796971148509165e+01)
+                  (double -2.59193146099879641e+01)
+                  (double  1.79258772950371181e-01)]
+            :velocity [(double (*  2.68067772490389322e-03 DAYS-PER-YEAR))
                        (double (*  1.62824170038242295e-03 DAYS-PER-YEAR))
-                       (double (* -9.51592254519715870e-05 DAYS-PER-YEAR)))})
+                       (double (* -9.51592254519715870e-05 DAYS-PER-YEAR))]})
           ]]
     (let [[momx momy momz] (offset-momentum bodies)
           a (double (/ -1.0 SOLAR-MASS))
@@ -195,10 +133,6 @@
 
 
 (defn kinetic-energy [bodies]
-;;  (doall
-;;   (for [i (range (count bodies))]
-;;     (println (format "i=%d body[i] kinetic energy=%.9f"
-;;                      i (kinetic-energy-1 (bodies i))))))
   (reduce + (map kinetic-energy-1 bodies)))
 
 
@@ -231,8 +165,6 @@
 
 
 (defn energy [bodies]
-;;  (println (format "kinetic-energy: %.9f" (kinetic-energy bodies)))
-;;  (println (format "potential-energy: %.9f" (potential-energy bodies)))
   (+ (kinetic-energy bodies) (potential-energy bodies)))
 
 
@@ -292,9 +224,7 @@
 
 
 (let [bodies (n-body-system)
-      delta-t (double 0.01)
-      all-ordered-body-index-pairs (all-seq-ordered-pairs
-                                    (range (count bodies)))]
+      delta-t (double 0.01)]
   (println (format "%.9f" (energy bodies)))
   (loop [i (int n)]
     (if (zero? i)
