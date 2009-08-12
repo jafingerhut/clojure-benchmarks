@@ -62,6 +62,15 @@ do
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
 	esac
+	case $L in
+	    # Put a number between the double quotes to make
+	    # knucleotide.clj-8.clj use the specified number of
+	    # threads in parallel.  With an empty string, the default
+	    # is 2 more threads than the number of available
+	    # processors.
+	    clj)  EXTRA_LANG_ARGS=""
+		;;
+	esac
 
 	echo
 	echo "benchmark: $BENCHMARK"
@@ -70,8 +79,8 @@ do
 	IN=${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
+	echo "( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+	( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
 	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done
