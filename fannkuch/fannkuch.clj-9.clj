@@ -6,25 +6,43 @@
 ;; possible, in hopes of speeding it up.  I was hoping that would
 ;; speed it up more than it did.
 
-;;(set! *warn-on-reflection* true)
-
 (ns clojure.benchmark.fannkuch
 ;;  (:use [clojure.contrib.combinatorics :only (lex-permutations)])
   )
 
+;;(set! *warn-on-reflection* true)
+
+
+(def *default-modified-pmap-num-threads*
+     (+ 2 (.. Runtime getRuntime availableProcessors)))
 
 (defn usage [exit-code]
-  (println (format "usage: %s N" *file*))
+  (println (format "usage: %s N [num-threads]" *file*))
   (println (format "    N must be a positive integer"))
+  (println (format "    num-threads is the maximum threads to use at once"))
+  (println (format "        during the computation.  If 0 or not given, it"))
+  (println (format "        defaults to the number of available cores plus 2,"))
+  (println (format "        which is %d"
+                   *default-modified-pmap-num-threads*))
   (. System (exit exit-code)))
 
-(when (not= (count *command-line-args*) 1)
+(when (or (< (count *command-line-args*) 1) (> (count *command-line-args*) 2))
   (usage 1))
 (when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
   (usage 1))
 (def N (. Integer valueOf (nth *command-line-args* 0) 10))
 (when (< N 1)
   (usage 1))
+(def num-threads
+     (if (>= (count *command-line-args*) 2)
+       (do
+         (when (not (re-matches #"^\d+$" (nth *command-line-args* 1)))
+           (usage 1))
+         (let [n (. Integer valueOf (nth *command-line-args* 1) 10)]
+           (if (== n 0)
+             *default-modified-pmap-num-threads*
+             n)))
+       *default-modified-pmap-num-threads*))
 
 
 (defn left-rotate
@@ -146,15 +164,71 @@
       accum)))
 
 
-(defn fannkuch [N]
-  (loop [perm-vec (permutation-from-seq (first-lex-permutation N))
-         maxflips (int 0)]
-    (if perm-vec
-      (let [curflips (int (fannkuch-of-permutation perm-vec))]
+(defn my-lazy-map
+  [f coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (cons (f (first s)) (my-lazy-map f (rest s))))))
+
+
+(defn modified-pmap
+  "Like pmap from Clojure 1.1, but with only as much parallelism as
+  there are available processors.  Uses my-lazy-map instead of map
+  from core.clj, since that version of map can use unwanted additional
+  parallelism for chunked collections, like ranges."
+  ([num-threads f coll]
+     (if (== num-threads 1)
+       (map f coll)
+       (let [n (if (>= num-threads 2) (dec num-threads) 1)
+             rets (my-lazy-map #(future (f %)) coll)
+             step (fn step [[x & xs :as vs] fs]
+                    (lazy-seq
+                      (if-let [s (seq fs)]
+                        (cons (deref x) (step xs (rest s)))
+                        (map deref vs))))]
+         (step rets (drop n rets)))))
+  ([num-threads f coll & colls]
+     (let [step (fn step [cs]
+                  (lazy-seq
+                    (let [ss (my-lazy-map seq cs)]
+                      (when (every? identity ss)
+                        (cons (my-lazy-map first ss) (step (my-lazy-map rest ss)))))))]
+       (modified-pmap num-threads #(apply f %) (step (cons coll colls))))))
+
+
+(defn fannkuch-of-some-permutations
+  "Sequentially calculate the maximum value of the fannkuch-of-permutation function for only some of the N! permutations of the integers 1..N, starting with the first permutation first-perm-vec, and continuing with permutations in lexicographic order for a total of num-perms permutations."
+  [first-perm-vec num-perms]
+  (let [num-perms (int num-perms)]
+    (loop [perm-vec first-perm-vec
+           maxflips (int 0)
+           i (int 0)]
+      (if (and perm-vec (< i num-perms))
         (recur (next-lex-permutation perm-vec)
-               (int (max maxflips curflips))))
-      ;; else
-      maxflips)))
+               (int (max maxflips (fannkuch-of-permutation perm-vec)))
+               (inc i))
+        ;; else
+        maxflips))))
+
+
+(defn factorial [n]
+  (reduce * (range 2 (inc n))))
+
+
+(defn n-evenly-separated-perms-of-1-to-n
+  [n]
+  (map (fn [i]
+         (vec (cons i (filter #(not= % i) (range 1 (inc n))))))
+       (range 1 (inc n))))
+
+
+(defn fannkuch
+  "Calculate the maximum value of the fannkuch-of-permutation function over all of the N! permutations of the integers 1..N.  Do this using at most num-threads threads in parallel."
+  [N num-threads]
+  (let [N-1-factorial (factorial (dec N))]
+    (reduce max (modified-pmap num-threads
+                               #(fannkuch-of-some-permutations % N-1-factorial)
+                               (n-evenly-separated-perms-of-1-to-n N)))))
 
 
 ;; This is quick compared to iterating through all permutations, so do
@@ -163,7 +237,7 @@
   (doseq [p (take 30 fannkuch-order-perms)]
     (println (apply str p))))
 
-(println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
+(println (format "Pfannkuchen(%d) = %d" N (fannkuch N num-threads)))
 
 ;;(let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
 ;;  (println (format "Pfannkuchen(%d) = %d  %s" N
