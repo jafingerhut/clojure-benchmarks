@@ -72,6 +72,16 @@ do
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
 	esac
+	case $L in
+	    sbcl) EXTRA_LANG_ARGS="1"
+		;;
+	    # Put a number between the double quotes to make
+	    # fannkuch.clj-9.clj use the specified number of threads
+	    # in parallel.  With an empty string, the default is 2
+	    # more threads than the number of available processors.
+	    clj)  EXTRA_LANG_ARGS=""
+		;;
+	esac
 	
 	echo
 	echo "benchmark: $BENCHMARK"
@@ -80,7 +90,7 @@ do
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
 	echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
+	( time ${CMD} ${N} ${EXTRA_LANG_ARGS} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
 	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done

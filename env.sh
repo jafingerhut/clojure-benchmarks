@@ -12,6 +12,8 @@ JAVA=java
 # Choose your style of Java profiling, if any.
 #JAVA_PROFILING=-Xprof
 #JAVA_PROFILING=-Xrunhprof
+#HPROF_OPTS="cpu=samples,depth=20,thread=y"
+#JAVA_PROFILING="-agentlib:hprof=$HPROF_OPTS"
 JAVA_PROFILING=
 
 # Glasgow Haskell Compiler location
