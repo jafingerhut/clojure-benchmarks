@@ -11,6 +11,6 @@ JVM_MEM_OPTS="-server"
 #JMX_MONITORING=-Dcom.sun.management.jmxremote
 
 # Current fastest
-CLJ_PROG=nbody.clj-10.clj
+CLJ_PROG=nbody.clj-11.clj
 
 $JAVA $JVM_MEM_OPTS $JMX_MONITORING ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main $CLJ_PROG "$@"

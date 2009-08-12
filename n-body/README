@@ -65,3 +65,16 @@ Same as clj-9, but change the bodies parameter to advance! and its
 call children to a Java array of java.lang.Object's, instead of a
 Clojure vector.  Only about 7% less run time than clj-9, but it is
 noticeable.
+
+
+clj-11
+
+Same as clj-10, but change order of operations for calculating mag so
+there is one multiplication and one division, instead of two
+divisions.  This matches the Java program more closely, and apparently
+the multiply is faster on my hardware, at least.
+
+Also just copy and paste the bodies of the two functions called by
+advance! into advance! itself, i.e. by-hand inlining.
+
+About 5% faster than clj-10.
