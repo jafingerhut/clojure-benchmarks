@@ -24,18 +24,19 @@ times more than the total of the Java "user + sys" time.
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
 
-                                                clj-8 uses mutable Java arrays
-fann-   |  80.6  | 6427.6 | 103.4  |  38.7  | 1571.6
-kuch    |  80.3  | 6376.4 | 199.1  |  69.2  | 1565.0
-        |   0.1  |   13.8 |   0.7  |   0.2  |    9.4  22.7 x java
+                                               clj-10 uses mutable Java arrays
+fann-   |  80.6  | 6427.6 | 103.4  |  38.7  |  315.6
+kuch    |  80.3  | 6376.4 | 199.1  |  69.2  |  314.1
+        |   0.1  |   13.8 |   0.7  |   0.2  |    2.4  4.6 x java
 
-           clj-9    clj-6
-       (transients)
-fann-   | 5067.9 | 8299.9 |        |        |
-kuch    | 5030.8 | 8995.6 |        |        |
-        |   52.3 |  302.4 |        |        |
-           73 x     134 x
-           java     java
+           clj-8    clj-9    clj-6
+         mutable   trans-
+         arrays    ients
+fann-   | 1571.6 | 5067.9 | 8299.9 |        |
+kuch    | 1565.0 | 5030.8 | 8995.6 |        |
+        |    9.4 |   52.3 |  302.4 |        |
+          22.7 x    73 x     134 x
+           java     java     java
 
                                                 clj-3 (1 thread)
 mand-   |   90.2 | out of |  32.7  |  28.8  |  148.3
@@ -48,9 +49,9 @@ elbrot  |        |        |        |        |  160.9
         |        |        |        |        |    2.6  3.0 x java
 
                                                clj-10 (uses mutable Java arrays)
-n-      |  39.3  |        |        |  25.9  |   76.7
-body    |  39.1  |        | crash  |  25.9  |   76.8
-        |   0.1  |        |        |   0.1  |    1.3  3.0 x java
+n-      |  39.3  | 2682.8 |        |  25.9  |   76.7
+body    |  39.1  | 2675.3 | crash  |  25.9  |   76.8
+        |   0.1  |    3.7 |        |   0.1  |    1.3  3.0 x java
 
            clj-9    clj-8     clj-6    clj-7    clj-5
 n-      |  83.0   | 278.0  |  965.2 | 2992.6 | 3560.2
@@ -95,13 +96,15 @@ version):
 
 The longest few benchmark run on my iMac are:
 
+real
 mins benchmark test language
 
 127   mandelbrot long perl
- 28     fannkuch long clj
+106     fannkuch long perl
  12         knuc long clj
   9        fasta long perl
   5         knuc long perl
+  5     fannkuch long clj
   3         knuc long sbcl
   2.6 mandelbrot long clj
   2   mandelbrot long sbcl

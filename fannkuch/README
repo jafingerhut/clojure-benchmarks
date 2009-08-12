@@ -86,3 +86,37 @@ modified to use the recently-added transient/assoc!/persistent!
 functions in reverse-first-n-restricted and next-lex-permutation.  It
 is significantly faster than clj-6, but at least on medium test seems
 slightly slower than clj-8.  Need to run the long test to compare.
+
+Measurements of multi-threaded version on MacBook Pro with 2 cores
+
+Why so much more user time with 2 or 3 threads vs. 1?  Is this a case
+of a shared on-chip cache between the 2 cores being big enough for 1
+thread, but getting thrashed for 2 or more?
+
+                         Threads
+Test             1          2          3
+------       ---------  ---------  ---------
+medium  real 0m32.852s  0m35.374s  0m25.966s
+run #1  user 0m33.403s	0m56.752s  0m45.090s
+        sys  0m 1.128s	0m 2.075s  0m 1.374s
+				   	 
+medium  real 0m32.619s	0m26.669s  0m31.447s
+run #2  user 0m33.232s	0m42.485s  0m53.814s
+        sys  0m 1.078s	0m 1.469s  0m 1.827s
+				   	 
+medium  real 0m33.979s	0m29.133s  0m29.376s
+run #3  user 0m34.469s	0m47.837s  0m50.388s
+        sys  0m 1.140s	0m 1.382s  0m 1.744s
+				   	 
+			0m29.736s  0m32.329s
+			0m49.199s  0m51.199s
+			0m 1.420s  0m 1.836s
+----------------------------------------------------------------------
+fannkuch.clj-10.clj
+
+Like clj-8, but change reverse-first-n! to a macro, and add #^ints
+type annotation to fannkuch-of-permutation's argument.  Also use
+aclone instead of slower copy-java-int-array (at least, aclone is
+faster when it has the appropriate type annotations for its argument).
+
+----------------------------------------------------------------------
