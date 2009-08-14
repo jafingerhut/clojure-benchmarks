@@ -17,5 +17,5 @@ JDB="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
 CLJ_PROG=memuse.clj
 
 
-echo "$JAVA $OPTS -Xmx1024m ${JDB} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main $CLJ_PROG" "$@"
+echo "java ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG}" "$@"
 java ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG} "$@"
