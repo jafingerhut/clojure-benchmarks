@@ -3,7 +3,7 @@
 # your command path.
 
 # Path to Clojure JAR file
-CLOJURE_JAR_DIR=/Users/andy/.clojure
+CLOJURE_JAR_DIR=$HOME/.clojure
 CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar
 
 JAVAC=javac
