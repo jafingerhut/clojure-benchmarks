@@ -4,7 +4,7 @@
 
 # Path to Clojure JAR file
 CLOJURE_JAR_DIR=$HOME/.clojure
-CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar
+CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.2.0.jar:$CLOJURE_JAR_DIR/clojure-contrib-1.2.0.jar
 
 JAVAC=javac
 JAVA=java
