@@ -20,11 +20,14 @@
 
 (when (not= (count *command-line-args*) 1)
   (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def N (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< N 1)
-  (usage 1))
+(def N
+     (let [arg (nth *command-line-args* 0)]
+       (when (not (re-matches #"^\d+$" arg))
+         (usage 1))
+       (let [temp (. Integer valueOf arg 10)]
+         (when (< temp 1)
+           (usage 1))
+         temp)))
 
 
 (defn left-rotate
@@ -89,6 +92,17 @@
           (aset java-arr i (aget java-arr n-1-i))
           (aset java-arr n-1-i temp))))))
 
+
+;; fannkuch-of-permutation is purely functional "as viewed from the
+;; outside", since it takes as input the collection perm, and then
+;; returns an integer that is a function of the value of the
+;; collection only.
+
+;; The fact that it is a pure function might be difficult to determine
+;; via a program, since it calls reverse-first-n!, which is definitely
+;; not functional.  It mutates its parameter perm-arr.  However,
+;; fannkuch-of-permutation creates that array, and never returns it or
+;; uses it in any other way than mutating it "locally".
 
 (defn fannkuch-of-permutation [perm]
   (if (== 1 (first perm))

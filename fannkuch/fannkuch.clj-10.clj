@@ -20,11 +20,14 @@
 
 (when (not= (count *command-line-args*) 1)
   (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def N (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< N 1)
-  (usage 1))
+(def N
+     (let [arg (nth *command-line-args* 0)]
+       (when (not (re-matches #"^\d+$" arg))
+         (usage 1))
+       (let [temp (. Integer valueOf arg 10)]
+         (when (< temp 1)
+           (usage 1))
+         temp)))
 
 
 (defn left-rotate
