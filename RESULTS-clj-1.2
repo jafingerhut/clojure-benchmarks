@@ -25,9 +25,9 @@ times more than the total of the Java "user + sys" time.
 -----------------------------------------------------
 
                                                clj-10 uses mutable Java arrays
-fann-   |  59.7  |     .  |  54.9  |  39.0  |  323.4
-kuch    |  59.6  |     .  | 107.8  |  71.6  |  324.2
-        |   0.1  |     .  |   0.6  |   0.1  |    2.1  4.6 x java
+fann-   |  59.7  | 4528.9 |  54.9  |  39.0  |  323.4
+kuch    |  59.6  | 4520.9 | 107.8  |  71.6  |  324.2
+        |   0.1  |    2.4 |   0.6  |   0.1  |    2.1  4.6 x java
 
 tbd: update results
            clj-8    clj-9    clj-6
@@ -49,11 +49,10 @@ mand-   |        |        |        |        |   56.4
 elbrot  |        |        |        |        |  103.7
         |        |        |        |        |    1.7  1.8 x java
 
-tbd: update perl results.  All others already updated.
                                                clj-11 (uses mutable Java arrays)
-n-      |  26.9  |        |        |  25.6  |  375.1
-body    |  26.7  |        | crash  |  25.6  |  368.2
-        |   0.1  |        |        |   0.1  |    2.3  14.4 x java
+n-      |  26.9  | 2019.3 |        |  25.6  |  375.1
+body    |  26.7  | 1834.1 | crash  |  25.6  |  368.2
+        |   0.1  |    5.5 |        |   0.1  |    2.3  14.4 x java
 
 tbd: update results
            clj-9    clj-8     clj-6    clj-7    clj-5
