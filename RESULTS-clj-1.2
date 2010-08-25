@@ -1,0 +1,158 @@
+iMac specs:
+
+2.16 GHz Intel Core 2 Duo (2 cores)
+2 GB RAM  667 MHz DDR2 SDRAM
+Running Mac OS X 10.6.4
+
+"The Computer Language Benchmarks Game" web site benchmark machine:
+
+Quad-core 2.4Ghz Intel Q6600
+4GB RAM
+250GB SATA II disk drive
+Ubuntu (TM) 9.04 Linux Kernel 2.6.28-11-generic
+
+
+Times are real / user / sys on my iMac, with the "long" versions of
+the tests, unless otherwise stated.  "real" is elapsed time from start
+to finish, so if it is significantly less than (user+sys), it is a
+sign that the program is using more than one processor core.
+
+When a Clojure benchmark is described as being "5 x java", for
+example, it means that the total of the Clojure "user + sys" time is 5
+times more than the total of the Java "user + sys" time.
+
+        |  sbcl  |  perl  |   ghc  |  java  |   clj
+-----------------------------------------------------
+
+                                               clj-10 uses mutable Java arrays
+fann-   |  59.7  |     .  |  54.9  |  39.0  |  323.4
+kuch    |  59.6  |     .  | 107.8  |  71.6  |  324.2
+        |   0.1  |     .  |   0.6  |   0.1  |    2.1  4.6 x java
+
+tbd: update results
+           clj-8    clj-9    clj-6
+         mutable   trans-
+         arrays    ients
+fann-   | 1571.6 | 5067.9 | 8299.9 |        |
+kuch    | 1565.0 | 5030.8 | 8995.6 |        |
+        |    9.4 |   52.3 |  302.4 |        |
+          22.7 x    73 x     134 x
+           java     java     java
+
+                                                clj-5 (1 thread)
+mand-   |   54.7 | 4936.8 |  28.6  |  30.1  |  102.2
+elbrot  |   54.1 | 4930.2 |  55.2  |  58.3  |  103.6
+        |    0.2 |    2.2 |   0.5  |   0.3  |    0.9  1.8 x java
+
+                                                clj-5 (4 parallel threads)
+mand-   |        |        |        |        |   56.4
+elbrot  |        |        |        |        |  103.7
+        |        |        |        |        |    1.7  1.8 x java
+
+tbd: update perl results.  All others already updated.
+                                               clj-11 (uses mutable Java arrays)
+n-      |  26.9  |        |        |  25.6  |  375.1
+body    |  26.7  |        | crash  |  25.6  |  368.2
+        |   0.1  |        |        |   0.1  |    2.3  14.4 x java
+
+tbd: update results
+           clj-9    clj-8     clj-6    clj-7    clj-5
+n-      | 377.4   |        |     .  |     .  |     . 
+body    | 378.8   | crash  |     .  |     .  |     . 
+        |   2.6   |        |     .  |     .  |     . 
+         14.8 x         x        x        x        x
+          java      java      java    java     java
+
+                                                clj-1
+regex-  | needs  |  54.1  | needs  |  24.2  |   52.1
+dna     | regex  |  52.7  | regex  |  41.2  |   53.2
+        |  lib   |   0.5  |  lib   |   1.1  |    0.8  1.3 x java
+
+                                   |            clj-9
+rcomp   |  36.4  |  10.9  |  10.6  |   7.7  |   68.2
+        |  31.3  |   6.3  |   3.7  |   3.0  |   50.2
+        |   1.9  |   2.0  |   3.7  |   1.3  |    2.6  12.3 x java
+
+                                                clj-6
+rcomp   |        |        |        |        |   59.3
+        |        |        |        |        |   64.0
+        |        |        |        |        |    3.8  15.8 x java
+
+                                   |            clj-7 (uses new transients)
+k-nuc-  | 186.5  | 275.1  |  86.6  |  56.9  |  413.0
+leotide | 185.0  | 272.6  | 135.8  | 105.1  |  416.9
+        |   1.4  |   1.5  |   5.1  |   1.3  |    3.3  3.9 x java
+
+                                                clj-6 (no transients)
+k-nuc-  |        |        |        |        |  702.7
+leotide |        |        |        |        |  707.0
+        |        |        |        |        |    4.6  6.7 x java
+
+k-nucleotide medium test, all clj, modified-pmap with specified number
+of parallel threads, on my iMac (note, these are from
+knucleotide.clj-5.clj, not the slightly improved knucleotide.clj-6.clj
+version):
+tbd: update results
+        |   1    |   2    |   3    |   4    |   5    |   6    |
+        |  74.9  |  70.7  |  77.2  |  76.8  |  82.5  |  77.8  |
+        | 125.9  | 122.1  | 134.6  | 134.0  | 143.4  | 134.0  |
+        |   2.5  |   2.8  |   2.8  |   2.3  |   3.1  |   2.3  |
+
+
+The longest few benchmark run on my iMac are:
+
+real
+mins benchmark test language
+
+tbd: update results
+
+
+
+mandelbrot notes:
+
+sbcl version implemented with threads.  I run it with only 1 thread.
+I haven't debugged why it produces the wrong output yet.
+
+perl version implemented with threads, but my Perl implementation
+doesn't have threads, so I made a slight modification for a 1-thread
+version that doesn't use them at all.
+
+There are at least two versions of Java source code on shootout web
+site.  I'm using the one that uses threads, not the other one that
+avoids using threads.
+
+----------------------------------------------------------------------
+Hardware and software used
+
+iMac with Intel Core 2 Duo, 2.16 GHz, 2 GB RAM, Mac OS X 10.6.4
+
+% /opt/local/bin/sbcl --version
+SBCL 1.0.39
+% /opt/local/bin/perl -v
+
+This is perl, v5.8.9 built for darwin-2level
+
+Copyright 1987-2008, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+% java -version
+java version "1.6.0_20"
+Java(TM) SE Runtime Environment (build 1.6.0_20-b02-279-10M3065)
+Java HotSpot(TM) 64-Bit Server VM (build 16.3-b01-279, mixed mode)
+
+% javac -version
+javac 1.6.0_20
+
+user> (clojure-version)
+"1.2.0"
+
+% ghc -V
+The Glorious Glasgow Haskell Compilation System, version 6.10.4
+
+----------------------------------------------------------------------
