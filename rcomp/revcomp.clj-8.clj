@@ -8,10 +8,10 @@
 ;; after the fact.  Should save a lot of memory, and I'm wondering
 ;; whether it will save time, too.
 
-;;(set! *warn-on-reflection* true)
-
 (ns clojure.benchmark.reverse-complement
   (:use [clojure.contrib.seq-utils :only (flatten)]))
+
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-slurp-br
@@ -126,8 +126,11 @@
       (loop [start (int (dec len))
              to-print-before-nl (int max-len)]
         (let [next-start (int (dec start))
-              next-to-print-before-nl (int (dec to-print-before-nl))]
-          (. bw write (int (comp (int (. s charAt start)))))
+              next-to-print-before-nl (int (dec to-print-before-nl))
+              in-c (int (. s charAt start))
+              out-c (int (comp in-c))]
+;          (. bw write (int (comp (int (. s charAt start)))))
+          (. bw write out-c)
           (if (zero? next-to-print-before-nl)
             (do
               (. bw newLine)
@@ -145,7 +148,7 @@
 
 (let [max-dna-chars-per-line 60
       br (java.io.BufferedReader. *in*)
-      bw (java.io.BufferedWriter. *out*)
+      bw (java.io.BufferedWriter. *out* (* 16 8192)) ; 16 * default size, I think
       ;; We could use the map complement-dna-char-map instead of
       ;; complement-dna-char-fn, but when I tested that, the program
       ;; spent a lot of time running the hashCode method on
