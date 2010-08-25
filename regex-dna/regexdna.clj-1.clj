@@ -1,8 +1,7 @@
-;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
-;; Date: Jul 30, 2009
+;;   The Computer Language Benchmarks Game
+;;   http://shootout.alioth.debian.org/
 
-
-;;(set! *warn-on-reflection* true)
+;; contributed by Andy Fingerhut
 
 (ns clojure.benchmark.regex-dna
   (:use [clojure.contrib.str-utils :only (re-gsub)])
