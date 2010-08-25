@@ -59,7 +59,7 @@
            momz (double 0.0)
            i (int 0)]
       (if (< i n)
-        (let [b (bodies i)
+        (let [#^doubles b (bodies i)
               m (mass b)]
           (recur (+ momx (* m (velx b)))
                  (+ momy (* m (vely b)))
@@ -125,7 +125,7 @@
       (assoc bodies sun-index sun))))
 
 
-(defn kinetic-energy-1 [body]
+(defn kinetic-energy-1 [#^doubles body]
   (* (double 0.5) (mass body)
      (+ (* (velx body) (velx body))
         (* (vely body) (vely body))
@@ -136,7 +136,7 @@
   (reduce + (map kinetic-energy-1 bodies)))
 
 
-(defn distance-between [b1 b2]
+(defn distance-between [#^doubles b1 #^doubles b2]
   (let [dx (double (- (posx b1) (posx b2)))
         dy (double (- (posy b1) (posy b2)))
         dz (double (- (posz b1) (posz b2)))]
@@ -153,7 +153,7 @@
       pairs)))
 
 
-(defn potential-energy-body-pair [[b1 b2]]
+(defn potential-energy-body-pair [[#^doubles b1 #^doubles b2]]
   (let [distance (distance-between b1 b2)]
     (/ (* (mass b1) (mass b2))
        distance)))
@@ -180,10 +180,10 @@
         n-1 (int (dec n))]
     (loop [i1 (int 0)]
       (if (< i1 n-1)
-        (let [b1 (bodies i1)]
+        (let [#^doubles b1 (bodies i1)]
           (loop [i2 (int (inc i1))]
             (if (< i2 n)
-              (let [b2 (bodies i2)
+              (let [#^doubles b2 (bodies i2)
                     delta-posx (double (- (posx b1) (posx b2)))
                     delta-posy (double (- (posy b1) (posy b2)))
                     delta-posz (double (- (posz b1) (posz b2)))
@@ -200,8 +200,8 @@
                     dv2x (* delta-posx b2-scale)
                     dv2y (* delta-posy b2-scale)
                     dv2z (* delta-posz b2-scale)]
-                (add-to-vel! (bodies i1) dv1x dv1y dv1z)
-                (add-to-vel! (bodies i2) dv2x dv2y dv2z)
+                (add-to-vel! #^doubles (bodies i1) dv1x dv1y dv1z)
+                (add-to-vel! #^doubles (bodies i2) dv2x dv2y dv2z)
                 (recur (unchecked-inc i2)))))
           (recur (unchecked-inc i1)))))))
 
@@ -211,7 +211,7 @@
         delta-t (double delta-t)]
     (loop [i (int 0)]
       (if (< i n)
-        (let [b (bodies i)]
+        (let [#^doubles b (bodies i)]
           (set-posx! b (+ (posx b) (* (velx b) delta-t)))
           (set-posy! b (+ (posy b) (* (vely b) delta-t)))
           (set-posz! b (+ (posz b) (* (velz b) delta-t)))

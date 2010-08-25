@@ -30,18 +30,18 @@
 (defmacro vely [p] `(double (aget ~p 5)))
 (defmacro velz [p] `(double (aget ~p 6)))
 
-(defmacro set-mass! [p new-mass] `(aset ~p 0 ~new-mass))
-(defmacro set-posx! [p new-posx] `(aset ~p 1 ~new-posx))
-(defmacro set-posy! [p new-posy] `(aset ~p 2 ~new-posy))
-(defmacro set-posz! [p new-posz] `(aset ~p 3 ~new-posz))
-(defmacro set-velx! [p new-velx] `(aset ~p 4 ~new-velx))
-(defmacro set-vely! [p new-vely] `(aset ~p 5 ~new-vely))
-(defmacro set-velz! [p new-velz] `(aset ~p 6 ~new-velz))
+(defmacro set-mass! [p new-mass] `(aset-double ~p 0 ~new-mass))
+(defmacro set-posx! [p new-posx] `(aset-double ~p 1 ~new-posx))
+(defmacro set-posy! [p new-posy] `(aset-double ~p 2 ~new-posy))
+(defmacro set-posz! [p new-posz] `(aset-double ~p 3 ~new-posz))
+(defmacro set-velx! [p new-velx] `(aset-double ~p 4 ~new-velx))
+(defmacro set-vely! [p new-vely] `(aset-double ~p 5 ~new-vely))
+(defmacro set-velz! [p new-velz] `(aset-double ~p 6 ~new-velz))
 
 
 (defn planet-construct [p]
   ;; Don't bother keeping the name around
-  (let [p-arr (make-array Double/TYPE 7)]
+  (let [p-arr (double-array 7)]
     (set-mass! p-arr (:mass p))
     (set-posx! p-arr ((:pos p) 0))
     (set-posy! p-arr ((:pos p) 1))
@@ -59,7 +59,7 @@
            momz (double 0.0)
            i (int 0)]
       (if (< i n)
-        (let [b (bodies i)
+        (let [#^doubles b (bodies i)
               m (mass b)]
           (recur (+ momx (* m (velx b)))
                  (+ momy (* m (vely b)))
@@ -125,7 +125,7 @@
       (assoc bodies sun-index sun))))
 
 
-(defn kinetic-energy-1 [body]
+(defn kinetic-energy-1 [#^doubles body]
   (* (double 0.5) (mass body)
      (+ (* (velx body) (velx body))
         (* (vely body) (vely body))
@@ -136,7 +136,7 @@
   (reduce + (map kinetic-energy-1 bodies)))
 
 
-(defn distance-between [b1 b2]
+(defn distance-between [#^doubles b1 #^doubles b2]
   (let [dx (double (- (posx b1) (posx b2)))
         dy (double (- (posy b1) (posy b2)))
         dz (double (- (posz b1) (posz b2)))]
@@ -153,7 +153,7 @@
       pairs)))
 
 
-(defn potential-energy-body-pair [[b1 b2]]
+(defn potential-energy-body-pair [[#^doubles b1 #^doubles b2]]
   (let [distance (distance-between b1 b2)]
     (/ (* (mass b1) (mass b2))
        distance)))
