@@ -20,7 +20,7 @@ fi
 # the Java implementation that is in error, or the one it is being
 # compared against.
 
-do_java_runs () {
+make_expected_output_files () {
     local B=$1
     shift
     local T
@@ -38,7 +38,7 @@ do_java_runs () {
 
 # There are no fasta input files, but its output files are the input
 # files for several other benchmarks.
-do_java_runs fasta quick knuc medium regexdna long
+make_expected_output_files fasta quick knuc medium regexdna long
 
 # k-nucleotide (knuc) and reverse-complement (rcomp) have input files
 # that are produced as output from the fasta benchmark programs.
@@ -78,13 +78,13 @@ fi
 
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
-do_java_runs mandelbrot quick medium long
-do_java_runs fannkuch quick medium long
+make_expected_output_files mandelbrot quick medium long
+make_expected_output_files fannkuch quick medium long
 
-do_java_runs knuc quick medium long
-do_java_runs rcomp quick medium long
-do_java_runs rlines long
-do_java_runs regex-dna quick long
-do_java_runs n-body quick medium long
+make_expected_output_files knuc quick medium long
+make_expected_output_files rcomp quick medium long
+make_expected_output_files rlines long
+make_expected_output_files regex-dna quick long
+make_expected_output_files n-body quick medium long
 
 exit 0
