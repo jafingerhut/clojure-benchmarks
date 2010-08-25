@@ -95,7 +95,7 @@
 	 result []
 	 x-vals x-vals]
     (if-let [s (seq x-vals)]
-      ; then
+      ;; then
       (let [new-bit (int (if (dot (first s) y) 1 0))
 	    new-b (int (+ (bit-shift-left b 1) new-bit))]
 	(if (= num-filled-bits 7)
@@ -107,7 +107,7 @@
 		 (int (inc num-filled-bits))
 		 result
 		 (rest s))))
-      ; else
+      ;; else
       (if (= num-filled-bits 0)
 	result
 	(conj result (byte (bit-shift-left b (- 8 num-filled-bits))))))))
