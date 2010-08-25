@@ -7,12 +7,11 @@ mkdir $OUTPUT_DIR
 
 BENCHMARK="reverse-complement"
 
-# No Clojure version created yet.
-
 # SBCL 1.0.23 works on Mac OS X, but SBCL 1.0.29 doesn't like opening
 # /dev/stdin with :element-type '(unsigned-byte 8) for some reason.
+# SBCL 1.0.39 seems to work fine.
 
-ALL_LANGUAGES="perl ghc java clj"
+ALL_LANGUAGES="sbcl perl ghc java clj"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -21,7 +20,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
