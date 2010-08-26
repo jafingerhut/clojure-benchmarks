@@ -165,3 +165,5 @@
 
 
 (main size num-threads)
+
+(. System (exit 0))
