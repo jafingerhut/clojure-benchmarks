@@ -20,7 +20,7 @@
 ;; Until then, I'm looking for other suggestions for speeding up the
 ;; code, or reducing its memory usage.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-description-line
@@ -44,7 +44,8 @@
                            lines)]
     (when-let [x (seq x)]
       (let [y (take-while (fn [l] (not (fasta-description-line l)))
-                          (map (fn [s] (.toUpperCase s)) (rest x)))]
+                          (map (fn [#^java.lang.String s] (.toUpperCase s))
+                               (rest x)))]
         (apply str y)))))
 
 
@@ -79,14 +80,14 @@
   [h things]
   (if-let [r (seq things)]
     (let [key (first r)]
-      (recur (assoc h key (inc (get h key 0))) (rest r)))
+      (recur (assoc! h key (inc (get h key 0))) (rest r)))
     h))
 
 
 (defn tally-loses-head
   "Same caller interface as tally-keeps-head, but it uses same memory as weird-tally-loses-head."
   [things]
-  (tally-loses-head-helper {} things))
+  (persistent! (tally-loses-head-helper (transient {}) things)))
 
 
 (defn all-tally-to-str
@@ -97,6 +98,7 @@
                       (keys tally))]
         (println (format "%s %.3f" k
                          (double (* 100 (/ (tally k) total)))))))))
+
 
 (defn one-tally-to-str
   [key tally]
