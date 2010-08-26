@@ -3,7 +3,8 @@
 
 ;; contributed by Andy Fingerhut
 
-(ns clojure.benchmark.regex-dna
+(ns regexdna
+  (:gen-class)
   (:use [clojure.contrib.str-utils :only (re-gsub)])
   (:import (java.util.regex Pattern)))
 
@@ -54,22 +55,24 @@
   (re-gsub (. Pattern (compile iub-str)) iub-replacement str))
 
 
-(let [content (slurp-std-input)
-      original-len (count content)
-      ;; I'd prefer if I could use the regexp #"(^>.*)?\n" like the
-      ;; Perl benchmark does, but that only matches ^ at the beginning
-      ;; of the string, not at the beginning of a line in the middle
-      ;; of the string.
-      content (re-gsub #"(^>.*|\n>.*)?\n" "" content)
-      dna-seq-only-len (count content)]
-
-  (doseq [re dna-seq-regexes]
-    (println (format "%s %d" re
-		     ;; Prepending (?i) to the regexp in Java makes it
-		     ;; case-insensitive.
-		     (count (re-seq (. Pattern (compile (str "(?i)" re)))
-				    content)))))
-
-  (let [content (reduce one-replacement content iub-codes)]
-    (println (format "\n%d\n%d\n%d" original-len dna-seq-only-len
-		     (count content)))))
+(defn -main
+  [& args]
+  (let [content (slurp-std-input)
+        original-len (count content)
+        ;; I'd prefer if I could use the regexp #"(^>.*)?\n" like the
+        ;; Perl benchmark does, but that only matches ^ at the beginning
+        ;; of the string, not at the beginning of a line in the middle
+        ;; of the string.
+        content (re-gsub #"(^>.*|\n>.*)?\n" "" content)
+        dna-seq-only-len (count content)]
+    
+    (doseq [re dna-seq-regexes]
+      (println (format "%s %d" re
+                       ;; Prepending (?i) to the regexp in Java makes it
+                       ;; case-insensitive.
+                       (count (re-seq (. Pattern (compile (str "(?i)" re)))
+                                      content)))))
+    
+    (let [content (reduce one-replacement content iub-codes)]
+      (println (format "\n%d\n%d\n%d" original-len dna-seq-only-len
+                       (count content))))))
