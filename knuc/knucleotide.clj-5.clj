@@ -48,10 +48,6 @@
         (apply str y)))))
 
 
-;;(defn dna-char-to-code-val
-;;  [c]
-;;  ({\A 0, \C 1, \T 2, \G 3} c))
-
 (defmacro dna-char-to-code-val
   [c]
   `({\A 0, \C 1, \T 2, \G 3} ~c))
@@ -89,8 +85,8 @@
       (if (zero? offset)
 	tally
 	(let [new-offset (dec offset)
-	      new-first-char-code (int (dna-char-to-code-val
-					(nth dna-str new-offset)))
+	      new-first-char-code (dna-char-to-code-val
+                                   (nth dna-str new-offset))
 	      new-key (+ (bit-shift-right key 2)
 			 (bit-shift-left new-first-char-code left-shift-amount))
 	      new-tally (assoc tally new-key (inc (get tally new-key 0)))]

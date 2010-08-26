@@ -48,23 +48,7 @@
         (apply str y)))))
 
 
-;;(defn dna-char-to-code-val
-;;  [c]
-;;  ({\A 0, \C 1, \T 2, \G 3} c))
-
-;;(defmacro dna-char-to-code-val
-;;  [c]
-;;  `({\A 0, \C 1, \T 2, \G 3} ~c))
-
-
 (def dna-char-to-code-val {\A 0, \C 1, \T 2, \G 3})
-
-
-;;(defn code-val-to-dna-char
-;;  [val]
-;;  ({0 \A, 1 \C, 2 \T, 3 \G} val))
-
-
 (def code-val-to-dna-char {0 \A, 1 \C, 2 \T, 3 \G})
 
 

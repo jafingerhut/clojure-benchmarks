@@ -48,13 +48,6 @@
         (apply str y)))))
 
 
-;; (defn all-equal-len-subs
-;;   "Returns a sequence of all length len substrings of the string s, if (count s) >= len, otherwise nil."
-;;   [len s]
-;;   (when (>= (count s) len)
-;;     (map #(subs s % (+ % len)) (range (inc (- (count s) len))))))
-
-
 ;; Unfortunately, at least with (clojure-version)=1.1.0-alpha-SNAPSHOT
 ;; and java version 1.5.0_19 on an Intel Mac with OS X 10.5.7,
 ;; tally-keeps-head keeps a reference to the beginning of the sequence
@@ -126,8 +119,8 @@
       (if (zero? offset)
 	tally
 	(let [new-offset (int (dec offset))
-	      new-first-char-code (int (dna-char-to-code-val
-					(nth dna-str new-offset)))
+	      new-first-char-code (dna-char-to-code-val
+                                   (nth dna-str new-offset))
 	      new-key (+ (bit-shift-right key 2)
 			 (bit-shift-left new-first-char-code left-shift-amount))
 	      new-tally (assoc tally new-key (inc (get tally new-key 0)))]
