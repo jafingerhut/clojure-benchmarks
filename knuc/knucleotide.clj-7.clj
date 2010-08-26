@@ -98,8 +98,8 @@
       (if (zero? offset)
 	(persistent! tally)
 	(let [new-offset (dec offset)
-	      new-first-char-code (int (dna-char-to-code-val
-					(nth dna-str new-offset)))
+	      new-first-char-code (dna-char-to-code-val
+					(nth dna-str new-offset))
 	      new-key (+ (bit-shift-right key 2)
 			 (bit-shift-left new-first-char-code left-shift-amount))
 	      new-tally (assoc! tally new-key (inc (get tally new-key 0)))]
