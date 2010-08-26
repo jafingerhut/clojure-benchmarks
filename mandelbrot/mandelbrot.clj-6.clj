@@ -11,39 +11,9 @@
 ;; David Sletten
 ;; John Harrop
 
-(import '(java.io BufferedOutputStream))
-
-(def *default-modified-pmap-num-threads*
-     (+ 2 (.. Runtime getRuntime availableProcessors)))
-
-(defn usage [exit-code]
-  (println (format "usage: %s size [num-threads]"
-                   *file*))
-  (println (format "    size must be a positive integer"))
-  (println (format "    num-threads is the maximum threads to use at once"))
-  (println (format "        during the computation.  If 0 or not given, it"))
-  (println (format "        defaults to the number of available cores plus 2,"))
-  (println (format "        which is %d"
-                   *default-modified-pmap-num-threads*))
-  (. System (exit exit-code)))
-
-(when (or (< (count *command-line-args*) 1) (> (count *command-line-args*) 2))
-  (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def size (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< size 1)
-  (usage 1))
-(def num-threads
-     (if (>= (count *command-line-args*) 2)
-       (do
-         (when (not (re-matches #"^\d+$" (nth *command-line-args* 1)))
-           (usage 1))
-         (let [n (. Integer valueOf (nth *command-line-args* 1) 10)]
-           (if (== n 0)
-             *default-modified-pmap-num-threads*
-             n)))
-       *default-modified-pmap-num-threads*))
+(ns mandelbrot
+  (:gen-class)
+  (:import (java.io BufferedOutputStream)))
 
 
 (def max-iterations 50)
@@ -153,7 +123,7 @@
                    (range size))))
 
 
-(defn main [size num-threads]
+(defn do-mandelbrot [size num-threads]
   (let [rows (compute-rows size num-threads)]
     (println "P4")
     (println (format "%d %d" size size))
@@ -164,6 +134,38 @@
     (flush)))
 
 
-(main size num-threads)
+(def *default-modified-pmap-num-threads*
+     (+ 2 (.. Runtime getRuntime availableProcessors)))
 
-(. System (exit 0))
+(defn usage [exit-code]
+  (println (format "usage: %s size [num-threads]"
+                   *file*))
+  (println (format "    size must be a positive integer"))
+  (println (format "    num-threads is the maximum threads to use at once"))
+  (println (format "        during the computation.  If 0 or not given, it"))
+  (println (format "        defaults to the number of available cores plus 2,"))
+  (println (format "        which is %d"
+                   *default-modified-pmap-num-threads*))
+  (. System (exit exit-code)))
+
+
+(defn -main [& args]
+  (when (or (< (count args) 1) (> (count args) 2))
+    (usage 1))
+  (when (not (re-matches #"^\d+$" (nth args 0)))
+    (usage 1))
+  (def size (. Integer valueOf (nth args 0) 10))
+  (when (< size 1)
+    (usage 1))
+  (def num-threads
+       (if (>= (count args) 2)
+         (do
+           (when (not (re-matches #"^\d+$" (nth args 1)))
+             (usage 1))
+           (let [n (. Integer valueOf (nth args 1) 10)]
+             (if (== n 0)
+               *default-modified-pmap-num-threads*
+               n)))
+         *default-modified-pmap-num-threads*))
+  (do-mandelbrot size num-threads)
+  (. System (exit 0)))
