@@ -20,7 +20,7 @@
 ;; Until then, I'm looking for other suggestions for speeding up the
 ;; code, or reducing its memory usage.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-description-line
@@ -44,7 +44,8 @@
                            lines)]
     (when-let [x (seq x)]
       (let [y (take-while (fn [l] (not (fasta-description-line l)))
-                          (map (fn [s] (.toUpperCase s)) (rest x)))]
+                          (map (fn [#^java.lang.String s] (.toUpperCase s))
+                               (rest x)))]
         (apply str y)))))
 
 
@@ -83,9 +84,9 @@
 	(persistent! tally)
 	(let [new-offset (dec offset)
 	      new-first-char-code (dna-char-to-code-val
-					(nth dna-str new-offset))
+                                   (nth dna-str new-offset))
 	      new-key (+ (bit-shift-right key 2)
-			 (bit-shift-left new-first-char-code left-shift-amount))
+                         (bit-shift-left new-first-char-code left-shift-amount))
 	      new-tally (assoc! tally new-key (inc (get tally new-key 0)))]
 	  (recur new-offset new-key new-tally))))))
 

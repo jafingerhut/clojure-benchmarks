@@ -20,7 +20,7 @@
 ;; Until then, I'm looking for other suggestions for speeding up the
 ;; code, or reducing its memory usage.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-description-line
@@ -44,7 +44,8 @@
                            lines)]
     (when-let [x (seq x)]
       (let [y (take-while (fn [l] (not (fasta-description-line l)))
-                          (map (fn [s] (.toUpperCase s)) (rest x)))]
+                          (map (fn [#^java.lang.String s] (.toUpperCase s))
+                               (rest x)))]
         (apply str y)))))
 
 
