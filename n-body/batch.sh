@@ -11,7 +11,7 @@ BENCHMARK="n-body"
 # the default list of languages for now.
 
 #ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_LANGUAGES="sbcl perl java"
+ALL_LANGUAGES="sbcl perl java clj"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -64,6 +64,7 @@ do
     do
 	case $L in
 	    clj) CMD=./clj-run.sh
+		( ./clj-compile.sh ) >& ${OUTPUT_DIR}/clj-compile-log.txt
 		;;
 	    java) CMD=./java-run.sh
 		( ./java-compile.sh ) >& ${OUTPUT_DIR}/java-compile-log.txt

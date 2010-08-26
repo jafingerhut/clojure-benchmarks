@@ -49,17 +49,17 @@ mand-   |        |        |        |        |   57.3
 elbrot  |        |        |        |        |  103.0
         |        |        |        |        |    1.6  1.78 x java
 
-                                               clj-11 (uses mutable Java arrays)
-n-      |  26.9  | 2019.3 |        |  25.6  |  375.1
-body    |  26.7  | 1834.1 | crash  |  25.6  |  368.2
-        |   0.1  |    5.5 |        |   0.1  |    2.3  14.4 x java
+                                               clj-12 (uses deftype)
+n-      |  26.9  | 2019.3 |        |  25.6  |   39.0
+body    |  26.7  | 1834.1 | crash  |  25.6  |   37.6
+        |   0.1  |    5.5 |        |   0.1  |    0.8  1.5 x java
 
 tbd: update results
-           clj-9    clj-8     clj-6    clj-7    clj-5
-n-      | 377.4   |        |     .  |     .  |     . 
-body    | 378.8   | crash  |     .  |     .  |     . 
-        |   2.6   |        |     .  |     .  |     . 
-         14.8 x         x        x        x        x
+          clj-11     clj-9    clj-8     clj-6    clj-7
+n-      | 375.1   | 377.4   |        |     .  |     .
+body    | 368.2   | 378.8   | crash  |     .  |     .
+        |   2.3   |   2.6   |        |     .  |     .
+         14.4 x    14.8 x         x        x        x
           java      java      java    java     java
 
                                                 clj-1
