@@ -24,10 +24,10 @@ times more than the total of the Java "user + sys" time.
         |  sbcl  |  perl  |   ghc  |  java  |   clj
 -----------------------------------------------------
 
-                                               clj-10 uses mutable Java arrays
-fann-   |  59.7  | 4528.9 |  54.9  |  39.0  |  323.4
-kuch    |  59.6  | 4520.9 | 107.8  |  71.6  |  324.2
-        |   0.1  |    2.4 |   0.6  |   0.1  |    2.1  4.6 x java
+                                               clj-11 uses mutable Java arrays
+fann-   |  59.7  | 4528.9 |  54.9  |  39.0  |  765.1
+kuch    |  59.6  | 4520.9 | 107.8  |  71.6  |  763.7
+        |   0.1  |    2.4 |   0.6  |   0.1  |    1.4  10.7 x java
 
 tbd: update results
            clj-8    clj-9    clj-6
@@ -77,10 +77,10 @@ rcomp   |        |        |        |        |   59.3
         |        |        |        |        |   64.0
         |        |        |        |        |    3.8  15.8 x java
 
-                                   |            clj-2 (uses transients)
-k-nuc-  | 186.5  | 275.1  |  86.6  |  56.9  |  869.9
-leotide | 185.0  | 272.6  | 135.8  | 105.1  | 1037.6
-        |   1.4  |   1.5  |   5.1  |   1.3  |    6.7  9.8 x java
+                                   |            clj-9 (uses transients)
+k-nuc-  | 186.5  | 275.1  |  86.6  |  51.2  |  725.2
+leotide | 185.0  | 272.6  | 135.8  |  90.4  |  840.9
+        |   1.4  |   1.5  |   5.1  |   1.4  |    4.9  9.2 x java
 
 
 The longest few benchmark run on my iMac are:
