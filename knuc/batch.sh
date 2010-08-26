@@ -50,6 +50,7 @@ do
     do
 	case $L in
 	    clj) CMD=./clj-run.sh
+		( ./clj-compile.sh ) >& ${OUTPUT_DIR}/clj-compile-log.txt
 		;;
 	    java) CMD=./java-run.sh
 		( ./java-compile.sh ) >& ${OUTPUT_DIR}/java-compile-log.txt
