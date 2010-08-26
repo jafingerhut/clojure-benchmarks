@@ -88,35 +88,30 @@ straightforward single function for this in Clojure 1.1 alpha, it
   (with-open [br (java.io.BufferedReader. *in*)]
     (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))]
       (flush)
-      (let [tally1 (all-tally-to-str
-                    (tally (all-equal-len-subs 1 dna-str)))]
+      (let [tally1 (all-tally-to-str (tally (all-equal-len-subs 1 dna-str)))]
         (println tally1))
       (flush)
-      (let [tally2 (all-tally-to-str
-                    (tally (all-equal-len-subs 2 dna-str)))]
+      (let [tally2 (all-tally-to-str (tally (all-equal-len-subs 2 dna-str)))]
         (println tally2))
       (flush)
-      (let [tally3 (one-tally-to-str
-                    "GGT" (tally (all-equal-len-subs 3 dna-str)))]
+      (let [tally3 (one-tally-to-str "GGT"
+                                     (tally (all-equal-len-subs 3 dna-str)))]
         (println tally3))
       (flush)
-      (let [tally4 (one-tally-to-str
-                    "GGTA" (tally (all-equal-len-subs 4 dna-str)))]
+      (let [tally4 (one-tally-to-str "GGTA"
+                                     (tally (all-equal-len-subs 4 dna-str)))]
         (println tally4))
       (flush)
-      (let [tally6 (one-tally-to-str
-                    "GGTATT"
-                    (tally (all-equal-len-subs 6 dna-str)))]
+      (let [tally6 (one-tally-to-str "GGTATT"
+                                     (tally (all-equal-len-subs 6 dna-str)))]
         (println tally6))
       (flush)
-      (let [tally12 (one-tally-to-str
-                     "GGTATTTTAATT"
-                     (tally (all-equal-len-subs 12 dna-str)))]
+      (let [tally12 (one-tally-to-str "GGTATTTTAATT"
+                                      (tally (all-equal-len-subs 12 dna-str)))]
         (println tally12))
       (flush)
-      (let [tally18 (one-tally-to-str
-                     "GGTATTTTAATTTATAGT"
-                     (tally (all-equal-len-subs 18 dna-str)))]
+      (let [tally18 (one-tally-to-str "GGTATTTTAATTTATAGT"
+                                      (tally (all-equal-len-subs 18 dna-str)))]
         (println tally18))
       (flush)))
   (. System (exit 0)))
