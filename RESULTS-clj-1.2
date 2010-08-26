@@ -39,15 +39,15 @@ kuch    | 1565.0 | 5030.8 | 8995.6 |        |
           22.7 x    73 x     134 x
            java     java     java
 
-                                                clj-5 (1 thread)
-mand-   |   54.7 | 4936.8 |  28.6  |  30.1  |  102.2
-elbrot  |   54.1 | 4930.2 |  55.2  |  58.3  |  103.6
-        |    0.2 |    2.2 |   0.5  |   0.3  |    0.9  1.8 x java
+                                                clj-6 (1 thread)
+mand-   |   54.7 | 4936.8 |  28.6  |  30.1  |  100.1
+elbrot  |   54.1 | 4930.2 |  55.2  |  58.3  |  101.2
+        |    0.2 |    2.2 |   0.5  |   0.3  |    0.8  1.74 x java
 
-                                                clj-5 (4 parallel threads)
-mand-   |        |        |        |        |   56.4
-elbrot  |        |        |        |        |  103.7
-        |        |        |        |        |    1.7  1.8 x java
+                                                clj-6 (4 parallel threads)
+mand-   |        |        |        |        |   57.3
+elbrot  |        |        |        |        |  103.0
+        |        |        |        |        |    1.6  1.78 x java
 
                                                clj-11 (uses mutable Java arrays)
 n-      |  26.9  | 2019.3 |        |  25.6  |  375.1
