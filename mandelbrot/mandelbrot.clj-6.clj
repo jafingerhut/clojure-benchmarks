@@ -2,14 +2,11 @@
 ;;   http://shootout.alioth.debian.org/
 
 ;; contributed by Andy Fingerhut
+
 ;; The function 'dot' is based on suggestions and improvements made by
 ;; these people posting to the Clojure Google group in April, 2009:
-;; dmitri.sotnikov@gmail.com
-;; William D. Lipe (atmcsld@gmail.com)
-;; Paul Stadig (paul@stadig.name)
-;; michael.messinides@invista.com
-;; David Sletten
-;; John Harrop
+;; dmitri.sotnikov, William D. Lipe, Paul Stadig, michael.messinides
+;; David Sletten, John Harrop
 
 (ns mandelbrot
   (:gen-class)
