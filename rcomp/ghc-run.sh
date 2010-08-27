@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-./revcomp.ghc-2.ghc_run 0
+./obj/ghc/revcomp.ghc-2.ghc_run 0

@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-./nbody.ghc_run "$@"
+./obj/ghc/nbody.ghc_run "$@"
