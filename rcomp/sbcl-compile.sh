@@ -3,4 +3,7 @@
 source ../env.sh
 
 $SBCL --version
-$SBCL --no-userinit --no-sysinit --load revcomp.sbcl_compile
+mkdir -p obj/sbcl
+cp revcomp.sbcl obj/sbcl
+cd obj/sbcl
+$SBCL --no-userinit --no-sysinit --load ../../revcomp.sbcl_compile

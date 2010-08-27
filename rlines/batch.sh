@@ -7,9 +7,7 @@ mkdir $OUTPUT_DIR
 
 BENCHMARK="reverse-lines"
 
-# No Clojure version created yet.
-
-ALL_LANGUAGES="perl java clj"
+ALL_LANGUAGES="java clj"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

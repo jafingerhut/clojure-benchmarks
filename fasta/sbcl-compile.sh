@@ -3,4 +3,7 @@
 source ../env.sh
 
 $SBCL --version
-$SBCL --no-userinit --no-sysinit --load fasta.sbcl_compile
+mkdir -p obj/sbcl
+cp fasta.sbcl obj/sbcl
+cd obj/sbcl
+$SBCL --no-userinit --no-sysinit --load ../../fasta.sbcl_compile

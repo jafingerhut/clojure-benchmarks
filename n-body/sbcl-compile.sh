@@ -3,4 +3,7 @@
 source ../env.sh
 
 $SBCL --version
-$SBCL --no-userinit --no-sysinit --load nbody.sbcl_compile
+mkdir -p obj/sbcl
+cp nbody.sbcl obj/sbcl
+cd obj/sbcl
+$SBCL --no-userinit --no-sysinit --load ../../nbody.sbcl_compile

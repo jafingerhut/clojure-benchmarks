@@ -5,7 +5,7 @@
 
 source ../env.sh
 
-$SBCL --noinform --core sbcl.core --no-userinit --no-sysinit --load fannkuch.sbcl-2.sbcl_run "$@"
+$SBCL --noinform --core obj/sbcl/sbcl.core --no-userinit --no-sysinit --load fannkuch.sbcl-2.sbcl_run "$@"
 
 # Experiment to verify that I can put all of fannkuch.sbcl-2.sbcl_run
 # contents on command line, if I wish.

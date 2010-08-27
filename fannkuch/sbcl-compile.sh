@@ -2,7 +2,10 @@
 
 source ../env.sh
 
-$SBCL --no-userinit --no-sysinit --load fannkuch.sbcl-2.sbcl_compile
+mkdir -p obj/sbcl
+cp fannkuch.sbcl-2.sbcl obj/sbcl
+cd obj/sbcl
+$SBCL --no-userinit --no-sysinit --load ../../fannkuch.sbcl-2.sbcl_compile
 
 # Experiment to verify that I can put all of fannkuch.sbcl-2.sbcl_compile
 # contents on the command line, if I wish.
