@@ -33,6 +33,8 @@
           (recur (inc i)))
         a))))
 
+(defstruct twod-point :x :y)
+
 (def list-of-stuff (doall
                     (condp = m
                       0 '(a)
@@ -51,6 +53,8 @@
                       13 (take n (repeatedly (fn [] (random-double-array 2))))
                       14 (random-long-array n)
                       15 (take n (repeatedly (fn [] (random-long-array 2))))
+                      16 (vec (take n (map (fn [[x y]] (struct twod-point x y))
+                                           (partition 2 (rands)))))
                       )))
 
 ;; Stick around, so we can attach things to it like jmap

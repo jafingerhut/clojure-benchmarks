@@ -1,25 +1,10 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Aug 10, 2009
 
-(ns clojure.benchmark.n-body)
+(ns nbody
+  (:gen-class))
 
 (set! *warn-on-reflection* true)
-
-(defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
-  (. System (exit exit-code)))
-
-(when (not= (count *command-line-args*) 1)
-  (usage 1))
-(def n
-     (let [arg (nth *command-line-args* 0)]
-       (when (not (re-matches #"^\d+$" arg))
-         (usage 1))
-       (let [temp (. Integer valueOf arg 10)]
-         (when (< temp 1)
-           (usage 1))
-         temp)))
 
 
 (defmacro mass [p] `(double (aget ~p 0)))
@@ -223,12 +208,29 @@
   (bodies-update-positions! bodies delta-t))
 
 
-(let [bodies (n-body-system)
-      delta-t (double 0.01)]
-  (println (format "%.9f" (energy bodies)))
-  (loop [i (int n)]
-    (if (zero? i)
-      (println (format "%.9f" (energy bodies)))
-      (do
-        (advance! bodies delta-t)
-        (recur (unchecked-dec i))))))
+(defn usage [exit-code]
+  (println (format "usage: %s n" *file*))
+  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (. System (exit exit-code)))
+
+
+(defn -main [& args]
+  (when (not= (count args) 1)
+    (usage 1))
+  (def n
+       (let [arg (nth args 0)]
+         (when (not (re-matches #"^\d+$" arg))
+           (usage 1))
+         (let [temp (. Integer valueOf arg 10)]
+           (when (< temp 1)
+             (usage 1))
+           temp)))
+  (let [bodies (n-body-system)
+        delta-t (double 0.01)]
+    (println (format "%.9f" (energy bodies)))
+    (loop [i (int n)]
+      (if (zero? i)
+        (println (format "%.9f" (energy bodies)))
+        (do
+          (advance! bodies delta-t)
+          (recur (unchecked-dec i)))))))

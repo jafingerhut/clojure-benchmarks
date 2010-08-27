@@ -4,10 +4,10 @@
 ;; Finally I seem to have a program that doesn't cons at a very high
 ;; rate, like the previous one did.  It isn't terribly slow, either.
 
-;;(set! *warn-on-reflection* true)
+(ns revcomp
+  (:gen-class))
 
-(ns clojure.benchmark.reverse-complement
-  (:use [clojure.contrib.seq-utils :only (flatten)]))
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-description-line
@@ -92,29 +92,29 @@
 	    (recur (dec i) next-to-print-before-nl)))))))
 
 
-(let [max-dna-chars-per-line 60
-      br (java.io.BufferedReader. *in*)
-      bw (java.io.BufferedWriter. *out*)
-      ;; We could use the map complement-dna-char-map instead of
-      ;; complement-dna-char-fn, but when I tested that, the program
-      ;; spent a lot of time running the hashCode method on
-      ;; characters.  I'm hoping this is faster.
-      complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
-      complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
-  (doseq [[desc str-seq] (fasta-desc-dna-str-pairs (line-seq br))]
-    (println-string-to-buffered-writer bw desc)
-
-    (loop [to-print-before-nl max-dna-chars-per-line
-	   str-seq (seq (reverse str-seq))]
-      (if str-seq
-	(let [next-to-print-before-nl
-	      (print-str-reverse-complement bw (first str-seq) to-print-before-nl
-					    max-dna-chars-per-line
-					    complement-dna-char-fn)]
-	  (recur next-to-print-before-nl (seq (next str-seq))))
-	(when (not= to-print-before-nl max-dna-chars-per-line)
-	  (. bw newLine)))))
-  (. bw flush))
-
-
-(. System (exit 0))
+(defn -main [& args]
+  (let [max-dna-chars-per-line 60
+        br (java.io.BufferedReader. *in*)
+        bw (java.io.BufferedWriter. *out*)
+        ;; We could use the map complement-dna-char-map instead of
+        ;; complement-dna-char-fn, but when I tested that, the program
+        ;; spent a lot of time running the hashCode method on
+        ;; characters.  I'm hoping this is faster.
+        complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
+        complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
+    (doseq [[desc str-seq] (fasta-desc-dna-str-pairs (line-seq br))]
+      (println-string-to-buffered-writer bw desc)
+      
+      (loop [to-print-before-nl max-dna-chars-per-line
+             str-seq (seq (reverse str-seq))]
+        (if str-seq
+          (let [next-to-print-before-nl
+                (print-str-reverse-complement bw (first str-seq)
+                                              to-print-before-nl
+                                              max-dna-chars-per-line
+                                              complement-dna-char-fn)]
+            (recur next-to-print-before-nl (seq (next str-seq))))
+          (when (not= to-print-before-nl max-dna-chars-per-line)
+            (. bw newLine)))))
+    (. bw flush))
+  (. System (exit 0)))

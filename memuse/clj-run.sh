@@ -1,7 +1,8 @@
 #! /bin/bash
 
 CLOJURE_JAR_DIR=$HOME/.clojure
-CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar
+#CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar
+CLOJURE_CLASSPATH=$CLOJURE_JAR_DIR/clojure-1.1.0-alpha-SNAPSHOT.jar:$CLOJURE_JAR_DIR/clojure-contrib.jar:/Users/Shared/lang/clojure-benchmarks/memuse/
 
 OPTS="-server"
 #OPTS="-client"
@@ -12,7 +13,8 @@ OPTS="-server"
 JAVA_PROFILING=""
 
 #JDB="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
-JDB="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
+ JDB="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
+#JDB="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8000"
 
 CLJ_PROG=memuse.clj
 

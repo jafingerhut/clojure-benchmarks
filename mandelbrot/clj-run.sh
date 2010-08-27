@@ -14,5 +14,5 @@ JVM_OPTS="-server -Xmx768m"
 #JVM_OPTS="-server -XX:+DoEscapeAnalysis -XX:+UseBiasedLocking"
 JVM_OPTS="-server -XX:+UseBiasedLocking"
 
-1>&2 echo $JAVA ${JVM_OPTS} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./clj-classes mandelbrot "$@"
-          $JAVA ${JVM_OPTS} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./clj-classes mandelbrot "$@"
+1>&2 echo $JAVA ${JVM_OPTS} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj mandelbrot "$@"
+          $JAVA ${JVM_OPTS} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj mandelbrot "$@"

@@ -4,4 +4,4 @@ source ../env.sh
 
 JVM_OPTS="-server"
 
-$JAVA $JVM_OPTS nbody "$@"
+$JAVA $JVM_OPTS -cp obj/java nbody "$@"

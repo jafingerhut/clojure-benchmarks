@@ -14,8 +14,10 @@
 ;; at a time, not a as a sequence of lines, but as a string or byte
 ;; array.
 
+(ns revcomp
+  (:gen-class))
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (defn fasta-description-line
   "Return true when the line l is a FASTA description line"
@@ -119,18 +121,20 @@
   (. bw newLine))
 
 
-(let [max-dna-chars-per-line 60]
+(defn -main [& args]
+  (let [max-dna-chars-per-line 60]
 ;;  (with-open [br (java.io.BufferedReader. *in*)
 ;;	      bw (java.io.BufferedWriter. *out*)]
-  (let [br (java.io.BufferedReader. *in*)
-	bw (java.io.BufferedWriter. *out*)]
-    (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
-      (println-string-to-buffered-writer bw desc)
+    (let [br (java.io.BufferedReader. *in*)
+          bw (java.io.BufferedWriter. *out*)]
+      (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
+        (println-string-to-buffered-writer bw desc)
 ;;      (println-string-to-buffered-writer bw dna-seq)
-      (print-reverse-complement-of-str-in-lines bw dna-seq
-						max-dna-chars-per-line)
-      (. bw flush))
-    ))
+        (print-reverse-complement-of-str-in-lines bw dna-seq
+                                                  max-dna-chars-per-line)
+        (. bw flush))
+      ))
+  (. System (exit 0)))
 
 
 (comment
@@ -154,6 +158,3 @@
     (. bw flush)
     ))
 )
-
-
-(. System (exit 0))

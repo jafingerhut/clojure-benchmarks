@@ -5,5 +5,6 @@ source ../env.sh
 $JAVA -version
 $JAVAC -version
 $CP nbody.java-2.java nbody.java
-$JAVAC nbody.java
+mkdir -p obj/java
+$JAVAC -d obj/java nbody.java
 $RM nbody.java

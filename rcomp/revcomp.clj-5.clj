@@ -1,10 +1,10 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Jul 29, 2009
 
-;;(set! *warn-on-reflection* true)
+(ns revcomp
+  (:gen-class))
 
-(ns clojure.benchmark.reverse-complement
-  (:use [clojure.contrib.seq-utils :only (flatten)]))
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-description-line
@@ -111,21 +111,20 @@
   (. bw newLine))
 
 
-(let [max-dna-chars-per-line 60
-      br (java.io.BufferedReader. *in*)
-      bw (java.io.BufferedWriter. *out*)
-      ;; We could use the map complement-dna-char-map instead of
-      ;; complement-dna-char-fn, but when I tested that, the program
-      ;; spent a lot of time running the hashCode method on
-      ;; characters.  I'm hoping this is faster.
-      complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
-      complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
-  (doseq [[desc str-seq] (fasta-desc-dna-str-pairs (line-seq br))]
-    (println-string-to-buffered-writer bw desc)
-    (print-char-seq-with-line-breaks bw
-      (reverse-complement-of-str-seq str-seq complement-dna-char-fn)
-      max-dna-chars-per-line))
-  (. bw flush))
-
-
-(. System (exit 0))
+(defn -main [& args]
+  (let [max-dna-chars-per-line 60
+        br (java.io.BufferedReader. *in*)
+        bw (java.io.BufferedWriter. *out*)
+        ;; We could use the map complement-dna-char-map instead of
+        ;; complement-dna-char-fn, but when I tested that, the program
+        ;; spent a lot of time running the hashCode method on
+        ;; characters.  I'm hoping this is faster.
+        complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
+        complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
+    (doseq [[desc str-seq] (fasta-desc-dna-str-pairs (line-seq br))]
+      (println-string-to-buffered-writer bw desc)
+      (print-char-seq-with-line-breaks bw
+        (reverse-complement-of-str-seq str-seq complement-dna-char-fn)
+        max-dna-chars-per-line))
+    (. bw flush))
+  (. System (exit 0)))

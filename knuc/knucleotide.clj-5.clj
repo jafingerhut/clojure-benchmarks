@@ -20,6 +20,9 @@
 ;; Until then, I'm looking for other suggestions for speeding up the
 ;; code, or reducing its memory usage.
 
+(ns knucleotide
+  (:gen-class))
+
 (set! *warn-on-reflection* true)
 
 
@@ -142,12 +145,12 @@
     (step rets (drop n rets))))
 
 
-(with-open [br (java.io.BufferedReader. *in*)]
-  (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
-	results (reverse (map #(compute-one-part dna-str %)
-			      (reverse (range 7))))]
-    (doseq [r results]
-      (println r)
-      (flush))))
-
-(. System (exit 0))
+(defn -main [& args]
+  (with-open [br (java.io.BufferedReader. *in*)]
+    (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
+          results (reverse (map #(compute-one-part dna-str %)
+                                (reverse (range 7))))]
+      (doseq [r results]
+        (println r)
+        (flush))))
+  (. System (exit 0)))

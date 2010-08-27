@@ -1,26 +1,12 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Aug 1, 2009
 
-
-;;(set! *warn-on-reflection* true)
-
-(ns clojure.benchmark.n-body
+(ns nbody
+  (:gen-class)
 ;;  (:use [clojure.contrib.seq-utils :only (flatten)])
-  (:use [clojure.contrib.pprint :only (pprint)])
-  )
+  (:use [clojure.contrib.pprint :only (pprint)]))
 
-(defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
-  (. System (exit exit-code)))
-
-(when (not= (count *command-line-args*) 1)
-  (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def n (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< n 1)
-  (usage 1))
+(set! *warn-on-reflection* true)
 
 
 (defn vec-add [v1 v2]
@@ -207,15 +193,29 @@
     (bodies-new-positions bodies-with-new-velocities delta-t)))
 
 
-(let [bodies (n-body-system)
-      delta-t 0.01]
-  (println (format "%.9f" (energy bodies)))
-  (loop [i 0
-         bodies bodies]
-;;    (println (format "%d" i) (energy bodies))
-;;    (pprint bodies)
-;;    (when (== 0 (rem i 10000))
-;;      (println (format "%d" i)))
-    (if (== i n)
-      (println (format "%.9f" (energy bodies)))
-      (recur (inc i) (advance bodies delta-t)))))
+(defn usage [exit-code]
+  (println (format "usage: %s n" *file*))
+  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (. System (exit exit-code)))
+
+
+(defn -main [& args]
+  (when (not= (count args) 1)
+    (usage 1))
+  (when (not (re-matches #"^\d+$" (nth args 0)))
+    (usage 1))
+  (def n (. Integer valueOf (nth args 0) 10))
+  (when (< n 1)
+    (usage 1))
+  (let [bodies (n-body-system)
+        delta-t 0.01]
+    (println (format "%.9f" (energy bodies)))
+    (loop [i 0
+           bodies bodies]
+;;      (println (format "%d" i) (energy bodies))
+;;      (pprint bodies)
+;;      (when (== 0 (rem i 10000))
+;;        (println (format "%d" i)))
+      (if (== i n)
+        (println (format "%.9f" (energy bodies)))
+        (recur (inc i) (advance bodies delta-t))))))

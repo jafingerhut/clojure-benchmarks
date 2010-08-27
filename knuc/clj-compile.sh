@@ -1,8 +1,8 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./clj-classes
+mkdir ./obj/clj
 
-cp knucleotide.clj-9.clj ./clj-classes/knucleotide.clj
+cp knucleotide.clj-9.clj ./obj/clj/knucleotide.clj
 
-java -Dclojure.compile.path=./clj-classes -classpath ${CLOJURE_CLASSPATH}:./clj-classes clojure.lang.Compile knucleotide
+java -Dclojure.compile.path=./obj/clj -classpath ${CLOJURE_CLASSPATH}:./obj/clj clojure.lang.Compile knucleotide

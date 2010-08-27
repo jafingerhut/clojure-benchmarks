@@ -1,8 +1,10 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Jul 29, 2009
 
+(ns revcomp
+  (:gen-class))
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (defn fasta-description-line
   "Return true when the line l is a FASTA description line"
@@ -110,11 +112,11 @@
 	  (recur next-start))))))
 
 
-(let [max-dna-chars-per-line 60]
-  (with-open [br (java.io.BufferedReader. *in*)]
-    (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
-      (println desc)
-      (print-string-broken-into-lines (reverse-complement-of-dna-seq dna-seq)
-				      max-dna-chars-per-line))))
-
-(. System (exit 0))
+(defn -main [& args]
+  (let [max-dna-chars-per-line 60]
+    (with-open [br (java.io.BufferedReader. *in*)]
+      (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
+        (println desc)
+        (print-string-broken-into-lines (reverse-complement-of-dna-seq dna-seq)
+                                        max-dna-chars-per-line))))
+  (. System (exit 0)))

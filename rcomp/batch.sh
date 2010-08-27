@@ -54,6 +54,7 @@ do
     do
 	case $L in
 	    clj) CMD=./clj-run.sh
+		( ./clj-compile.sh ) >& ${OUTPUT_DIR}/clj-compile-log.txt
 		;;
 	    java) CMD=./java-run.sh
 		( ./java-compile.sh ) >& ${OUTPUT_DIR}/java-compile-log.txt
@@ -71,12 +72,12 @@ do
 	echo "benchmark: $BENCHMARK"
 	echo "language: $L"
 	echo "test: $T"
-	IN=${T}-input.txt
+	IN=./input/${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
 	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
 	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
-	$CMP ${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
+	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
     done
 done

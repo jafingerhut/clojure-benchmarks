@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-$JAVA -server fannkuch "$@"
+$JAVA -server -cp obj/java fannkuch "$@"

@@ -14,27 +14,12 @@
 ;; clj-run.sh sends the command line arguments, not including the
 ;; command name.
 
-;; Needed for BufferedOutputStream
-(import '(java.io BufferedOutputStream))
+(ns mandelbrot
+  (:gen-class)
+  ;; Needed for BufferedOutputStream
+  (:import (java.io BufferedOutputStream)))
 
-;;(set! *warn-on-reflection* true)
-
-(def prog-name "mandelbrot")
-(def args *command-line-args*)
-
-(defn usage [exit-code]
-  (println (format "usage: %s size [print-in-text-format]" prog-name))
-  (println (format "    size must be a positive integer"))
-  (. System (exit exit-code)))
-
-(when (or (< (count args) 1) (> (count args) 2))
-  (usage 1))
-(when (not (re-matches #"^\d+$" (nth args 0)))
-  (usage 1))
-(def size (. Integer valueOf (nth args 0) 10))
-(when (< size 1)
-  (usage 1))
-(def print-in-text-format (= (count args) 2))
+(set! *warn-on-reflection* true)
 
 
 (def max-iterations 50)
@@ -68,6 +53,13 @@
   (+ (* i scale-fac) offset))
 
 
+(defn ubyte
+  [val]
+  (if (>= val 128)
+    (byte (- val 256))
+    (byte val)))
+
+
 ;; I had a much more sequence-y implementation of this before, but it
 ;; allocated garbage very quickly, which caused the program to slow
 ;; down dramatically once it hit the heap limit and start garbage
@@ -86,7 +78,7 @@
 	(if (= num-filled-bits 7)
 	  (recur (int 0)
 		 (int 0)
-		 (conj result (byte new-b))
+		 (conj result (ubyte new-b))
 		 (rest s))
 	  (recur new-b
 		 (int (inc num-filled-bits))
@@ -95,7 +87,7 @@
       ; else
       (if (= num-filled-bits 0)
 	result
-	(conj result (byte (bit-shift-left b (- 8 num-filled-bits))))))))
+	(conj result (ubyte (bit-shift-left b (- 8 num-filled-bits))))))))
 
 
 (defn rows-calculated-sequentially [size]
@@ -107,7 +99,7 @@
       (compute-row x-vals y))))
 
 
-(defn main [size print-in-text-format]
+(defn do-mandelbrot [size print-in-text-format]
   (let [rows (rows-calculated-sequentially size)]
     (println "P4")
     (println (format "%d %d" size size))
@@ -124,6 +116,22 @@
     (flush)))
 
 
-(main size print-in-text-format)
+(def prog-name "mandelbrot")
 
-(. System (exit 0))
+(defn usage [exit-code]
+  (println (format "usage: %s size [print-in-text-format]" prog-name))
+  (println (format "    size must be a positive integer"))
+  (. System (exit exit-code)))
+
+
+(defn -main [& args]
+  (when (or (< (count args) 1) (> (count args) 2))
+    (usage 1))
+  (when (not (re-matches #"^\d+$" (nth args 0)))
+    (usage 1))
+  (def size (. Integer valueOf (nth args 0) 10))
+  (when (< size 1)
+    (usage 1))
+  (def print-in-text-format (= (count args) 2))
+  (do-mandelbrot size print-in-text-format)
+  (. System (exit 0)))

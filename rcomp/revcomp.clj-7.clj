@@ -8,10 +8,10 @@
 ;; after the fact.  Should save a lot of memory, and I'm wondering
 ;; whether it will save time, too.
 
-;;(set! *warn-on-reflection* true)
+(ns revcomp
+  (:gen-class))
 
-(ns clojure.benchmark.reverse-complement
-  (:use [clojure.contrib.seq-utils :only (flatten)]))
+(set! *warn-on-reflection* true)
 
 
 (defn fasta-slurp-br
@@ -110,23 +110,22 @@
       )))
 
 
-(let [max-dna-chars-per-line 60
-      br (java.io.BufferedReader. *in*)
-      bw (java.io.BufferedWriter. *out*)
-      ;; We could use the map complement-dna-char-map instead of
-      ;; complement-dna-char-fn, but when I tested that, the program
-      ;; spent a lot of time running the hashCode method on
-      ;; characters.  I'm hoping this is faster.
-      complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
-      complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
-  (loop [[desc-str dna-seq-str more] (fasta-slurp-br br)]
-    (println-string-to-buffered-writer bw desc-str)
-    (print-reverse-complement-of-str-in-lines bw dna-seq-str
-					      complement-dna-char-fn
-					      max-dna-chars-per-line)
-    (when more
-      (recur (fasta-slurp-br br))))
-  (. bw flush))
-
-
-(. System (exit 0))
+(defn -main [& args]
+  (let [max-dna-chars-per-line 60
+        br (java.io.BufferedReader. *in*)
+        bw (java.io.BufferedWriter. *out*)
+        ;; We could use the map complement-dna-char-map instead of
+        ;; complement-dna-char-fn, but when I tested that, the program
+        ;; spent a lot of time running the hashCode method on
+        ;; characters.  I'm hoping this is faster.
+        complement-dna-char-vec (make-vec-char-mapper complement-dna-char-map)
+        complement-dna-char-fn (fn [ch] (complement-dna-char-vec (int ch)))]
+    (loop [[desc-str dna-seq-str more] (fasta-slurp-br br)]
+      (println-string-to-buffered-writer bw desc-str)
+      (print-reverse-complement-of-str-in-lines bw dna-seq-str
+                                                complement-dna-char-fn
+                                                max-dna-chars-per-line)
+      (when more
+        (recur (fasta-slurp-br br))))
+    (. bw flush))
+  (. System (exit 0)))

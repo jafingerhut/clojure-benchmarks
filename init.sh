@@ -29,7 +29,7 @@ make_expected_output_files () {
     ./batch.sh java $*
     for T in $*
     do
-	/bin/mv -f output/${T}-java-output.txt ${T}-expected-output.txt
+	/bin/mv -f output/${T}-java-output.txt output/${T}-expected-output.txt
     done
     cd ..
 }
@@ -43,17 +43,21 @@ make_expected_output_files fasta quick knuc medium regexdna long
 # k-nucleotide (knuc) and reverse-complement (rcomp) have input files
 # that are produced as output from the fasta benchmark programs.
 cd knuc
+mkdir ./input
+cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-ln -s ../fasta/knuc-expected-output.txt quick-input.txt
-ln -s ../fasta/medium-expected-output.txt medium-input.txt
-ln -s ../fasta/long-expected-output.txt long-input.txt
-cd ..
+ln -s ../../fasta/output/knuc-expected-output.txt quick-input.txt
+ln -s ../../fasta/output/medium-expected-output.txt medium-input.txt
+ln -s ../../fasta/output/long-expected-output.txt long-input.txt
+cd ../..
 cd rcomp
+mkdir ./input
+cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-ln -s ../fasta/quick-expected-output.txt quick-input.txt
-ln -s ../fasta/medium-expected-output.txt medium-input.txt
-ln -s ../fasta/long-expected-output.txt long-input.txt
-cd ..
+ln -s ../../fasta/output/quick-expected-output.txt quick-input.txt
+ln -s ../../fasta/output/medium-expected-output.txt medium-input.txt
+ln -s ../../fasta/output/long-expected-output.txt long-input.txt
+cd ../..
 
 # rlines isn't one of the benchmarks from the shootout web site.  I
 # created it as a simplified version of reverse-complement, to try to
@@ -61,13 +65,17 @@ cd ..
 # earlier solution attempts.  I'm keeping it around for future
 # reference.
 cd rlines
-sed -n -e '/^>THREE/,$p' ../fasta/long-expected-output.txt >| long-input.txt
-cd ..
+mkdir ./input
+cd ./input
+sed -n -e '/^>THREE/,$p' ../../fasta/output/long-expected-output.txt >| long-input.txt
+cd ../..
 
 cd regex-dna
-ln -s ../fasta/knuc-expected-output.txt quick-input.txt
-ln -s ../fasta/regexdna-expected-output.txt long-input.txt
-cd ..
+mkdir ./input
+cd ./input
+ln -s ../../fasta/output/knuc-expected-output.txt quick-input.txt
+ln -s ../../fasta/output/regexdna-expected-output.txt long-input.txt
+cd ../..
 
 if [ $MAKE_EXPECTED_OUTPUT_FILES == 0 ]
 then

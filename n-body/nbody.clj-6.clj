@@ -1,25 +1,10 @@
 ;; Author: Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
 ;; Date: Aug 10, 2009
 
-(ns clojure.benchmark.n-body)
+(ns nbody
+  (:gen-class))
 
-;;(set! *warn-on-reflection* true)
-
-(defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
-  (. System (exit exit-code)))
-
-(when (not= (count *command-line-args*) 1)
-  (usage 1))
-(def n
-     (let [arg (nth *command-line-args* 0)]
-       (when (not (re-matches #"^\d+$" arg))
-         (usage 1))
-       (let [temp (. Integer valueOf arg 10)]
-         (when (< temp 1)
-           (usage 1))
-         temp)))
+(set! *warn-on-reflection* true)
 
 
 (defn vec-construct [x y z]
@@ -266,21 +251,39 @@
 (defn vec-of-velocities [bodies] (vec (map (fn [b] (planet-velocity b)) bodies)))
 
 
-(let [bodies (n-body-system)
-      planet-masses (vec-of-masses bodies)
-      planet-positions (vec-of-positions bodies)
-      planet-velocities (vec-of-velocities bodies)
-      delta-t (double 0.01)
-      all-ordered-body-index-pairs (all-seq-ordered-pairs
-                                    (range (count bodies)))]
-  (println (format "%.9f"
-                   (energy planet-masses planet-positions planet-velocities)))
-  (loop [i (int n)
-         planet-velocities planet-velocities
-         planet-positions planet-positions]
-    (if (zero? i)
-      (println (format "%.9f"
-                       (energy planet-masses planet-positions planet-velocities)))
-      (let [[new-velocities new-positions]
-            (advance planet-masses planet-positions planet-velocities delta-t)]
-        (recur (unchecked-dec i) new-velocities new-positions)))))
+(defn usage [exit-code]
+  (println (format "usage: %s n" *file*))
+  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (. System (exit exit-code)))
+
+
+(defn -main [& args]
+  (when (not= (count args) 1)
+    (usage 1))
+  (def n
+       (let [arg (nth args 0)]
+         (when (not (re-matches #"^\d+$" arg))
+           (usage 1))
+         (let [temp (. Integer valueOf arg 10)]
+           (when (< temp 1)
+             (usage 1))
+           temp)))
+  (let [bodies (n-body-system)
+        planet-masses (vec-of-masses bodies)
+        planet-positions (vec-of-positions bodies)
+        planet-velocities (vec-of-velocities bodies)
+        delta-t (double 0.01)
+        all-ordered-body-index-pairs (all-seq-ordered-pairs
+                                      (range (count bodies)))]
+    (println (format "%.9f"
+                     (energy planet-masses planet-positions planet-velocities)))
+    (loop [i (int n)
+           planet-velocities planet-velocities
+           planet-positions planet-positions]
+      (if (zero? i)
+        (println (format "%.9f" (energy planet-masses planet-positions
+                                        planet-velocities)))
+        (let [[new-velocities new-positions]
+              (advance planet-masses planet-positions planet-velocities
+                       delta-t)]
+          (recur (unchecked-dec i) new-velocities new-positions))))))

@@ -1,8 +1,8 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./clj-classes
+mkdir ./obj/clj
 
-cp mandelbrot.clj-6.clj ./clj-classes/mandelbrot.clj
+cp mandelbrot.clj-6.clj ./obj/clj/mandelbrot.clj
 
-java -Dclojure.compile.path=./clj-classes -classpath ${CLOJURE_CLASSPATH}:./clj-classes clojure.lang.Compile mandelbrot
+java -Dclojure.compile.path=./obj/clj -classpath ${CLOJURE_CLASSPATH}:./obj/clj clojure.lang.Compile mandelbrot

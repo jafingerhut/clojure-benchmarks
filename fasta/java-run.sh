@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-$JAVA -server fasta "$@"
+$JAVA -server -cp obj/java fasta "$@"
