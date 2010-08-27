@@ -4,25 +4,11 @@
 ;; This version is fairly slow.  Would be nice to speed it up without
 ;; getting too crazy in the implementation.
 
-;;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
-(ns clojure.benchmark.fannkuch
-  (:use [clojure.contrib.combinatorics :only (lex-permutations)])
-  )
-
-
-(defn usage [exit-code]
-  (println (format "usage: %s N" *file*))
-  (println (format "    N must be a positive integer"))
-  (. System (exit exit-code)))
-
-(when (not= (count *command-line-args*) 1)
-  (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def N (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< N 1)
-  (usage 1))
+(ns fannkuch
+  (:gen-class)
+  (:use [clojure.contrib.combinatorics :only (lex-permutations)]))
 
 
 (defn left-rotate
@@ -133,17 +119,28 @@
 ;;             (lex-permutations (range 1 (inc N)))))
 
 
-;; This is quick compared to iterating through all permutations, so do
-;; it separately.
-(let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
-  (doseq [p (take 30 fannkuch-order-perms)]
-    (println (apply str p))))
+(defn usage [exit-code]
+  (println (format "usage: %s N" *file*))
+  (println (format "    N must be a positive integer"))
+  (. System (exit exit-code)))
 
-(println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
 
-;;(let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
-;;  (println (format "Pfannkuchen(%d) = %d  %s" N
-;;                   (fannkuch-of-permutation max-fannkuch-perm)
-;;                   (str (seq max-fannkuch-perm)))))
-
-(. System (exit 0))
+(defn -main [& args]
+  (when (not= (count args) 1)
+    (usage 1))
+  (when (not (re-matches #"^\d+$" (nth args 0)))
+    (usage 1))
+  (def N (. Integer valueOf (nth args 0) 10))
+  (when (< N 1)
+    (usage 1))
+  ;; This is quick compared to iterating through all permutations, so do
+  ;; it separately.
+  (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
+    (doseq [p (take 30 fannkuch-order-perms)]
+      (println (apply str p))))
+  (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
+;;  (let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
+;;    (println (format "Pfannkuchen(%d) = %d  %s" N
+;;                     (fannkuch-of-permutation max-fannkuch-perm)
+;;                     (str (seq max-fannkuch-perm)))))
+  (. System (exit 0)))

@@ -6,28 +6,14 @@
 ;; arrays for iterating through the sequence of permutations, instead
 ;; of using lex-permutations.
 
-;;(set! *warn-on-reflection* true)
+;; I do not know why yet, but this version appears to produce
+;; incorrect output at least for the quick test.
 
-(ns clojure.benchmark.fannkuch
-  (:use [clojure.contrib.combinatorics :only (lex-permutations)])
-  )
+(set! *warn-on-reflection* true)
 
-
-(defn usage [exit-code]
-  (println (format "usage: %s N" *file*))
-  (println (format "    N must be a positive integer"))
-  (. System (exit exit-code)))
-
-(when (not= (count *command-line-args*) 1)
-  (usage 1))
-(def N
-     (let [arg (nth *command-line-args* 0)]
-       (when (not (re-matches #"^\d+$" arg))
-         (usage 1))
-       (let [temp (. Integer valueOf arg 10)]
-         (when (< temp 1)
-           (usage 1))
-         temp)))
+(ns fannkuch
+  (:gen-class)
+  (:use [clojure.contrib.combinatorics :only (lex-permutations)]))
 
 
 (defn left-rotate
@@ -132,12 +118,27 @@
 	maxflips))))
 
 
-;; This is quick compared to iterating through all permutations, so do
-;; it separately.
-(let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
-  (doseq [p (take 30 fannkuch-order-perms)]
-    (println (apply str p))))
+(defn usage [exit-code]
+  (println (format "usage: %s N" *file*))
+  (println (format "    N must be a positive integer"))
+  (. System (exit exit-code)))
 
-(println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
 
-(. System (exit 0))
+(defn -main [& args]
+  (when (not= (count args) 1)
+    (usage 1))
+  (def N
+       (let [arg (nth args 0)]
+         (when (not (re-matches #"^\d+$" arg))
+           (usage 1))
+         (let [temp (. Integer valueOf arg 10)]
+           (when (< temp 1)
+             (usage 1))
+           temp)))
+  ;; This is quick compared to iterating through all permutations, so do
+  ;; it separately.
+  (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
+    (doseq [p (take 30 fannkuch-order-perms)]
+      (println (apply str p))))
+  (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
+  (. System (exit 0)))

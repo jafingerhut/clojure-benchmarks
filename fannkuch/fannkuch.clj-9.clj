@@ -6,43 +6,12 @@
 ;; possible, in hopes of speeding it up.  I was hoping that would
 ;; speed it up more than it did.
 
-(ns clojure.benchmark.fannkuch
+(ns fannkuch
+  (:gen-class)
 ;;  (:use [clojure.contrib.combinatorics :only (lex-permutations)])
   )
 
-;;(set! *warn-on-reflection* true)
-
-
-(def *default-modified-pmap-num-threads*
-     (+ 2 (.. Runtime getRuntime availableProcessors)))
-
-(defn usage [exit-code]
-  (println (format "usage: %s N [num-threads]" *file*))
-  (println (format "    N must be a positive integer"))
-  (println (format "    num-threads is the maximum threads to use at once"))
-  (println (format "        during the computation.  If 0 or not given, it"))
-  (println (format "        defaults to the number of available cores plus 2,"))
-  (println (format "        which is %d"
-                   *default-modified-pmap-num-threads*))
-  (. System (exit exit-code)))
-
-(when (or (< (count *command-line-args*) 1) (> (count *command-line-args*) 2))
-  (usage 1))
-(when (not (re-matches #"^\d+$" (nth *command-line-args* 0)))
-  (usage 1))
-(def N (. Integer valueOf (nth *command-line-args* 0) 10))
-(when (< N 1)
-  (usage 1))
-(def num-threads
-     (if (>= (count *command-line-args*) 2)
-       (do
-         (when (not (re-matches #"^\d+$" (nth *command-line-args* 1)))
-           (usage 1))
-         (let [n (. Integer valueOf (nth *command-line-args* 1) 10)]
-           (if (== n 0)
-             *default-modified-pmap-num-threads*
-             n)))
-       *default-modified-pmap-num-threads*))
+(set! *warn-on-reflection* true)
 
 
 (defn left-rotate
@@ -231,17 +200,46 @@
                                (n-evenly-separated-perms-of-1-to-n N)))))
 
 
-;; This is quick compared to iterating through all permutations, so do
-;; it separately.
-(let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
-  (doseq [p (take 30 fannkuch-order-perms)]
-    (println (apply str p))))
+(def *default-modified-pmap-num-threads*
+     (+ 2 (.. Runtime getRuntime availableProcessors)))
 
-(println (format "Pfannkuchen(%d) = %d" N (fannkuch N num-threads)))
+(defn usage [exit-code]
+  (println (format "usage: %s N [num-threads]" *file*))
+  (println (format "    N must be a positive integer"))
+  (println (format "    num-threads is the maximum threads to use at once"))
+  (println (format "        during the computation.  If 0 or not given, it"))
+  (println (format "        defaults to the number of available cores plus 2,"))
+  (println (format "        which is %d"
+                   *default-modified-pmap-num-threads*))
+  (. System (exit exit-code)))
 
-;;(let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
-;;  (println (format "Pfannkuchen(%d) = %d  %s" N
-;;                   (fannkuch-of-permutation max-fannkuch-perm)
-;;                   (str (seq max-fannkuch-perm)))))
 
-(. System (exit 0))
+(defn -main [& args]
+  (when (or (< (count args) 1) (> (count args) 2))
+    (usage 1))
+  (when (not (re-matches #"^\d+$" (nth args 0)))
+    (usage 1))
+  (def N (. Integer valueOf (nth args 0) 10))
+  (when (< N 1)
+    (usage 1))
+  (def num-threads
+       (if (>= (count args) 2)
+         (do
+           (when (not (re-matches #"^\d+$" (nth args 1)))
+             (usage 1))
+           (let [n (. Integer valueOf (nth args 1) 10)]
+             (if (== n 0)
+               *default-modified-pmap-num-threads*
+               n)))
+         *default-modified-pmap-num-threads*))
+  ;; This is quick compared to iterating through all permutations, so do
+  ;; it separately.
+  (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
+    (doseq [p (take 30 fannkuch-order-perms)]
+      (println (apply str p))))
+  (println (format "Pfannkuchen(%d) = %d" N (fannkuch N num-threads)))
+;;  (let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
+;;    (println (format "Pfannkuchen(%d) = %d  %s" N
+;;                     (fannkuch-of-permutation max-fannkuch-perm)
+;;                     (str (seq max-fannkuch-perm)))))
+  (. System (exit 0)))
