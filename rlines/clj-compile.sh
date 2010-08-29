@@ -1,7 +1,7 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./obj/clj
+mkdir -p ./obj/clj
 
 cp revlines.clj-1.clj ./obj/clj/revlines.clj
 

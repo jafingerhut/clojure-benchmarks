@@ -1,7 +1,7 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./obj/clj
+mkdir -p ./obj/clj
 
 cp nbody.clj-12.clj ./obj/clj/nbody.clj
 

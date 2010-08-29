@@ -1,7 +1,7 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./obj/clj
+mkdir -p ./obj/clj
 
 cp fannkuch.clj-11.clj ./obj/clj/fannkuch.clj
 

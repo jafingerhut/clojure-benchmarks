@@ -1,7 +1,7 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./obj/clj
+mkdir -p ./obj/clj
 
 cp mandelbrot.clj-6.clj ./obj/clj/mandelbrot.clj
 

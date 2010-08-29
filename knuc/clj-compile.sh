@@ -1,7 +1,7 @@
 #! /bin/sh
 
 source ../env.sh
-mkdir ./obj/clj
+mkdir -p ./obj/clj
 
 cp knucleotide.clj-9.clj ./obj/clj/knucleotide.clj
 
