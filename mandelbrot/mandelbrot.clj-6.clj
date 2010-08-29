@@ -84,10 +84,10 @@
 
 
 (defn modified-pmap
-  "Like pmap from Clojure 1.1, but with only as much parallelism as
-  there are available processors.  Uses my-lazy-map instead of map
-  from core.clj, since that version of map can use unwanted additional
-  parallelism for chunked collections, like ranges."
+;   Like pmap from Clojure 1.1, but with only as much parallelism as
+;   there are available processors.  Uses my-lazy-map instead of map
+;   from core.clj, since that version of map can use unwanted additional
+;   parallelism for chunked collections, like ranges.
   ([num-threads f coll]
      (if (== num-threads 1)
        (map f coll)
@@ -134,35 +134,20 @@
 (def *default-modified-pmap-num-threads*
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
-(defn usage [exit-code]
-  (println (format "usage: %s size [num-threads]"
-                   *file*))
-  (println (format "    size must be a positive integer"))
-  (println (format "    num-threads is the maximum threads to use at once"))
-  (println (format "        during the computation.  If 0 or not given, it"))
-  (println (format "        defaults to the number of available cores plus 2,"))
-  (println (format "        which is %d"
-                   *default-modified-pmap-num-threads*))
-  (. System (exit exit-code)))
-
 
 (defn -main [& args]
-  (when (or (< (count args) 1) (> (count args) 2))
-    (usage 1))
-  (when (not (re-matches #"^\d+$" (nth args 0)))
-    (usage 1))
-  (def size (. Integer valueOf (nth args 0) 10))
-  (when (< size 1)
-    (usage 1))
+  (def size
+       (if (and (>= (count args) 1)
+                (re-matches #"^\d+$" (nth args 0)))
+         (. Integer valueOf (nth args 0) 10)
+         200))
   (def num-threads
-       (if (>= (count args) 2)
-         (do
-           (when (not (re-matches #"^\d+$" (nth args 1)))
-             (usage 1))
-           (let [n (. Integer valueOf (nth args 1) 10)]
-             (if (== n 0)
-               *default-modified-pmap-num-threads*
-               n)))
+       (if (and (>= (count args) 2)
+                (re-matches #"^\d+$" (nth args 1)))
+         (let [n (. Integer valueOf (nth args 1) 10)]
+           (if (== n 0)
+             *default-modified-pmap-num-threads*
+             n))
          *default-modified-pmap-num-threads*))
   (do-mandelbrot size num-threads)
   (. System (exit 0)))
