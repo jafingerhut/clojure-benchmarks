@@ -82,12 +82,13 @@ then
     exit 0
 fi
 
-# Make all expected input files
+# Make all expected output files
 
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
 make_expected_output_files mandelbrot quick medium long
 make_expected_output_files fannkuch quick medium long
+make_expected_output_files fannkuchredux quick medium long
 
 make_expected_output_files knuc quick medium long
 make_expected_output_files rcomp quick medium long
