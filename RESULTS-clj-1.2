@@ -66,21 +66,34 @@ body    | 368.2   | 378.8   | crash  |     .  |     .
 regex-  | needs  |  54.1  | needs  |  24.2  |   52.1
 dna     | regex  |  52.7  | regex  |  41.2  |   53.2
         |  lib   |   0.5  |  lib   |   1.1  |    0.8  1.3 x java
+                                      ^ regexdna.java-2.java
 
-                                   |            clj-8
-rcomp   |  36.4  |  10.9  |  10.6  |   7.7  |   56.5
-        |  31.3  |   6.3  |   3.7  |   3.0  |   48.3
-        |   1.9  |   2.0  |   3.7  |   1.3  |    2.2  11.7 x java
+                                      V regexdna.java-5.java
+regex-  |        |        |        |  23.0  |
+dna     |        |        |        |  29.1  |
+        |        |        |        |   1.2  |
 
-                                                clj-6
-rcomp   |        |        |        |        |   59.3
-        |        |        |        |        |   64.0
-        |        |        |        |        |    3.8  15.8 x java
+                                   |            clj-10
+rcomp   |  36.4  |  10.9  |  10.6  |   7.7  |   24.6
+        |  31.3  |   6.3  |   3.7  |   3.0  |   20.4
+        |   1.9  |   2.0  |   3.7  |   1.3  |    2.3  5.3 x java
+                            ^ revcomp.ghc-2.ghc
+
+          clj-8             V revcomp.ghc-3.ghc clj-6
+rcomp   |  60.4  |        |   9.4  |        |   59.3
+        |  46.8  |        |   2.2  |        |   64.0
+        |   2.8  |        |   2.0  |        |    3.8  15.8 x java
 
                                    |            clj-9 (uses transients)
 k-nuc-  | 186.5  | 275.1  |  86.6  |  51.2  |  725.2
 leotide | 185.0  | 272.6  | 135.8  |  90.4  |  840.9
         |   1.4  |   1.5  |   5.1  |   1.4  |    4.9  9.2 x java
+                                      ^ knucleotide.andy.java
+
+                                      V knucleotide.java-2.java
+k-nuc-  |        |        |        |  45.7  |
+leotide |        |        |        |  56.7  |
+        |        |        |        |   1.3  |
 
 
 The longest few benchmark run on my iMac are:
