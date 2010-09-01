@@ -9,27 +9,31 @@
 (set! *warn-on-reflection* true)
 
 
+;; Return true when the line l is a FASTA description line
+
 (defn fasta-description-line
-  "Return true when the line l is a FASTA description line"
   [l]
   (= \> (first (seq l))))
 
 
+;; Return true when the line l is a FASTA description line that begins
+;; with the string desc-str.
+
 (defn fasta-description-line-beginning
-  "Return true when the line l is a FASTA description line that begins
-with the string desc-str."
   [desc-str l]
   (and (fasta-description-line l)
        (= desc-str (subs l 1 (min (count l) (inc (count desc-str)))))))
 
 
+;; Take a sequence of lines from a FASTA format file, and a string
+;; desc-str.  Look for a FASTA record with a description that begins
+;; with desc-str, and if one is found, return its DNA sequence as a
+;; single (potentially quite long) string.  If input file is big,
+;; you'll save lots of memory if you call this function in a with-open
+;; for the file, and don't hold on to the head of the lines
+;; parameter.
+
 (defn fasta-dna-str-with-desc-beginning
-  "Take a sequence of lines from a FASTA format file, and a string
-desc-str.  Look for a FASTA record with a description that begins with
-desc-str, and if one is found, return its DNA sequence as a
-single (potentially quite long) string.  If input file is big, you'll
-save lots of memory if you call this function in a with-open for the
-file, and don't hold on to the head of the lines parameter."
   [desc-str lines]
   (when-let [x (drop-while (fn [l]
                              (not (fasta-description-line-beginning desc-str
@@ -42,9 +46,10 @@ file, and don't hold on to the head of the lines parameter."
         (apply str y)))))
 
 
+;; Returns a sequence of all length len substrings of the string s, if
+;; (count s) >= len, otherwise nil.
+
 (defn all-equal-len-subs
-  "Returns a sequence of all length len substrings of the string s,
-if (count s) >= len, otherwise nil."
   [len s]
   (when (>= (count s) len)
     (map #(subs s % (+ % len)) (range (inc (- (count s) len))))))
@@ -58,13 +63,14 @@ if (count s) >= len, otherwise nil."
     h))
 
 
+;; Take a sequence things, and return a hash map h whose keys are the
+;; set of unique objects in the sequence, and where (h obj) is equal
+;; to the number of times obj occurs in the sequence.  Splitting it
+;; into this and a helper function is a little odd, but when I had a
+;; more straightforward single function for this in Clojure 1.1 alpha,
+;; it 'kept the head' of the sequence and used excessive memory.
+
 (defn tally
-  "Take a sequence things, and return a hash map h whose keys are the
-set of unique objects in the sequence, and where (h obj) is equal to
-the number of times obj occurs in the sequence.  Splitting it into
-this and a helper function is a little odd, but when I had a more
-straightforward single function for this in Clojure 1.1 alpha, it
-'kept the head' of the sequence and used excessive memory."
   [things]
   (persistent! (tally-helper (transient {}) things)))
 
