@@ -69,7 +69,7 @@ do
 	    # threads in parallel.  With an empty string, the default
 	    # is 2 more threads than the number of available
 	    # processors.
-	    clj)  EXTRA_LANG_ARGS=""
+	    clj)  EXTRA_LANG_ARGS="1"
 		;;
 	esac
 
