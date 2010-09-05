@@ -1,6 +1,10 @@
 import java.text.DecimalFormat;
 
+
+
 public class ParallelTest {
+
+    static int CacheBuster1_data[];
 
     public static class IntTest implements Runnable {
 	long jobSize;
@@ -53,11 +57,11 @@ public class ParallelTest {
 	}
     }
     
-    public static class NewDoubleTest implements Runnable {
+    public static class NewDoubleTestA implements Runnable {
 	long jobSize;
 	Double result;
 	
-	public NewDoubleTest(long jobSize) {
+	public NewDoubleTestA(long jobSize) {
 	    this.jobSize = jobSize;
 	}
 	
@@ -69,12 +73,32 @@ public class ParallelTest {
 	    System.out.println(result);
 	}
     }
+    
+    public static class NewDoubleTestB implements Runnable {
+	long jobSize;
+	Double result;
+	
+	public NewDoubleTestB(long jobSize) {
+	    this.jobSize = jobSize;
+	}
+	
+	public void run() {
+	    result = new Double(0.0);
+	    for (long i = 0L; i < jobSize; i++) {
+		double old = result.doubleValue() + 1.0;
+		result = new Double(old);
+	    }
+	    System.out.println(result);
+	}
+    }
 
     static String typeList() {
 	return ("int"
 		+ "," + "long"
 		+ "," + "double"
-		+ "," + "newdouble"
+		+ "," + "newdoubleA"
+		+ "," + "newdoubleB"
+		+ "," + "cachebuster1"
 		);
     }
 
@@ -82,16 +106,33 @@ public class ParallelTest {
 	if (s.equals("int")) return true;
 	else if (s.equals("long")) return true;
 	else if (s.equals("double")) return true;
-	else if (s.equals("newdouble")) return true;
+	else if (s.equals("newdoubleA")) return true;
+	else if (s.equals("newdoubleB")) return true;
+	else if (s.equals("cachebuster1")) return true;
 	return false;
     }
 
-    static Thread newThreadWithType (String s, long jobSize) {
-	if (s.equals("int")) return new Thread(new IntTest(jobSize));
-	else if (s.equals("long")) return new Thread(new LongTest(jobSize));
-	else if (s.equals("double")) return new Thread(new DoubleTest(jobSize));
-	else if (s.equals("newdouble")) return new Thread(new NewDoubleTest(jobSize));
-	else usage(1);
+    static Thread newThreadWithType (String s, int threadNum, long jobSize) {
+	CacheBuster1 c;
+	if (s.equals("int"))
+	    return new Thread(new IntTest(jobSize));
+	else if (s.equals("long"))
+	    return new Thread(new LongTest(jobSize));
+	else if (s.equals("double"))
+	    return new Thread(new DoubleTest(jobSize));
+	else if (s.equals("newdoubleA"))
+	    return new Thread(new NewDoubleTestA(jobSize));
+	else if (s.equals("newdoubleB"))
+	    return new Thread(new NewDoubleTestB(jobSize));
+	else if (s.equals("cachebuster1")) {
+	    c = new CacheBuster1(threadNum, jobSize);
+	    if (threadNum == 0) {
+		CacheBuster1_data = c.initReadData();
+	    }
+	    c.setData(CacheBuster1_data);
+	    return new Thread(c);
+	} else
+	    usage(1);
 	return null;
     }
 
@@ -100,7 +141,7 @@ public class ParallelTest {
 	try {
 	    Thread[] tarray = new Thread[numJobs];
 	    for (int i = 0; i < numJobs; i++) {
-		tarray[i] = newThreadWithType(taskFnSpecifier, jobSize);
+		tarray[i] = newThreadWithType(taskFnSpecifier, i, jobSize);
 	    }
 	    
 	    long startTime 	= System.nanoTime();

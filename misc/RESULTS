@@ -4,23 +4,24 @@ definitions of the functions involved.
 
              spin-double1 (1)     NewDoubleTest.run()  (2)
 
-             real 330.48 (A)       321.08 (D)
-sequential   user 311.40 (B)       299.55 (E)
-             sys   15.81 (C)        16.11 (F)
+                                    Aug 2009      Aug 2010 (same hardware, new versions of Mac OS X and Java)
+             real 330.48 (A)       321.08 (D)       318.61
+sequential   user 311.40 (B)       299.55 (E)       298.75
+             sys   15.81 (C)        16.11 (F)        15.51
 
-             real 283.52 86% of A  277.24 86% of D
-parallel     user 476.85  1.5 x    461.86  1.5 x
-             sys   15.10  (B+C)     15.20  (E+F)
+             real 283.52 86% of A  277.24 86% of D  318.49 100% of D
+parallel     user 476.85  1.5 x    461.86  1.5 x    548.39 1.8 x
+             sys   15.10  (B+C)     15.20  (E+F)     16.32 (E+F)
 
              spin-double2 (3)     DoubleTest.run()  (4)
 
-             real  96.21 (G)        31.87 (J)
-sequential   user  87.70 (H)        28.90 (K)
-             sys    1.97 (I)         0.65 (L)
+             real  96.21 (G)        31.87 (J)        31.80
+sequential   user  87.70 (H)        28.90 (K)        28.81
+             sys    1.97 (I)         0.65 (L)         0.73
 
-             real  47.14 49% of G   15.77 49% of J
-parallel     user  86.39  0.98 x    28.55  0.98 x
-             sys    1.25  (H+I)      0.43  (K+L)
+             real  47.14 49% of G   15.77 49% of J   16.34 51% of J
+parallel     user  86.39  0.98 x    28.55  0.98 x    28.64 0.99 x
+             sys    1.25  (H+I)      0.43  (K+L)      0.46 (K+L)
 
 Notes:
 

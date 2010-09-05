@@ -9,8 +9,11 @@ BENCHMARK="ParallelTest.java"
 
 TIME="/usr/bin/time -lp"
 HPROF_OPTS="cpu=samples,depth=20,thread=y"
+#JAVA_PROFILING_OPTS="-agentlib:hprof=$HPROF_OPTS"
+JAVA_PROFILING_OPTS=""
+JVM_OPTS="-server -Xmx1024m"
 
-for TYPE in newdouble double
+for TYPE in newdoubleB newdoubleA double cachebuster1
 do
     for THREADS in 1 2
     do
@@ -30,8 +33,8 @@ do
 	HPROF_OUT=output/ParallelTest-${TYPE}-${THREADS}-hprof.txt
 	uname -a > $OUT
 	java -version >> $OUT
-	echo "( $TIME java -agentlib:hprof=$HPROF_OPTS ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT"
-	( $TIME java -agentlib:hprof=$HPROF_OPTS ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT
+	echo "( $TIME java $JVM_OPTS $JAVA_PROFILING_OPTS -classpath obj/java ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT"
+	      ( $TIME java $JVM_OPTS $JAVA_PROFILING_OPTS -classpath obj/java ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT
 	/bin/mv -f java.hprof.txt $HPROF_OUT
     done
 done
