@@ -63,10 +63,38 @@
 ;; calculate the sign from an arbitrary permutation, then you can
 ;; generate the permutations in any order you wish).
 
-(defn init-permutation [n]
-  [(int-array (range 1 (inc n)))    ;; permutation
-   1                                ;; sign
-   (int-array (range 1 (inc n)))])  ;; array of count values
+;; With the particular order of generating permutations used in this
+;; program, it turns out that each of the n consecutive "groups" of
+;; (n-1)!  permutations begin with these permutations (example given
+;; for n=6):
+
+;;   1st permutation: 1 2 3 4 5 6    sign: 1  count vals: 1 2 3 4 5 6
+;; 121st permutation: 2 3 4 5 6 1    sign: 1  count vals: 1 2 3 4 5 5
+;; 241st permutation: 3 4 5 6 1 2    sign: 1  count vals: 1 2 3 4 5 4
+;; 361st permutation: 4 5 6 1 2 3    sign: 1  count vals: 1 2 3 4 5 3
+;; 481st permutation: 5 6 1 2 3 4    sign: 1  count vals: 1 2 3 4 5 2
+;; 601st permutation: 6 1 2 3 4 5    sign: 1  count vals: 1 2 3 4 5 1
+
+;; This makes it very easy to divide the work into n parallel tasks
+;; that each start at one of the permutations above, and generate only
+;; (n-1)! permutations each.  Then combine the checksum and maxflips
+;; values of each thread and print.
+
+(defn init-permutations [n]
+  (let [n-1 (dec n)]
+    (loop [i 1
+           p (int-array (range 1 (inc n)))
+           sign 1
+           c (int-array (range 1 (inc n)))
+           tasks [{:perm p :sign sign :counts c}]]
+      (if (== i n)
+        tasks
+        (let [p2 (aclone p)
+              c2 (aclone c)]
+          (rotate-left-first-n! n p2)
+          (aset-int c2 n-1 (dec (aget c2 n-1)))
+          (recur (inc i) p2 sign c2
+                 (conj tasks {:perm p2 :sign sign :counts c2})))))))
 
 
 (defmacro swap-array-elems! [a i j]
@@ -102,26 +130,41 @@
 		(aset-int c i i+1)
 		(rotate-left-first-n! (inc i+1) p)
 		(recur i+1)))))))
+    ;; else sign is +1
     (swap-array-elems! p 0 1)))
 
 
-(defn fannkuch [N]
-  (let [[#^ints p first-sign #^ints c] (init-permutation N)]
-    (loop [sign (int first-sign)
+(defn partial-fannkuch [num-perms #^ints p-arg first-sign #^ints c-arg]
+  (let [#^ints p (aclone p-arg)
+        #^ints c (aclone c-arg)
+        N (int (count p))]
+    (loop [i (int num-perms)
+           sign (int first-sign)
 	   maxflips (int 0)
 	   checksum (int 0)]
-      (let [curflips (int (fannkuch-of-permutation p))
-	    next-maxflips (int (max maxflips curflips))
-            next-checksum (+ checksum (* sign curflips))
-            next-sign (int (- sign))]
-;;	(print (clojure.string/join "" (seq p)) " "
-;;	       (clojure.string/join "" (seq c)))
-;;	(if (zero? curflips)
-;;	  (println " ----- --")
-;;	  (println (format " %5d %2d %5d" curflips sign next-checksum)))
-	(if (next-permutation! N p sign c)
-	  (recur next-sign next-maxflips next-checksum)
-	  [next-checksum next-maxflips])))))
+      (if (zero? i)
+        [checksum maxflips]
+        (let [curflips (int (fannkuch-of-permutation p))]
+;;          (print (clojure.string/join "" (seq p)) " "
+;;                 (clojure.string/join "" (seq c)))
+;;          (if (zero? curflips)
+;;            (println " ----- --")
+;;            (println (format " %5d %2d %5d" curflips sign
+;;                             (+ checksum (* sign curflips)))))
+          (next-permutation! N p sign c)
+          (recur (dec i) (- sign) (int (max maxflips curflips))
+                 (+ checksum (* sign curflips))))))))
+
+
+(defn fannkuch [N]
+  (let [init-perms (init-permutations N)
+        N-1-factorial (reduce * (range 1 N))
+        partial-results (pmap (fn [{p :perm, s :sign, c :counts}]
+                                (partial-fannkuch N-1-factorial p s c))
+                              init-perms)]
+    (reduce (fn [[checksum1 maxflips1] [checksum2 maxflips2]]
+              [(+ checksum1 checksum2) (max maxflips1 maxflips2)])
+            partial-results)))
 
 
 (defn -main [& args]
