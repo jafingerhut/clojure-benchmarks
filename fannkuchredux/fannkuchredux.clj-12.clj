@@ -40,7 +40,7 @@
 
 
 (defn fannkuch-of-permutation [#^ints p]
-  (if (== 1 (aget p 0))
+  (if (== (int 1) (aget p 0))
     ;; Handle this special case without bothering to create a Java
     ;; array.
     0
@@ -49,7 +49,7 @@
     (let [#^ints p2 (aclone p)]
       (loop [flips (int 0)]
         (let [first-num (int (aget p2 0))]
-          (if (== 1 first-num)
+          (if (== (int 1) first-num)
             flips
             (do
               (reverse-first-n! first-num p2)
