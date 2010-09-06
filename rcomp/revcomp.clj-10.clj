@@ -29,11 +29,11 @@
 
 
 (defn make-array-char-mapper [cmap]
-  (let [a (make-array Integer/TYPE 256)]
+  (let [#^ints a (int-array 256)]
     (dotimes [i 256]
-      (aset-int a i (if (contains? cmap (char i))
-		      (int (cmap (char i)))
-		      i)))
+      (aset a i (if (contains? cmap (char i))
+                  (int (cmap (char i)))
+                  i)))
     a))
 
 
@@ -47,12 +47,12 @@
 	(when (<= begin end)
 	  ;; then reverse and complement two more characters, working
 	  ;; from beginning and end towards the middle
-	  (let [b (if (= (.charAt buf begin) \newline)
-		    (inc begin)
-		    begin)
-		e (if (= (.charAt buf end) \newline)
-		    (dec end)
-		    end)]
+	  (let [b (int (if (= (.charAt buf begin) \newline)
+                         (inc begin)
+                         begin))
+		e (int (if (= (.charAt buf end) \newline)
+                         (dec end)
+                         end))]
 	    (when (<= b e)
 	      (let [cb (char (aget comp (int (.charAt buf b))))
 		    ce (char (aget comp (int (.charAt buf e))))]
