@@ -144,12 +144,6 @@
       (if (zero? i)
         [checksum maxflips]
         (let [curflips (int (fannkuch-of-permutation p))]
-;;          (print (clojure.string/join "" (seq p)) " "
-;;                 (clojure.string/join "" (seq c)))
-;;          (if (zero? curflips)
-;;            (println " ----- --")
-;;            (println (format " %5d %2d %5d" curflips sign
-;;                             (+ checksum (* sign curflips)))))
           (next-permutation! N p sign c)
           (recur (dec i) (- sign) (int (max maxflips curflips))
                  (+ checksum (* sign curflips))))))))

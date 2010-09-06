@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-$JAVA -server -Xmx1024m ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj fannkuchredux "$@"
+$JAVA -server ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj fannkuchredux "$@"
