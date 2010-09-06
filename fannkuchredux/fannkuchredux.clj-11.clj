@@ -23,8 +23,8 @@
        (when (< i# n-to-swap#)
          (let [temp# (aget ~a i#)
                n-1-i# (int (- n-1# i#))]
-           (aset-int ~a i# (aget ~a n-1-i#))
-           (aset-int ~a n-1-i# temp#))
+           (aset ~a i# (aget ~a n-1-i#))
+           (aset ~a n-1-i# temp#))
          (recur (inc i#))))))
 
 
@@ -34,9 +34,9 @@
 	 a0# (aget ~a 0)]
      (loop [i# (int 0)]
        (if (== i# n-1#)
-	 (aset-int ~a n-1# a0#)
+	 (aset ~a n-1# a0#)
 	 (let [i+1# (inc i#)]
-	   (aset-int ~a i# (aget ~a i+1#))
+	   (aset ~a i# (aget ~a i+1#))
 	   (recur i+1#))))))
 
 
@@ -71,8 +71,8 @@
 
 (defmacro swap-array-elems! [a i j]
   `(let [temp# (aget ~a ~i)]
-     (aset-int ~a ~i (aget ~a ~j))
-     (aset-int ~a ~j temp#)))
+     (aset ~a ~i (aget ~a ~j))
+     (aset ~a ~j temp#)))
 
 
 ;; Modify the passed Java arrays p (a permutation) and c (count
@@ -94,12 +94,12 @@
 	      i+1 (inc i)]
 	  (if (not= cx 1)
 	    (do
-	      (aset-int c i (dec cx))
+	      (aset c i (dec cx))
 	      true)
 	    (if (== i N-1)
 	      false
 	      (do
-		(aset-int c i i+1)
+		(aset c i i+1)
 		(rotate-left-first-n! (inc i+1) p)
 		(recur i+1)))))))
     (swap-array-elems! p 0 1)))

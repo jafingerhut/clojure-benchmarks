@@ -17,15 +17,14 @@
 
 (defmacro reverse-first-n! [n #^ints a]
   `(let [n# (int ~n)
-         n-to-swap# (int (quot n# 2))
          n-1# (int (dec n#))]
-     (loop [i# (int 0)]
-       (when (< i# n-to-swap#)
-         (let [temp# (aget ~a i#)
-               n-1-i# (int (- n-1# i#))]
-           (aset-int ~a i# (aget ~a n-1-i#))
-           (aset-int ~a n-1-i# temp#))
-         (recur (inc i#))))))
+     (loop [i# (int 0)
+            j# (int n-1#)]
+       (when (< i# j#)
+         (let [temp# (aget ~a i#)]
+           (aset ~a i# (aget ~a j#))
+           (aset ~a j# temp#))
+         (recur (inc i#) (dec j#))))))
 
 
 (defmacro rotate-left-first-n! [n #^ints a]
@@ -34,9 +33,9 @@
 	 a0# (aget ~a 0)]
      (loop [i# (int 0)]
        (if (== i# n-1#)
-	 (aset-int ~a n-1# a0#)
+	 (aset ~a n-1# a0#)
 	 (let [i+1# (inc i#)]
-	   (aset-int ~a i# (aget ~a i+1#))
+	   (aset ~a i# (aget ~a i+1#))
 	   (recur i+1#))))))
 
 
@@ -47,7 +46,7 @@
     0
     ;; Using aclone instead of copy-java-int-array was a big
     ;; improvement.
-    (let [p2 (aclone p)]
+    (let [#^ints p2 (aclone p)]
       (loop [flips (int 0)]
         (let [first-num (int (aget p2 0))]
           (if (== 1 first-num)
@@ -92,15 +91,15 @@
         (let [p2 (aclone p)
               c2 (aclone c)]
           (rotate-left-first-n! n p2)
-          (aset-int c2 n-1 (dec (aget c2 n-1)))
+          (aset c2 n-1 (dec (aget c2 n-1)))
           (recur (inc i) p2 sign c2
                  (conj tasks {:perm p2 :sign sign :counts c2})))))))
 
 
 (defmacro swap-array-elems! [a i j]
   `(let [temp# (aget ~a ~i)]
-     (aset-int ~a ~i (aget ~a ~j))
-     (aset-int ~a ~j temp#)))
+     (aset ~a ~i (aget ~a ~j))
+     (aset ~a ~j temp#)))
 
 
 ;; Modify the passed Java arrays p (a permutation) and c (count
@@ -122,12 +121,12 @@
 	      i+1 (inc i)]
 	  (if (not= cx 1)
 	    (do
-	      (aset-int c i (dec cx))
+	      (aset c i (dec cx))
 	      true)
 	    (if (== i N-1)
 	      false
 	      (do
-		(aset-int c i i+1)
+		(aset c i i+1)
 		(rotate-left-first-n! (inc i+1) p)
 		(recur i+1)))))))
     ;; else sign is +1
