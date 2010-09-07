@@ -152,8 +152,8 @@
 
 
 (defn bodies-new-velocities [bodies delta-t]
-;;  (println (format "bodies-new-velocities: (class bodies)='%s' delta-t=%.3f"
-;;                   (class bodies) delta-t))
+;;  (printf "bodies-new-velocities: (class bodies)='%s' delta-t=%.3f\n"
+;;          (class bodies) delta-t)
   (loop [n 0
          velocity-changes
          (apply concat
@@ -194,8 +194,9 @@
 
 
 (defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (printf "usage: %s n\n" *file*)
+  (printf "    n, a positive integer, is the number of simulation steps to run\n")
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -209,13 +210,14 @@
     (usage 1))
   (let [bodies (n-body-system)
         delta-t 0.01]
-    (println (format "%.9f" (energy bodies)))
+    (printf "%.9f\n" (energy bodies))
     (loop [i 0
            bodies bodies]
-;;      (println (format "%d" i) (energy bodies))
+;;      (printf "%d %.9f\n" i (energy bodies))
 ;;      (pprint bodies)
 ;;      (when (== 0 (rem i 10000))
-;;        (println (format "%d" i)))
+;;        (printf "%d\n" i))
       (if (== i n)
-        (println (format "%.9f" (energy bodies)))
-        (recur (inc i) (advance bodies delta-t))))))
+        (printf "%.9f\n" (energy bodies))
+        (recur (inc i) (advance bodies delta-t)))))
+  (flush))

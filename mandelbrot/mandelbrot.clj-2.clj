@@ -144,12 +144,13 @@
 
 (defn do-mandelbrot [size num-threads print-in-text-format]
   (let [rows (compute-rows size num-threads)]
-    (println "P4")
-    (println (format "%d %d" size size))
+    (printf "P4\n")
+    (printf "%d %d\n" size size)
+    (flush)
     (if print-in-text-format
       (doseq [r rows]
         (doseq [byte r]
-          (print (format " %02x" byte)))
+          (printf " %02x" byte))
         (newline))
       ;; else print in default PBM format
       (let [ostream (BufferedOutputStream. System/out)]
@@ -163,14 +164,15 @@
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
 (defn usage [exit-code]
-  (println (format "usage: %s size [num-threads [print-in-text-format]]"
-                   *file*))
-  (println (format "    size must be a positive integer"))
-  (println (format "    num-threads is the maximum threads to use at once"))
-  (println (format "        during the computation.  If 0 or not given, it"))
-  (println (format "        defaults to the number of available cores plus 2,"))
-  (println (format "        which is %d"
-                   *default-modified-pmap-num-threads*))
+  (printf "usage: %s size [num-threads [print-in-text-format]]\n"
+          *file*)
+  (printf "    size must be a positive integer\n")
+  (printf "    num-threads is the maximum threads to use at once\n")
+  (printf "        during the computation.  If 0 or not given, it\n")
+  (printf "        defaults to the number of available cores plus 2,\n")
+  (printf "        which is %d\n"
+          *default-modified-pmap-num-threads*)
+  (flush)
   (. System (exit exit-code)))
 
 

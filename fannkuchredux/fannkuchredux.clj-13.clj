@@ -118,8 +118,8 @@
 ;;	(print (clojure.string/join "" (seq p)) " "
 ;;	       (clojure.string/join "" (seq c)))
 ;;	(if (zero? curflips)
-;;	  (println " ----- --")
-;;	  (println (format " %5d %2d %5d" curflips sign next-checksum)))
+;;	  (printf " ----- --\n")
+;;	  (printf " %5d %2d %5d\n" curflips sign next-checksum))
 	(if (next-permutation! N p sign c)
 	  (recur next-sign next-maxflips next-checksum)
 	  [next-checksum next-maxflips])))))
@@ -131,6 +131,7 @@
 	    (. Integer valueOf (nth args 0) 10)
 	    10)]
     (let [[checksum maxflips] (fannkuch N)]
-      (println (format "%d" checksum))
-      (println (format "Pfannkuchen(%d) = %d" N maxflips))))
+      (printf "%d\n" checksum)
+      (printf "Pfannkuchen(%d) = %d\n" N maxflips)))
+  (flush)
   (. System (exit 0)))

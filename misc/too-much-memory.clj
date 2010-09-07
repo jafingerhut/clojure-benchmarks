@@ -45,7 +45,7 @@
       fasta-recs (fasta-from-lines (line-seq-of-file input-fname))
       dna-str (force (some #(dna-seq-of-rec-with-desc % "THREE") fasta-recs))]
   (binding [*out* (java.io.FileWriter. output-fname)]
-    (println (format "%d %s" (count dna-str) dna-str))
+    (printf "%d %s\n" (count dna-str) dna-str)
     ))
 )
 
@@ -65,10 +65,10 @@
             fasta-recs (fasta-from-lines lines)
             dna-str (force (some #(dna-seq-of-rec-with-desc % "THREE") fasta-recs))]
 
-;;      (dorun (map #(println (format "%d %s" %1 %2))
+;;      (dorun (map #(printf "%d %s\n" %1 %2)
 ;;                  (iterate inc 1) lines))
-        (println (format "dna-str has len %d" (count dna-str)))
-        (println dna-str)
+        (printf "dna-str has len %d\n" (count dna-str))
+        (printf "%s\n" dna-str)
 
         )
       ) ; (binding [*out ...]

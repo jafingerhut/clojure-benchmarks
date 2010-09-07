@@ -204,13 +204,13 @@
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
 (defn usage [exit-code]
-  (println (format "usage: %s N [num-threads]" *file*))
-  (println (format "    N must be a positive integer"))
-  (println (format "    num-threads is the maximum threads to use at once"))
-  (println (format "        during the computation.  If 0 or not given, it"))
-  (println (format "        defaults to the number of available cores plus 2,"))
-  (println (format "        which is %d"
-                   *default-modified-pmap-num-threads*))
+  (printf "usage: %s N [num-threads]\n" *file*)
+  (printf "    N must be a positive integer\n")
+  (printf "    num-threads is the maximum threads to use at once\n")
+  (printf "        during the computation.  If 0 or not given, it\n")
+  (printf "        defaults to the number of available cores plus 2,\n")
+  (printf "        which is %d\n" *default-modified-pmap-num-threads*)
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -237,9 +237,10 @@
   (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
     (doseq [p (take 30 fannkuch-order-perms)]
       (println (apply str p))))
-  (println (format "Pfannkuchen(%d) = %d" N (fannkuch N num-threads)))
+  (printf "Pfannkuchen(%d) = %d\n" N (fannkuch N))
 ;;  (let [max-fannkuch-perm (fannkuch-perm-with-most-flips N)]
-;;    (println (format "Pfannkuchen(%d) = %d  %s" N
-;;                     (fannkuch-of-permutation max-fannkuch-perm)
-;;                     (str (seq max-fannkuch-perm)))))
+;;    (printf "Pfannkuchen(%d) = %d  %s\n" N
+;;            (fannkuch-of-permutation max-fannkuch-perm)
+;;            (str (seq max-fannkuch-perm))))
+  (flush)
   (. System (exit 0)))

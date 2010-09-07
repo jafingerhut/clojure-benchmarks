@@ -219,8 +219,9 @@ Timing for Java version - same machine, same N
 
 
 (defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (printf "usage: %s n\n" *file*)
+  (printf "    n, a positive integer, is the number of simulation steps to run\n")
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -236,7 +237,8 @@ Timing for Java version - same machine, same N
              (usage 1))
            temp)))
   (init-state)
-  (println (format "%.9f" (energy)))
+  (printf "%.9f\n" (energy))
   (dotimes [_ (int n)]
     (advance 0.01))
-  (println (format "%.9f" (energy))))
+  (printf "%.9f\n" (energy))
+  (flush))

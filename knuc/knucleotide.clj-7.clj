@@ -100,8 +100,8 @@
     (let [total (reduce + (vals tally))]
       (doseq [k (sort #(>= (tally %1) (tally %2))  ; sort by tally, largest first
                       (keys tally))]
-        (println (format "%s %.3f" (fn-key-to-str k)
-                         (double (* 100 (/ (tally k) total)))))))))
+        (printf "%s %.3f\n" (fn-key-to-str k)
+                (double (* 100 (/ (tally k) total))))))))
 
 
 (defn one-tally-to-str

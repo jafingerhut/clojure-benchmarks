@@ -145,8 +145,8 @@
 (defn kinetic-energy [body-masses body-velocities]
 ;;  (doall
 ;;   (for [i (range (count body-masses))]
-;;     (println (format "i=%d body[i] kinetic energy=%.9f"
-;;                      i (kinetic-energy-1 (body-masses i) (body-velocities i))))))
+;;     (printf "i=%d body[i] kinetic energy=%.9f\n"
+;;             i (kinetic-energy-1 (body-masses i) (body-velocities i)))))
   (reduce + (map kinetic-energy-1 body-masses body-velocities)))
 
 
@@ -179,10 +179,10 @@
 
 
 (defn energy [body-masses body-positions body-velocities]
-;;  (println (format "kinetic-energy: %.9f"
-;;                   (kinetic-energy body-masses body-velocities)))
-;;  (println (format "potential-energy: %.9f" 
-;;                   (potential-energy body-masses body-positions)))
+;;  (printf "kinetic-energy: %.9f\n"
+;;          (kinetic-energy body-masses body-velocities))
+;;  (printf "potential-energy: %.9f\n" 
+;;          (potential-energy body-masses body-positions))
   (+ (kinetic-energy body-masses body-velocities)
      (potential-energy body-masses body-positions)))
 
@@ -252,8 +252,9 @@
 
 
 (defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (printf "usage: %s n\n" *file*)
+  (printf "    n, a positive integer, is the number of simulation steps to run\n")
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -275,15 +276,15 @@
         delta-t (double 0.01)
         all-ordered-body-index-pairs (all-seq-ordered-pairs
                                       (range (count bodies)))]
-    (println (format "%.9f"
-                     (energy planet-masses planet-positions planet-velocities)))
+    (printf "%.9f\n" (energy planet-masses planet-positions planet-velocities))
     (loop [i (int n)
            planet-velocities planet-velocities
            planet-positions planet-positions]
       (if (zero? i)
-        (println (format "%.9f" (energy planet-masses planet-positions
-                                        planet-velocities)))
+        (printf "%.9f\n" (energy planet-masses planet-positions
+                                 planet-velocities))
         (let [[new-velocities new-positions]
               (advance planet-masses planet-positions planet-velocities
                        delta-t)]
-          (recur (unchecked-dec i) new-velocities new-positions))))))
+          (recur (unchecked-dec i) new-velocities new-positions)))))
+  (flush))

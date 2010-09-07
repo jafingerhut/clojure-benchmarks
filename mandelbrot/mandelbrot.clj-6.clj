@@ -122,8 +122,9 @@
 
 (defn do-mandelbrot [size num-threads]
   (let [rows (compute-rows size num-threads)]
-    (println "P4")
-    (println (format "%d %d" size size))
+    (printf "P4\n")
+    (printf "%d %d\n" size size)
+    (flush)
     (let [ostream (BufferedOutputStream. System/out)]
       (doseq [r rows]
         (. ostream write (into-array Byte/TYPE r) 0 (count r)))

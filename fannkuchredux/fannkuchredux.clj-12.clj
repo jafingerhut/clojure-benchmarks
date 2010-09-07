@@ -167,6 +167,7 @@
 	    (. Integer valueOf (nth args 0) 10)
 	    10)]
     (let [[checksum maxflips] (fannkuch N)]
-      (println (format "%d" checksum))
-      (println (format "Pfannkuchen(%d) = %d" N maxflips))))
+      (printf "%d\n" checksum)
+      (printf "Pfannkuchen(%d) = %d\n" N maxflips)))
+  (flush)
   (. System (exit 0)))

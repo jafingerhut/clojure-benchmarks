@@ -206,8 +206,9 @@
 
 
 (defn usage [exit-code]
-  (println (format "usage: %s n" *file*))
-  (println (format "    n, a positive integer, is the number of simulation steps to run"))
+  (printf "usage: %s n\n" *file*)
+  (printf "    n, a positive integer, is the number of simulation steps to run\n")
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -224,10 +225,11 @@
            temp)))
   (let [bodies (n-body-system)
         delta-t (double 0.01)]
-    (println (format "%.9f" (energy bodies)))
+    (printf "%.9f\n" (energy bodies))
     (loop [i (int n)]
       (if (zero? i)
-        (println (format "%.9f" (energy bodies)))
+        (printf "%.9f\n" (energy bodies))
         (do
           (advance! bodies delta-t)
-          (recur (unchecked-dec i)))))))
+          (recur (unchecked-dec i))))))
+  (flush))

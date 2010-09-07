@@ -10,17 +10,17 @@
 (def *allowed-types* ["int" "long" "float-primitive" "double" "double1" "double2" "double-primitive"])
 
 (defn usage [exit-code]
-  (println (format "usage: %s type num-jobs job-size num-threads" *file*))
-  (println (format "    type must be one of: " (str-join "," *allowed-types*)))
-  (println (format "    all other arguments must be integers >= 0"))
-  (println (format "    num-jobs must be >= 1, and is the number of jobs in the list to perform"))
-  (println (format "    job-size is the number of steps in each job"))
-  (println (format "        0 means to use the default number of steps: %d"
-                   *default-repetitions*))
-  (println (format "    num-threads is the number of threads to run in parallel"))
-  (println (format "        0 means to use the default number of threads: %d"
-                   *default-modified-pmap-num-threads*))
-  (println (format "        1 means to use sequential map, guaranteeing no parallelism"))
+  (printf "usage: %s type num-jobs job-size num-threads\n" *file*)
+  (printf "    type must be one of: %s\n" (str-join "," *allowed-types*))
+  (printf "    all other arguments must be integers >= 0\n")
+  (printf "    num-jobs must be >= 1, and is the number of jobs in the list to perform\n")
+  (printf "    job-size is the number of steps in each job\n")
+  (printf "        0 means to use the default number of steps: %d\n"
+          *default-repetitions*)
+  (printf "    num-threads is the number of threads to run in parallel\n")
+  (printf "        0 means to use the default number of threads: %d\n"
+          *default-modified-pmap-num-threads*)
+  (printf "        1 means to use sequential map, guaranteeing no parallelism\n")
   (. System (exit exit-code)))
 
 (when (not= 4 (count *command-line-args*))

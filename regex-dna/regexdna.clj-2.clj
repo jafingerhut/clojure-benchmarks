@@ -66,15 +66,14 @@
       dna-seq-only-len (count content)]
 
   (doseq [re dna-seq-regexes]
-    (println (format "%s %d" re
-		     ;; Prepending (?i) to the regexp in Java makes it
-		     ;; case-insensitive.
-		     (count (re-seq (. Pattern (compile (str "(?i)" re)))
-				    content)))))
+    (printf "%s %d\n" re
+            ;; Prepending (?i) to the regexp in Java makes it
+            ;; case-insensitive.
+            (count (re-seq (. Pattern (compile (str "(?i)" re))) content))))
 
   ;; The problem description says that these replacements should be
   ;; done "one at a time", but it seems that several of the benchmarks
   ;; do them simultaneously.  Let me try that, too.
   (let [content (do-all-replacements content iub-codes)]
-    (println (format "\n%d\n%d\n%d" original-len dna-seq-only-len
-		     (count content)))))
+    (printf "\n%d\n%d\n%d\n" original-len dna-seq-only-len (count content)))
+  (flush))

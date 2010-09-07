@@ -146,8 +146,9 @@ order."
 
 
 (defn usage [exit-code]
-  (println (format "usage: %s N" *file*))
-  (println (format "    N must be a positive integer"))
+  (printf "usage: %s N\n" *file*)
+  (printf "    N must be a positive integer\n")
+  (flush)
   (. System (exit exit-code)))
 
 
@@ -165,5 +166,6 @@ order."
   (let [fannkuch-order-perms (permutations-in-fannkuch-order N)]
     (doseq [p (take 30 fannkuch-order-perms)]
       (println (apply str p))))
-  (println (format "Pfannkuchen(%d) = %d" N (fannkuch N)))
+  (printf "Pfannkuchen(%d) = %d\n" N (fannkuch N))
+  (flush)
   (. System (exit 0)))

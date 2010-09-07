@@ -8,8 +8,9 @@
 (def args *command-line-args*)
 
 (defn usage [exit-code]
-  (println (format "usage: %s size [print-in-text-format]" prog-name))
-  (println (format "    size must be a positive integer"))
+  (printf "usage: %s size [print-in-text-format]\n" prog-name)
+  (printf "    size must be a positive integer\n")
+  (flush)
   (. System (exit exit-code)))
 
 (when (or (< (count args) 1) (> (count args) 2))
@@ -124,12 +125,12 @@
 
 (defn main [size print-in-text-format]
   (let [rows (rows-calculated-sequentially size)]
-    (println "P4")
-    (println (format "%d %d" size size))
+    (printf "P4\n")
+    (printf "%d %d\n" size size)
     (if print-in-text-format
       (doseq [r rows]
 	(doseq [byte r]
-	  (print (format " %02x" byte)))
+          (printf " %02x" byte))
 	(newline))
       ;; else print in default PBM format
       (let [ostream (BufferedOutputStream. System/out)]
