@@ -42,9 +42,11 @@
       IA (int 3877)
       IC (int 29573)]
   (defn gen-random! [max]
-    (let [max (double max)]
-      (set! last-random (rem (+ (* last-random IA) IC) IM))
-      (/ (* max last-random) IM))))
+    (let [max (double max)
+          last-rand (int last-random)
+          next-rand (int (rem (+ (* last-rand IA) IC) IM))]
+      (set! last-random next-rand)
+      (/ (* max next-rand) IM))))
 
 
 ;; Find desired gene from cdf using binary search.
@@ -52,20 +54,22 @@
 (defn lookup-gene [genelist rand-frac]
   (let [#^chars chars (:chars genelist)
         #^doubles cdf (:cdf genelist)
-        n (count cdf)]
+        n (alength cdf)
+        x (double rand-frac)]
     (loop [lo (int -1)
            hi (int (dec n))]
       (if (== (inc lo) hi)
         (aget chars hi)
         (let [mid (int (quot (+ lo hi) 2))]
-          (if (< rand-frac (aget cdf mid))
+          (if (< x (aget cdf mid))
             (recur lo mid)
             (recur mid hi)))))))
 
 
-(defn #^String select-random [genelist n]
-  (apply str (map (fn [max-val] (lookup-gene genelist (gen-random! max-val)))
-                  (repeat n (double 1.0)))))
+(defn fill-random! [genelist n #^chars buf]
+  (let [max-val (double 1.0)]
+    (dotimes [i n]
+      (aset buf i (char (lookup-gene genelist (gen-random! max-val)))))))
 
 
 (defn make-random-fasta [#^java.io.BufferedWriter wrtr
@@ -73,13 +77,18 @@
   (let [descstr (str ">" id " " desc "\n")]
     (.write wrtr descstr))
   (let [line-length (int line-length)
-        num-full-lines (int (quot n line-length))]
+        len-with-newline (int (inc line-length))
+        num-full-lines (int (quot n line-length))
+        line-buf (char-array len-with-newline)]
+    (aset line-buf line-length \newline)
     (dotimes [i num-full-lines]
-      (.write wrtr (select-random genelist line-length))
-      (.write wrtr "\n"))
-    (when (not= 0 (rem n line-length))
-      (.write wrtr (select-random genelist (rem n line-length)))
-      (.write wrtr "\n"))))
+      (fill-random! genelist line-length line-buf)
+      (.write wrtr line-buf (int 0) len-with-newline))
+    (let [remaining-len (int (rem n line-length))]
+      (when (not= 0 remaining-len)
+        (fill-random! genelist remaining-len line-buf)
+        (.write wrtr line-buf 0 remaining-len)
+        (.write wrtr "\n")))))
 
 
 (def alu (str "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"

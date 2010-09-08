@@ -7,8 +7,7 @@ mkdir $OUTPUT_DIR
 
 BENCHMARK="fasta"
 
-#ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_LANGUAGES="sbcl perl ghc java"
+ALL_LANGUAGES="sbcl perl ghc java clj"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
