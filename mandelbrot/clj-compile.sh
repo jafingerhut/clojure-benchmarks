@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 source ../env.sh
 mkdir -p ./obj/clj
