@@ -1,0 +1,9 @@
+I performance tests on my system, I got a faster program using linear
+search (e.g. clj-6, clj-7) versus binary search (clj-1 through clj-5)
+for looking up the gene characters in the cumulative distribution
+function.  With the binary search a macro was a little faster than a
+function call, but linear search right inside of fill-random! beat
+them both.
+
+I also got a little faster results using byte-based output (clj-6)
+rather than char/String-based output (clj-1 through clj-5, and clj-7).
