@@ -1,4 +1,4 @@
-July 28, 2009
+September 10, 2010
 
 The non-Clojure versions of these benchmark programs have been
 downloaded from this web site:
@@ -11,30 +11,35 @@ distributed.
 So far I have Clojure implementations for the benchmarks noted in the
 table below.
 
-                               Amenable to
-                    Sequential parallel    Parallel
-                    Clojure    implement-  Clojure
-Benchmark           program?   ation?      program?
-------------------- ---------- ----------- --------
-n-body               yes          no         no
-meteor-contest        no           ?         no
-spectral-norm         no         yes         no
-------------------- ---------- ----------- --------
-fannkuch             yes         yes         no
-k-nucleotide         yes         yes         no
-  (directory knuc)
-mandelbrot           yes         yes        yes
-------------------- ---------- ----------- --------
-fasta                 no          no         no
-thread-ring          N/A         yes         no
-chameneos-redux      N/A         yes         no
-------------------- ---------- ----------- --------
-regex-dna            yes         (1)         no
-pidigits              no          no         no
-binary-trees          no           ?         no
-reverse-complement   yes          no         no
-  (directory rcomp)
-------------------- ---------- ----------- --------
+                                           Clojure
+                    Clojure    Easy to	   program is
+Benchmark           program    parallel-   parallel-
+                    written?   ize?        ized?
+------------------- ---------- ----------- ----------
+binary-trees           -          ?          -
+chameneos-redux        -         yes         -
+------------------- ---------- ----------- ----------
+fannkuch              yes        yes        yes
+   (^^^ deprecated on shootout web site)
+fannkuch-redux        yes        yes        yes
+fasta                 yes         no         no
+------------------- ---------- ----------- ----------
+k-nucleotide          yes        yes        yes
+   (directory knuc)
+mandelbrot            yes        yes        yes
+meteor-contest         -          ?          -
+------------------- ---------- ----------- ----------
+n-body                yes         no         no
+pidigits               -          no         -
+regex-dna             yes        (1)         no
+------------------- ---------- ----------- ----------
+reverse-complement    yes         no         no
+   (directory rcomp)
+spectral-norm          -         yes         -
+thread-ring            -         yes         -
+------------------- ---------- ----------- ----------
+
+
 
 (1) Several entries to the language shootout web site are parallel,
 but I don't yet know how they try to take advantage of parallelism for
@@ -43,10 +48,13 @@ this problem.
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X
-10.5.7 with recent versions of the Glasgow Haskell Compiler ghc, SBCL
-Common Lisp, Perl, the version of Java distributed by Apple, and a
-recent version of Clojure (either 1.0.0 or more recent, I don't
-recall).  See below for the steps I used to install SBCL and ghc.
+10.6.4 (and earlier with 10.5.7) with recent versions of the Glasgow
+Haskell Compiler ghc, SBCL Common Lisp, Perl, the version of Java
+distributed by Apple, and Clojure 1.2.0 (and earlier 1.0.0 or shortly
+before that release).  Some of the benchmarks use Clojure transients
+and thus require 1.0 or later, and some use deftype, requiring Clojure
+1.2.0 or later (or whenever deftype's were introduced).  See below for
+the steps I used to install SBCL and ghc.
 
 You should edit the file env.sh to point at the location of your
 Clojure JAR file, and perhaps give explicit path names to some of the
@@ -139,15 +147,15 @@ The Glorious Glasgow Haskell Compilation System, version 6.10.1
 
 ----------------------------------------------------------------------
 
-I've also done some testing of this set of scripts on an Ubuntu 9.04
+I've also done some testing of this set of scripts on an Ubuntu 10.04
 Desktop i386 installation, in a VMWare Fusion virtual machine running
-on my Mac.
+on my Mac (and earlier tested on Ubuntu 9.04).
 
 I've tried it with these versions of packages installed using Ubuntu's
 Synaptic Package Manager.
 
 sun-java6-jdk 6-14-0ubuntu1.9.04
-sbcl 1.0.18.0-2
+sbcl 1.0.42 (and earlier tested with 1.0.18.0-2)
 ghc 6.8.2dfsg1-1ubuntu1
 
 
