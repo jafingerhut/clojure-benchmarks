@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-"${JAVA}" -Xmx2048m -server -classpath "${JAVA_OBJ_DIR}" knucleotide "$@"
+"${JAVA}" -Xmx1536m -server -classpath "${JAVA_OBJ_DIR}" knucleotide "$@"
