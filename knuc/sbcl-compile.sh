@@ -2,8 +2,8 @@
 
 source ../env.sh
 
-mkdir -p obj/sbcl
-cp knucleotide.sbcl-3.sbcl obj/sbcl
-cd obj/sbcl
-$SBCL --version
-$SBCL --no-userinit --no-sysinit --load ../../knucleotide.sbcl-3.sbcl_compile
+"${SBCL}" --version
+mkdir -p "${SBCL_OBJ_DIR}"
+"${CP}" knucleotide.sbcl-3.sbcl knucleotide.sbcl-3.sbcl_compile "${SBCL_OBJ_DIR}"
+cd "${SBCL_OBJ_DIR}"
+"${SBCL}" --no-userinit --no-sysinit --load knucleotide.sbcl-3.sbcl_compile

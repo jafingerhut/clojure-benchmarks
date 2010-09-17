@@ -9,4 +9,4 @@
 
 source ../env.sh
 
-$JAVA -server -Xmx1536m ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj knucleotide "$@"
+"${JAVA}" -server -Xmx1536m ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" knucleotide "$@"

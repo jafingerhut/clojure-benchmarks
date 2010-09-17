@@ -2,8 +2,8 @@
 
 source ../env.sh
 
-$SBCL --version
-mkdir -p obj/sbcl
-cp fasta.sbcl obj/sbcl
-cd obj/sbcl
-$SBCL --no-userinit --no-sysinit --load ../../fasta.sbcl_compile
+"${SBCL}" --version
+mkdir -p "${SBCL_OBJ_DIR}"
+"${CP}" fasta.sbcl fasta.sbcl_compile "${SBCL_OBJ_DIR}"
+cd "${SBCL_OBJ_DIR}"
+"${SBCL}" --no-userinit --no-sysinit --load fasta.sbcl_compile

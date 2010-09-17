@@ -106,4 +106,4 @@ JVM_OPTS="-client -Xmx544m"
 #JVM_OPTS="-client -Xmx528m"
 
 
-$JAVA $JVM_OPTS -cp obj/java revlines "$@"
+"${JAVA}" $JVM_OPTS -classpath "${JAVA_OBJ_DIR}" revlines "$@"

@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-./obj/ghc/revcomp.ghc-3.ghc_run 0
+"${GHC_OBJ_DIR}/revcomp.ghc-3.ghc_run" 0

@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-./obj/ghc/fannkuch.ghc-5.ghc_run +RTS -N5 -RTS "$@"
+"${GHC_OBJ_DIR}/fannkuch.ghc-5.ghc_run" +RTS -N5 -RTS "$@"

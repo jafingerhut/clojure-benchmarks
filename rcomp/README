@@ -1,3 +1,18 @@
+Mac OS X 10.5.8 with java 1.5.0_24 failed with this exception when
+running revcomp.clj-10.clj.  Perhaps this program relies on a change
+made in java 1.6?
+
+Exception in thread "main" java.lang.IllegalArgumentException: Can't call public method of non-public class: public void java.lang.AbstractStringBuilder.setCharAt(int,char)
+	at clojure.lang.Reflector.invokeMatchingMethod(Reflector.java:85)
+	at clojure.lang.Reflector.invokeInstanceMethod(Reflector.java:28)
+	at revcomp$revcomp_buf_and_write.invoke(revcomp.clj:59)
+	at revcomp$_main.doInvoke(revcomp.clj:77)
+	at clojure.lang.RestFn.invoke(RestFn.java:398)
+	at clojure.lang.AFn.applyToHelper(AFn.java:159)
+	at clojure.lang.RestFn.applyTo(RestFn.java:133)
+	at revcomp.main(Unknown Source)
+
+
 July 29, 2009
 
 revcomp.clj-4.clj is the best I've got so far, but it runs out of

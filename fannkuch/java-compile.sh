@@ -2,9 +2,10 @@
 
 source ../env.sh
 
-$JAVA -version
-$JAVAC -version
-#$CP fannkuch.java-4.java fannkuch.java
-mkdir -p obj/java
-$JAVAC -d obj/java fannkuch.java
-#$RM fannkuch.java
+"${JAVA}" -version
+"${JAVAC}" -version
+# No need to rename file
+#"${CP}" fannkuch.java fannkuch.java
+mkdir -p "${JAVA_OBJ_DIR}"
+"${JAVAC}" -d "${JAVA_OBJ_DIR}" fannkuch.java
+#"${RM}" fannkuch.java

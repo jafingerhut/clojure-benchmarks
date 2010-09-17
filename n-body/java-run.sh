@@ -4,4 +4,4 @@ source ../env.sh
 
 JVM_OPTS="-server"
 
-$JAVA $JVM_OPTS -cp obj/java nbody "$@"
+"${JAVA}" $JVM_OPTS -classpath "${JAVA_OBJ_DIR}" nbody "$@"

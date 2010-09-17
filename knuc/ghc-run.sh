@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-./obj/ghc/knucleotide.ghc-3.ghc_run +RTS -N4 -RTS 0
+"${GHC_OBJ_DIR}/knucleotide.ghc-3.ghc_run" +RTS -N4 -RTS 0

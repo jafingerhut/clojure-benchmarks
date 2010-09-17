@@ -10,5 +10,5 @@ source ../env.sh
 JVM_MEM_OPTS="-client -Xmx1024m"
 #JMX_MONITORING=-Dcom.sun.management.jmxremote
 
-$JAVA $JVM_MEM_OPTS $JMX_MONITORING ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj regexdna "$@"
+"${JAVA}" ${JVM_MEM_OPTS} ${JMX_MONITORING} ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" regexdna "$@"
 

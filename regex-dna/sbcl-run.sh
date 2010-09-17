@@ -5,4 +5,4 @@
 
 source ../env.sh
 
-$SBCL --dynamic-space-size 1000 --noinform --core obj/sbcl/sbcl.core --no-userinit --no-sysinit --load regexdna.sbcl-3.sbcl_run 0
+"${SBCL}" --dynamic-space-size 1000 --noinform --core "${SBCL_OBJ_DIR}/sbcl.core" --no-userinit --no-sysinit --load regexdna.sbcl-3.sbcl_run 0

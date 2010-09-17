@@ -1,8 +1,8 @@
 #! /bin/bash
 
 source ../env.sh
-mkdir -p ./obj/clj
+mkdir -p "${CLJ_OBJ_DIR}"
 
-cp regexdna.clj-1.clj ./obj/clj/regexdna.clj
+cp regexdna.clj-1.clj "${CLJ_OBJ_DIR}/regexdna.clj"
 
-java -Dclojure.compile.path=./obj/clj -classpath ${CLOJURE_CLASSPATH}:./obj/clj clojure.lang.Compile regexdna
+"${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile regexdna

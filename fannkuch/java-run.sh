@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-$JAVA -server -cp obj/java fannkuch "$@"
+"${JAVA}" -server -classpath "${JAVA_OBJ_DIR}" fannkuch "$@"

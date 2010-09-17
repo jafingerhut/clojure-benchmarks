@@ -4,4 +4,4 @@ source ../env.sh
 
 JVM_OPTS="-server -Xmx1024m"
 
-$JAVA $JVM_OPTS -cp obj/java regexdna "$@"
+"${JAVA}" $JVM_OPTS -classpath "${JAVA_OBJ_DIR}" regexdna "$@"

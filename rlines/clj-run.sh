@@ -79,5 +79,5 @@ JVM_MEM_OPTS="-server -Xmx1024m"
 JMX_MONITORING=
 
 
-1>&2 echo "$JAVA $JVM_OPTS $JMX_MONITORING ${JAVA_PROFILING} -classpath ${CLOJURE_CLASSPATH}:./obj/clj revlines" "$@"
-           $JAVA $JVM_OPTS $JMX_MONITORING ${JAVA_PROFILING} -classpath ${CLOJURE_CLASSPATH}:./obj/clj revlines "$@"
+1>&2 echo "${JAVA}  ${JVM_OPTS} ${JMX_MONITORING} ${JAVA_PROFILING} -classpath ${PS_FULL_CLJ_CLASSPATH} revlines" "$@"
+          "${JAVA}" ${JVM_OPTS} ${JMX_MONITORING} ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" revlines "$@"

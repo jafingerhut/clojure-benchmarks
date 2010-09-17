@@ -19,5 +19,5 @@ JAVA_PROFILING=""
 CLJ_PROG=memuse.clj
 
 
-echo "java ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG}" "$@"
-java ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG} "$@"
+echo "${JAVA}  ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -classpath ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG}" "$@"
+     "${JAVA}" ${OPTS} -Xmx1024m ${JDB} ${JAVA_PROFILING} -classpath ${CLOJURE_CLASSPATH} clojure.main ${CLJ_PROG} "$@"
