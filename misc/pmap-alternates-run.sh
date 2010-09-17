@@ -2,4 +2,4 @@
 
 source ../env.sh
 
-$JAVA -server ${JAVA_PROFILING} -cp ${CLOJURE_CLASSPATH}:./obj/clj pmapalternates "$@"
+"${JAVA}" -server ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" pmapalternates "$@"

@@ -32,9 +32,9 @@ do
 	OUT=output/ParallelTest-${TYPE}-${THREADS}-out.txt
 	HPROF_OUT=output/ParallelTest-${TYPE}-${THREADS}-hprof.txt
 	uname -a > $OUT
-	java -version >> $OUT
-	echo "( $TIME java $JVM_OPTS $JAVA_PROFILING_OPTS -classpath obj/java ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT"
-	      ( $TIME java $JVM_OPTS $JAVA_PROFILING_OPTS -classpath obj/java ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT
+	"${JAVA}" -version >> $OUT
+	echo "( $TIME ${JAVA} $JVM_OPTS $JAVA_PROFILING_OPTS -classpath ${JAVA_OBJ_DIR} ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT"
+	      ( $TIME "${JAVA}" $JVM_OPTS $JAVA_PROFILING_OPTS -classpath "${JAVA_OBJ_DIR}" ParallelTest $TYPE $NUM_JOBS $JOB_SIZE $PARSEQ ) 2>&1 | tee -a $OUT
 	/bin/mv -f java.hprof.txt $HPROF_OUT
     done
 done

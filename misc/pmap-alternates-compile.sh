@@ -1,9 +1,8 @@
 #! /bin/bash
 
 source ../env.sh
-mkdir -p ./obj/clj
-rm -f ./obj/clj/*
+mkdir -p "${CLJ_OBJ_DIR}"
 
-cp pmap-alternates.clj ./obj/clj/pmapalternates.clj
+"${CP}" pmap-alternates.clj "${CLJ_OBJ_DIR}/pmapalternates.clj"
 
-java -Dclojure.compile.path=./obj/clj -classpath ${CLOJURE_CLASSPATH}:./obj/clj clojure.lang.Compile pmapalternates
+"${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile pmapalternates

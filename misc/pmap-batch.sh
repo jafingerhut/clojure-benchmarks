@@ -35,8 +35,8 @@ do
 	OUT=output/pmap-${TYPE}-${THREADS}-out.txt
 	HPROF_OUT=output/pmap-${TYPE}-${THREADS}-hprof.txt
 	uname -a > $OUT
-	java -version >> $OUT
-	( $TIME java -agentlib:hprof=$HPROF_OPTS -cp $CLOJURE_CLASSPATH clojure.main pmap-testing.clj $TYPE $NUM_JOBS $JOB_SIZE $THREADS ) 2>&1 | tee -a $OUT
+	"${JAVA}" -version >> $OUT
+	( $TIME "${JAVA}" -agentlib:hprof=$HPROF_OPTS -classpath "${CLOJURE_CLASSPATH}" clojure.main pmap-testing.clj $TYPE $NUM_JOBS $JOB_SIZE $THREADS ) 2>&1 | tee -a $OUT
 	/bin/mv -f java.hprof.txt $HPROF_OUT
     done
 done
