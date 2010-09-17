@@ -72,7 +72,7 @@ then
     ######################################################################
     PERL="perl"
 
-elif [ "$OS" == "Linux" -o "$OS" == "Darwin" ]
+elif [ "$OS" == "GNU/Linux" -o "$OS" == "Darwin" ]
 then
     SEP='/'
     PSEP=':'
