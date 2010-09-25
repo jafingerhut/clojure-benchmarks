@@ -29,12 +29,11 @@
 
 
 (defn make-array-char-mapper [cmap]
-  (let [#^ints a (int-array 256)]
-    (dotimes [i 256]
-      (aset a i (if (contains? cmap (char i))
-                  (int (cmap (char i)))
-                  i)))
-    a))
+  (int-array 256 (map (fn [i]
+                        (if (contains? cmap (char i))
+                          (int (cmap (char i)))
+                          i))
+                      (range 256))))
 
 
 (defn revcomp-buf-and-write [#^java.lang.StringBuilder buf
