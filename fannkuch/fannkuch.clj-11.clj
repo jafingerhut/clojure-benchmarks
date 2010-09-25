@@ -64,15 +64,14 @@ condition is violated.  It does this merely to avoid checking a few
 conditions, and thus perhaps be a bit faster."
   [n #^ints a]
   `(let [n# (int ~n)
-         n-to-swap# (int (quot n# 2))
          n-1# (int (dec n#))]
-     (loop [i# (int 0)]
-       (when (< i# n-to-swap#)
-         (let [temp# (aget ~a i#)
-               n-1-i# (int (- n-1# i#))]
-           (aset ~a i# (aget ~a n-1-i#))
-           (aset ~a n-1-i# temp#))
-         (recur (inc i#))))))
+     (loop [i# (int 0)
+            j# (int n-1#)]
+       (when (< i# j#)
+         (let [temp# (aget ~a i#)]
+           (aset ~a i# (aget ~a j#))
+           (aset ~a j# temp#))
+         (recur (inc i#) (dec j#))))))
 
 
 (defn fannkuch-of-permutation [#^ints perm]
@@ -97,7 +96,7 @@ conditions, and thus perhaps be a bit faster."
 
 
 (defn permutation-from-seq [s]
-  (into-array Integer/TYPE s))
+  (int-array (count s) s))
 
 
 ;; next-lex-permutation! is copied from
