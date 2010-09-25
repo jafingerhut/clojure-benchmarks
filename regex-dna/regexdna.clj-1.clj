@@ -5,7 +5,7 @@
 
 (ns regexdna
   (:gen-class)
-  (:use [clojure.contrib.str-utils :only (re-gsub)])
+  (:require [clojure.string :as str])
   (:import (java.util.regex Pattern)))
 
 
@@ -52,7 +52,7 @@
 
 
 (defn one-replacement [str [iub-str iub-replacement]]
-  (re-gsub (. Pattern (compile iub-str)) iub-replacement str))
+  (str/replace str (. Pattern (compile iub-str)) iub-replacement))
 
 
 (defn -main
@@ -63,7 +63,7 @@
         ;; Perl benchmark does, but that only matches ^ at the beginning
         ;; of the string, not at the beginning of a line in the middle
         ;; of the string.
-        content (re-gsub #"(^>.*|\n>.*)?\n" "" content)
+        content (str/replace content #"(^>.*|\n>.*)?\n" "")
         dna-seq-only-len (count content)]
     
     (doseq [re dna-seq-regexes]
