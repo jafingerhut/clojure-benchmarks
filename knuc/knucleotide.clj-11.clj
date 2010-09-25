@@ -54,10 +54,10 @@
 ;; significant of which is that Java arrays are mutable.  If you
 ;; inserted an item in a map / hash table with a Java array as a key,
 ;; and later modified that array, doing what is done below will cause
-;; the hashCode of that array to change, and thus you could not any
-;; longer retreive the item from the map using that array.  It is not
-;; obvious how to create an immutable Java array in Java or in
-;; Clojure, although there are osme attempts at it described here:
+;; the hashCode of that array to change, and thus you could no longer
+;; retreive the item from the map using that array.  It is not obvious
+;; how to create an immutable Java array in Java or in Clojure,
+;; although there are some attempts at it described here:
 
 ;; http://www.javapractices.com/topic/TopicAction.do?Id=29
 ;; http://mindprod.com/jgloss/immutable.html
