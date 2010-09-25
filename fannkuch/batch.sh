@@ -3,13 +3,13 @@
 source ../env.sh
 
 OUTPUT_DIR=./output
-mkdir $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
 
 BENCHMARK="fannkuch"
 
 # No Clojure version created yet.
 
-ALL_LANGUAGES="sbcl perl ghc java clj"
+ALL_LANGUAGES="sbcl perl ghc java clj-1.2.0 clj-1.3.0-alpha1"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -18,7 +18,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
@@ -59,8 +59,8 @@ do
     for L in $LANGUAGES
     do
 	case $L in
-	    clj) CMD=./clj-run.sh
-		( ./clj-compile.sh ) >& ${OUTPUT_DIR}/clj-compile-log.txt
+	    clj*) CMD="./clj-run.sh $L"
+		( ./clj-compile.sh $L ) >& ${OUTPUT_DIR}/clj-compile-log.txt
 		;;
 	    java) CMD=./java-run.sh
 		( ./java-compile.sh ) >& ${OUTPUT_DIR}/java-compile-log.txt
@@ -80,7 +80,7 @@ do
 	    # fannkuch.clj-9.clj use the specified number of threads
 	    # in parallel.  With an empty string, the default is 2
 	    # more threads than the number of available processors.
-	    clj)  EXTRA_LANG_ARGS=""
+	    clj*)  EXTRA_LANG_ARGS=""
 		;;
 	esac
 	

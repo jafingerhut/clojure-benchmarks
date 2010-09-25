@@ -86,12 +86,25 @@ then
     ######################################################################
     # Linux/MacOS Clojure
     ######################################################################
-    CLOJURE_JAR_DIR="$HOME/.clojure"
-    CLOJURE_CLASSPATH="$CLOJURE_JAR_DIR/clojure-1.2.0.jar:$CLOJURE_JAR_DIR/clojure-contrib-1.2.0.jar"
+
+    if [ "${CLJ_VERSION:=clj-1.2.0}" == "clj-1.2.0" ]
+    then
+        # Let default Clojure version be 1.2.0 if none is specified.
+        CLOJURE_JAR_DIR="$HOME/lein/swank-clj-1.2.0/lib"
+        CLOJURE_CLASSPATH="$CLOJURE_JAR_DIR/clojure-1.2.0.jar:$CLOJURE_JAR_DIR/clojure-contrib-1.2.0.jar"
+    elif [ "$CLJ_VERSION" == "clj-1.3.0-alpha1" ]
+    then
+        CLOJURE_JAR_DIR="$HOME/lein/contrib-clj-1.3.0-a1/lib"
+        CLOJURE_CLASSPATH="$CLOJURE_JAR_DIR/clojure-1.3.0-alpha1.jar:$CLOJURE_JAR_DIR/complete-1.3.1-20100923.180543-12-bin.jar"
+    else
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2.0 clj-1.3.0-alpha1"
+        exit 1
+    fi
+
     # Platform-specific form of Clojure object file directory
-    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}clj"
+    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}${CLJ_VERSION}"
     PS_FULL_CLJ_CLASSPATH="${CLOJURE_CLASSPATH}${PSEP}${PS_CLJ_OBJ_DIR}"
-    CLJ_OBJ_DIR="./obj/clj"
+    CLJ_OBJ_DIR="./obj/${CLJ_VERSION}"
 
     ######################################################################
     # Linux/MacOS SBCL

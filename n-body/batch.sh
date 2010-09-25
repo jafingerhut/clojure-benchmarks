@@ -3,15 +3,15 @@
 source ../env.sh
 
 OUTPUT_DIR=./output
-mkdir $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR
 
 BENCHMARK="n-body"
 
 # The compiled GHC executable crashes on my Mac.  Leaving it out of
 # the default list of languages for now.
 
-#ALL_LANGUAGES="sbcl perl ghc java clj"
-ALL_LANGUAGES="sbcl perl java clj"
+#ALL_LANGUAGES="sbcl perl ghc java clj-1.2.0 clj-1.3.0-alpha1"
+ALL_LANGUAGES="sbcl perl java clj-1.2.0 clj-1.3.0-alpha1"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -20,7 +20,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|medium2|long) TESTS="$TESTS $1"
 	    ;;
@@ -63,8 +63,8 @@ do
     for L in $LANGUAGES
     do
 	case $L in
-	    clj) CMD=./clj-run.sh
-		( ./clj-compile.sh ) >& ${OUTPUT_DIR}/clj-compile-log.txt
+	    clj*) CMD="./clj-run.sh $L"
+		( ./clj-compile.sh $L ) >& ${OUTPUT_DIR}/clj-compile-log.txt
 		;;
 	    java) CMD=./java-run.sh
 		( ./java-compile.sh ) >& ${OUTPUT_DIR}/java-compile-log.txt
