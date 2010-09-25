@@ -8,6 +8,14 @@
 
 (set! *warn-on-reflection* true)
 
+;; Handle slight difference in function name between Clojure 1.2.0 and
+;; 1.3.0-alpha1.
+(defmacro my-unchecked-inc-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-inc ~@args)
+    `(unchecked-inc-int ~@args)))
+
 
 (comment"
 Jovian planets N-body simulation
@@ -209,11 +217,11 @@ Timing for Java version - same machine, same N
     (dotimes [i len]
       (let [^Body body (aget bodies i) ]
         ; update velocity
-        (loop [j (unchecked-inc i) ]
+        (loop [j (my-unchecked-inc-int i) ]
           (when (< j len)
             (let [^Body nbody (aget bodies j)]
               (.v-dt! body dt nbody)
-              (recur (unchecked-inc j)))))
+              (recur (my-unchecked-inc-int j)))))
         ; update position
         (.p-dt! body dt)))))
 

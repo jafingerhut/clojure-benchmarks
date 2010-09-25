@@ -12,6 +12,16 @@
   (:gen-class)
   (:import (java.io BufferedOutputStream)))
 
+(set! *warn-on-reflection* true)
+
+;; Handle slight difference in function name between Clojure 1.2.0 and
+;; 1.3.0-alpha1.
+(defmacro my-unchecked-dec-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-dec ~@args)
+    `(unchecked-dec-int ~@args)))
+
 
 (def max-iterations 50)
 (def limit-square (double 4.0))
@@ -34,7 +44,7 @@
                  (< (+ zr2 zi2) limit-square))
           (recur (+ (- zr2 zi2) pr)
                  (+ (* (* f2 zr) zi) pi)
-                 (unchecked-dec i))
+                 (my-unchecked-dec-int i))
           (zero? i))))))
 
 
