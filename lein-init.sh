@@ -6,28 +6,29 @@
 
 LEIN_FILES="`dirname $0`/lein-files"
 
-echo $LEIN_FILES
-exit 0
+#echo $LEIN_FILES
+#exit 0
 
-cd "${HOME}"
-mkdir -p lein
-cd lein
+mkdir -p "${HOME}/lein/lein-files"
+cp -pr "${LEIN_FILES}"/* "${HOME}/lein/lein-files/"
+
+cd "${HOME}/lein"
 
 lein new clj-1.2.0
 cd clj-1.2.0
-cp -p "${LEIN_FILES}/project.clj-for-clj-1.2.0-only" project.clj
+cp -p "../lein-files/project.clj-for-clj-1.2.0-only" project.clj
 lein deps
 cd ..
 
 lein new swank-clj-1.2.0
 cd swank-clj-1.2.0
-cp -p "${LEIN_FILES}/project.clj-for-clj-1.2.0-plus-contrib-plus-swank" project.clj
+cp -p "../lein-files/project.clj-for-clj-1.2.0-plus-contrib-plus-swank" project.clj
 lein deps
 cd ..
 
 lein new clj-1.3.0-alpha1
 cd clj-1.3.0-alpha1
-cp -p "${LEIN_FILES}/project.clj-for-clj-1.3.0-alpha1-only" project.clj
+cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha1-only" project.clj
 lein deps
 cd ..
 
