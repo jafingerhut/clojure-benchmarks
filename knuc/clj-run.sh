@@ -17,4 +17,4 @@ shift
 
 source ../env.sh
 
-"${JAVA}" -server -Xmx1536m ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" knucleotide "$@"
+"${JAVA}" -server -Xmx2048m ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" knucleotide "$@"
