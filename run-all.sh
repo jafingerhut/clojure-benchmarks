@@ -1,8 +1,10 @@
 #! /bin/bash
 
-for B in rcomp knuc mandelbrot fasta
+#for j in fannkuch fannkuchredux fasta knuc mandelbrot n-body rcomp regex-dna
+
+for j in fannkuch fannkuchredux fasta knuc mandelbrot rcomp regex-dna
 do
-    cd $B
-    ./batch.sh
+    cd $j
+    ./batch.sh "$@"
     cd ..
 done
