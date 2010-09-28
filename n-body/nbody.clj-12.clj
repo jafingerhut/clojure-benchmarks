@@ -96,34 +96,34 @@ Timing for Java version - same machine, same N
     this )
 
   (v-dt! [this dt other]
-    (let [^Body nbody other
-          dx (- x (.x nbody))
-          dy (- y (.y nbody))
-          dz (- z (.z nbody))
+    (let [^Body b other
+          dx (- x (.x b))
+          dy (- y (.y b))
+          dz (- z (.z b))
           dsq (+ (* dx dx)
                 (+ (* dy dy)
                   (* dz dz)))
           mag (/ dt (* dsq (Math/sqrt dsq)))
-          m1 (- (* (.mass nbody) mag))
+          m1 (- (* (.mass b) mag))
           m2 (* mass mag) ]
       ; own velocity
       (set! vx (+ vx (* dx m1)))
       (set! vy (+ vy (* dy m1)))
       (set! vz (+ vz (* dz m1)))
       ; v of other
-      (.v+! nbody (* dx m2) (* dy m2) (* dz m2))
+      (.v+! b (* dx m2) (* dy m2) (* dz m2))
       this ))
 
   (energy [this nbodies]
     (let [v-sq (+ (* vx vx) (* vy vy) (* vz vz)) 
           e (* 1/2 mass v-sq)  ; kinetic energy: 1/2 * m * v^2
-          f (fn [e ^Body nbody]
-              (let [dx (- x (.x nbody))
-                    dy (- y (.y nbody))
-                    dz (- z (.z nbody))
+          f (fn [e ^Body b]
+              (let [dx (- x (.x b))
+                    dy (- y (.y b))
+                    dz (- z (.z b))
                     dist (Math/sqrt
                            (+ (* dx dx) (* dy dy) (* dz dz))) ]
-                (- e (/ (* mass (.mass nbody))
+                (- e (/ (* mass (.mass b))
                        dist)))) ]
       (reduce f e nbodies)))
 
