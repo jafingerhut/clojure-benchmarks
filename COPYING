@@ -2,6 +2,10 @@ Here is a list of all files, and the license they fall under.
 
 The abbreviations used in the file list below are defined here:
 
+A - Copyright 2009 John Andrew Fingerhut - Revised BSD license (see below)
+B - Computer Language Benchmarks Game Revised BSD license (see below)
+F - Copyright 2010 Johann Friestad - Revised BSD license  TBD (see below)
+
 ----------------------------------------------------------------------
 B - Computer Language Benchmarks Game Revised BSD license
 ----------------------------------------------------------------------
@@ -88,11 +92,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------
 
 A CHANGELOG
+A compile-all-clj.sh
 A COPYING
 A env.sh
 A fannkuch/batch.sh
+A fannkuch/clj-compile.sh
 A fannkuch/clj-run.sh
 A fannkuch/fannkuch.clj-1.clj
+A fannkuch/fannkuch.clj-10.clj
+A fannkuch/fannkuch.clj-11.clj
+A fannkuch/fannkuch.clj-2.clj
+A fannkuch/fannkuch.clj-3.clj
+A fannkuch/fannkuch.clj-4.clj
+A fannkuch/fannkuch.clj-5.clj
+A fannkuch/fannkuch.clj-6.clj
+A fannkuch/fannkuch.clj-6b.clj
+A fannkuch/fannkuch.clj-7.clj
+A fannkuch/fannkuch.clj-8.clj
+A fannkuch/fannkuch.clj-9.clj
 B fannkuch/fannkuch.ghc-5.ghc
 B fannkuch/fannkuch.java
 B fannkuch/fannkuch.perl
@@ -103,11 +120,32 @@ B fannkuch/ghc-compile.sh
 B fannkuch/ghc-run.sh
 A fannkuch/java-compile.sh
 A fannkuch/java-run.sh
-B fannkuch/long-expected-output.txt
-B fannkuch/quick-expected-output.txt
+A fannkuch/README
 A fannkuch/sbcl-compile.sh
 A fannkuch/sbcl-run.sh
+A fannkuchredux/batch.sh
+A fannkuchredux/clj-compile.sh
+A fannkuchredux/clj-run.sh
+A fannkuchredux/fannkuchredux.clj-11.clj
+A fannkuchredux/fannkuchredux.clj-12.clj
+A fannkuchredux/fannkuchredux.clj-13.clj
+B fannkuchredux/fannkuchredux.ghc-3.ghc
+B fannkuchredux/fannkuchredux.java
+B fannkuchredux/fannkuchredux.perl
+B fannkuchredux/ghc-compile.sh
+B fannkuchredux/ghc-run.sh
+B fannkuchredux/java-compile.sh
+B fannkuchredux/java-run.sh
 A fasta/batch.sh
+A fasta/clj-compile.sh
+A fasta/clj-run.sh
+A fasta/fasta.clj-1.clj
+A fasta/fasta.clj-2.clj
+A fasta/fasta.clj-3.clj
+A fasta/fasta.clj-4.clj
+A fasta/fasta.clj-5.clj
+A fasta/fasta.clj-6.clj
+A fasta/fasta.clj-7.clj
 B fasta/fasta.ghc-2.ghc
 B fasta/fasta.java-2.java
 B fasta/fasta.perl-4.perl
@@ -118,23 +156,31 @@ B fasta/ghc-compile.sh
 B fasta/ghc-run.sh
 A fasta/java-compile.sh
 A fasta/java-run.sh
+A fasta/README
 A fasta/sbcl-compile.sh
 A fasta/sbcl-run.sh
 A fclean.sh
 A fwaste.sh
 A init.sh
 A knuc/batch.sh
+A knuc/clj-compile.sh
 A knuc/clj-run.sh
 B knuc/ghc-compile.sh
 B knuc/ghc-run.sh
 A knuc/java-compile.sh
 A knuc/java-run.sh
 B knuc/knucleotide.andys.java
+A knuc/knucleotide.clj-11.clj
 A knuc/knucleotide.clj-2.clj
 A knuc/knucleotide.clj-3.clj
 A knuc/knucleotide.clj-4.clj
 A knuc/knucleotide.clj-5.clj
 A knuc/knucleotide.clj-6.clj
+A knuc/knucleotide.clj-7.clj
+A knuc/knucleotide.clj-8.clj
+A knuc/knucleotide.clj-8b.clj
+A knuc/knucleotide.clj-9.clj
+B knuc/knucleotide.java-2.java
 B knuc/knucleotide.ghc-3.ghc
 B knuc/knucleotide.java-3.java
 B knuc/knucleotide.perl-2.perl
@@ -143,14 +189,24 @@ B knuc/knucleotide.sbcl-3.sbcl_compile
 B knuc/knucleotide.sbcl-3.sbcl_run
 A knuc/sbcl-compile.sh
 A knuc/sbcl-run.sh
+A lein-files/project.clj-for-clj-1.2.0-only
+A lein-files/project.clj-for-clj-1.2.0-plus-contrib-plus-swank
+A lein-files/project.clj-for-clj-1.3.0-alpha1-only
+A lein-init.sh
 A mandelbrot/batch.sh
+A mandelbrot/clj-compile.sh
 A mandelbrot/clj-run.sh
 B mandelbrot/ghc-compile.sh
 B mandelbrot/ghc-run.sh
 A mandelbrot/java-compile.sh
 A mandelbrot/java-run.sh
 B mandelbrot/mandelbrot.andys.java
-A mandelbrot/mandelbrot.clj
+A mandelbrot/mandelbrot.clj-1.clj
+A mandelbrot/mandelbrot.clj-2.clj
+A mandelbrot/mandelbrot.clj-3.clj
+A mandelbrot/mandelbrot.clj-4.clj
+A mandelbrot/mandelbrot.clj-5.clj
+A mandelbrot/mandelbrot.clj-6.clj
 A mandelbrot/mandelbrot.conses-too-much1.clj
 A mandelbrot/mandelbrot.conses-too-much2.clj
 B mandelbrot/mandelbrot.ghc-2.ghc
@@ -167,36 +223,67 @@ O mandelbrot/other-code/speed07.clj
 O mandelbrot/other-code/speed08.clj
 O mandelbrot/other-code/speed09.clj
 O mandelbrot/other-code/speed10.clj
+A mandelbrot/README
 A mandelbrot/sbcl-compile.sh
 A mandelbrot/sbcl-run.sh
+A memuse/clj-run.sh
+A memuse/memuse.clj
+A misc/CacheBuster1.java
 A misc/cat-n.clj
   misc/in.txt
 A misc/notes.txt
+A misc/paralleltest-batch.sh
+A misc/paralleltest-compile.sh
+A misc/ParallelTest.java
+A misc/pmap-alternates-compile.sh
+A misc/pmap-alternates-run.sh
+A misc/pmap-alternates.clj
+A misc/pmap-batch-output/pmap-double-1-hprof.txt
+A misc/pmap-batch-output/pmap-double-1-out.txt
+A misc/pmap-batch-output/pmap-double-2-hprof.txt
+A misc/pmap-batch-output/pmap-double-2-out.txt
+A misc/pmap-batch-output/pmap-int-1-hprof.txt
+A misc/pmap-batch-output/pmap-int-1-out.txt
+A misc/pmap-batch-output/pmap-int-2-hprof.txt
+A misc/pmap-batch-output/pmap-int-2-out.txt
+A misc/pmap-batch.sh
+A misc/pmap-testing.clj
   misc/post2.txt
+A misc/RESULTS
   misc/test-sbcl-input.lisp
-  misc/tiny-fasta-input.txt
 A misc/too-much-memory.clj
 A misc/try.clj
 A misc/try.sh
 A n-body/batch.sh
+A n-body/clj-compile.sh
 A n-body/clj-run.sh
 B n-body/ghc-compile.sh
 B n-body/ghc-run.sh
 A n-body/java-compile.sh
 A n-body/java-run.sh
 A n-body/nbody.clj-1.clj
+A n-body/nbody.clj-10.clj
+A n-body/nbody.clj-11.clj
+F n-body/nbody.clj-12.clj
 A n-body/nbody.clj-2.clj
 A n-body/nbody.clj-3.clj
 A n-body/nbody.clj-4.clj
+A n-body/nbody.clj-5.clj
+A n-body/nbody.clj-6.clj
+A n-body/nbody.clj-7.clj
+A n-body/nbody.clj-8.clj
+A n-body/nbody.clj-9.clj
 B n-body/nbody.ghc
 B n-body/nbody.java-2.java
 B n-body/nbody.perl
 B n-body/nbody.sbcl
 B n-body/nbody.sbcl_compile
 B n-body/nbody.sbcl_run
+A n-body/README
 A n-body/sbcl-compile.sh
 A n-body/sbcl-run.sh
 A rcomp/batch.sh
+A rcomp/clj-compile.sh
 A rcomp/clj-run.sh
 B rcomp/ghc-compile.sh
 B rcomp/ghc-run.sh
@@ -204,6 +291,7 @@ A rcomp/java-compile.sh
 A rcomp/java-run.sh
 A rcomp/README
 A rcomp/revcomp.clj-1.clj
+A rcomp/revcomp.clj-10.clj
 A rcomp/revcomp.clj-2.clj
 A rcomp/revcomp.clj-3.clj
 A rcomp/revcomp.clj-4.clj
@@ -211,7 +299,9 @@ A rcomp/revcomp.clj-5.clj
 A rcomp/revcomp.clj-6.clj
 A rcomp/revcomp.clj-7.clj
 A rcomp/revcomp.clj-8.clj
+A rcomp/revcomp.clj-9.clj
 B rcomp/revcomp.ghc-2.ghc
+B rcomp/revcomp.ghc-3.ghc
 B rcomp/revcomp.java-4.java
 B rcomp/revcomp.perl-2.perl
 B rcomp/revcomp.sbcl
@@ -221,6 +311,7 @@ A rcomp/sbcl-compile.sh
 A rcomp/sbcl-run.sh
 A README
 A regex-dna/batch.sh
+A regex-dna/clj-compile.sh
 A regex-dna/clj-run.sh
 B regex-dna/ghc-compile.sh
 B regex-dna/ghc-run.sh
@@ -231,14 +322,17 @@ A regex-dna/regexdna.clj-1.clj
 A regex-dna/regexdna.clj-2.clj
 B regex-dna/regexdna.ghc-4.ghc
 B regex-dna/regexdna.java-2.java
+B regex-dna/regexdna.java-5.java
 B regex-dna/regexdna.perl-4.perl
 B regex-dna/regexdna.sbcl-3.sbcl
 B regex-dna/regexdna.sbcl-3.sbcl_compile
 B regex-dna/regexdna.sbcl-3.sbcl_run
 A regex-dna/sbcl-compile.sh
 A regex-dna/sbcl-run.sh
-A RESULTS
+A RESULTS-clj-1.1
+A RESULTS-clj-1.2
 A rlines/batch.sh
+A rlines/clj-compile.sh
 A rlines/clj-run.sh
 A rlines/java-compile.sh
 A rlines/java-run.sh

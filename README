@@ -1,4 +1,24 @@
-September 10, 2010
+This file last edited: September 27, 2010
+
+Quick start instructions (see below for a few more details of what
+these do if you are curious):
+
+    # Run lein-init.sh, which creates directories 'lein' and '.m2' in
+    # your home directory, or edit env.sh to specify the location of
+    # your Clojure JAR files.  Takes about 3 mins on my system.
+
+    ./lein-init.sh
+
+    # Create largish input and expected output files by running some
+    # Java programs.  Takes about 4 mins on my system.
+
+    ./init.sh output
+
+    # Run Java, Clojure 1.2, and Clojure 1.3 alpha1 versions of all of
+    # the benchmark programs.  Takes about 60 mins (?) on my system.
+
+    ./run-all.sh long java clj-1.2 clj-1.3-alpha1
+
 
 The non-Clojure versions of these benchmark programs have been
 downloaded from this web site:
@@ -48,17 +68,30 @@ this problem.
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X
-10.6.4 (and earlier with 10.5.7) with recent versions of the Glasgow
-Haskell Compiler ghc, SBCL Common Lisp, Perl, the version of Java
-distributed by Apple, and Clojure 1.2.0 (and earlier 1.0.0 or shortly
-before that release).  Some of the benchmarks use Clojure transients
-and thus require 1.0 or later, and some use deftype, requiring Clojure
-1.2.0 or later (or whenever deftype's were introduced).  See below for
-the steps I used to install SBCL and ghc.
+10.5.8 and 10.6.4 with recent versions of the Glasgow Haskell Compiler
+ghc, SBCL Common Lisp, Perl, several versions of Sun's Java VM (for
+Windows XP, Linux, and Mac), Oracle's JRockit JVM for Windows, and
+Clojure 1.2.0 and 1.3.0 alpha1 (and earlier 1.0.0 or shortly before
+that release).  Some of the benchmarks use Clojure transients and thus
+require 1.0 or later, and some use deftype, requiring Clojure 1.2.0 or
+later (or whenever deftype was introduced).  See below for the steps I
+used to install SBCL and ghc.
 
 You should edit the file env.sh to point at the location of your
-Clojure JAR file, and perhaps give explicit path names to some of the
+Clojure JAR files, and perhaps give explicit path names to some of the
 other language implementations, if you wish.
+
+If you want to create Clojure JAR files in the locations already
+specified in the file env.sh, you can install Leiningen and then run
+the following script.  Doing so will create directories named 'lein'
+and '.m2' in your home directory, if they do not already exist, and
+fill them with a few dozen files each.
+
+Note: This step is optional, but if you do not do it, you must either
+edit env.sh to point at your Clojure JAR files, or put Clojure JAR
+files in the locations mentioned in that file.
+
+./lein-init.sh
 
 The k-nucleotide, regex-dna, and reverse-complement benchmark input
 files are quite large (250 Mbytes), and not included in the
@@ -85,30 +118,49 @@ You can also pick and choose which benchmark lengths to run, and which
 language implementations to run, by giving options like these on the
 command line:
 
-./batch.sh java clj quick medium
+./batch.sh java clj-1.2 clj-1.3-alpha1 quick medium
 
-That would run both the Clojure and Java versions of the benchmark,
-each with the quick and medium size input files.  The following
-command would run only the Clojure version with the long input file:
+That would run the Java, Clojure 1.2, and Clojure 1.3 alpha1 versions
+of the benchmark, each with the quick and medium size input files.
+Note that the order of the command line arguments is not important.
+The following command would run only the Clojure 1.2 version with the
+long input file:
 
-./batch.sh clj long
+./batch.sh clj-1.2 long
+
+You can also run the following command from the root directory of this
+package, and it will run a batch.sh command with the same command line
+arguments in each of the benchmark subdirectories, e.g.
+
+./run-all.sh long java clj-1.2
+
+will run the long benchmark for Java and Clojure 1.2 in all of the
+subdirectories mentioned in the 'for' line you can see for yourself in
+the run-all.sh script.
+
+Note that all of the shootout web site results are for what are called
+the 'long' benchmarks in this package.  The short and medium tests are
+primarily for quicker cycling through the edit-compile-run-debug loop,
+when you are developing a benchmark program yourself.
 
 If you find any improvements to the Clojure versions, I'd love to hear
 about them.
 
-The file RESULTS contains some summarized execution times from running
-these programs on my home iMac.  It also has copies of some of the
-running times reported on the shootout web site above, which were run
-on different machine (see RESULTS for some specs).
-
+The file RESULTS-1.1 and RESULTS-1.2 contains some summarized
+execution times from running these programs on my home iMac.  The file
+results.xls is an Excel spreadsheet containing run time results for
+several different JVMs and operating system, all on the same hardware
+as each other (but not the same hardware as the RESULTS-1.1 and
+RESULTS-1.2 files above, so don't go comparing results between these
+files to each other directly).
 
 Andy Fingerhut
 andy_fingerhut@alum.wustl.edu
 
 
 ----------------------------------------------------------------------
-On a Mac OS X machine (tested on 10.5.7 at least), download and install
-MacPorts from here:
+On a Mac OS X machine (tested on 10.5.8 and 10.6.4 at least), download
+and install MacPorts from here:
 
 http://www.macports.org
 
