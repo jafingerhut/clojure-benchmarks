@@ -7,7 +7,7 @@ mkdir -p $OUTPUT_DIR
 
 BENCHMARK="reverse-lines"
 
-ALL_LANGUAGES="java clj-1.2.0 clj-1.3.0-alpha1"
+ALL_LANGUAGES="java clj-1.2 clj-1.3-alpha1"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
