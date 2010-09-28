@@ -146,13 +146,14 @@ when you are developing a benchmark program yourself.
 If you find any improvements to the Clojure versions, I'd love to hear
 about them.
 
-The file RESULTS-1.1 and RESULTS-1.2 contains some summarized
-execution times from running these programs on my home iMac.  The file
-results.xls is an Excel spreadsheet containing run time results for
-several different JVMs and operating system, all on the same hardware
-as each other (but not the same hardware as the RESULTS-1.1 and
-RESULTS-1.2 files above, so don't go comparing results between these
-files to each other directly).
+The files RESULTS-clj-1.1 and RESULTS-clj-1.2 in the results directory
+contains some summarized execution times from running these programs
+on my home iMac.  The file results-java-clj-1.2-1.3a1.xls is an Excel
+spreadsheet containing run time results for several different JVMs and
+operating systems, all on the same hardware as each other (but not the
+same hardware as the RESULTS-clj-1.1 and RESULTS-clj-1.2 files above,
+so don't go comparing results between these files to each other
+directly).
 
 Andy Fingerhut
 andy_fingerhut@alum.wustl.edu
