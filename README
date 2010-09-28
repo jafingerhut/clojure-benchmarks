@@ -3,14 +3,18 @@ This file last edited: September 27, 2010
 Quick start instructions (see below for a few more details of what
 these do if you are curious):
 
-    # Run lein-init.sh, which creates directories 'lein' and '.m2' in
-    # your home directory, or edit env.sh to specify the location of
-    # your Clojure JAR files.  Takes about 3 mins on my system.
+    # Either: (1) Install Leiningen and run lein-init.sh, which
+    # creates directories 'lein' and '.m2' in your home directory
+    # (takes about 1.5 mins on my system after Leiningen is
+    # installed), or (2) edit env.sh to specify the location of your
+    # Clojure JAR files.
 
+    # Leiningen installation: http://github.com/technomancy/leiningen
     ./lein-init.sh
 
-    # Create largish input and expected output files by running some
-    # Java programs.  Takes about 4 mins on my system.
+    # Use init.sh to create largish input and expected output files
+    # (total about 850 Mbytes of storage), by running some Java
+    # programs.  Takes about 6 mins on my system.
 
     ./init.sh output
 
