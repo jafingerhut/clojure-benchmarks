@@ -10,9 +10,9 @@
   (clrhash ht)
 ;  (setf ht (make-hash-table :size (expt 2 k)))
   (if (= k 1)
-      (dotimes (i (the fixnum (- (length gene) k)))
+      (dotimes (i (the fixnum (1+ (- (length gene) k))))
         (incf (the fixnum (gethash (schar gene i) ht 0))))
-      (loop for i from 0 to (the fixnum (- (length gene) k))
+      (loop for i from 0 to (the fixnum (1+ (- (length gene) k)))
          with gene-num = 0 and mask = (1- (expt 4 k)) do
            (setf gene-num (logand mask (letter-to-num gene i gene-num)))
            (unless (< i (the fixnum (1- k)))
