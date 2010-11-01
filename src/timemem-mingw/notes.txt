@@ -1,0 +1,138 @@
+These are some miscellaneous working notes I took while testing the
+source code that ended up in timem-mingw.c and other similar programs
+that tested part of its functionality.
+
+It isn't expected that readers will hang on its every word and/or find
+it enlightening.  I just want to keep it around for future reference
+in case I run into additional problems that it might help me answer
+more quickly.
+
+Andy Fingerhut
+andy_fingerhut@alum.wustl.edu
+
+======================================================================
+
+Note:
+
+Some of the commands below were run in different command/shell windows.
+You can distinguish which was run where by the prompt I use:
+
+$ MingW shell window
+% Cygwin bash shell window
+> Window XP cmd window
+
+
+Note: When running timem on a process, it appears that the statistics
+for these values come out correctly:
+
+    Page Fault Count
+    Peak Working Set Size
+    Quota Peak Paged Pool Usage
+    Quota Peak Non Paged Pool Usage (maybe good?)
+    Peak Pagefile Usage
+
+It appears that these are probably not really relevant, since the process
+is complete by the time we ask for the statistics:
+
+    Working Set Size
+    Quota Paged Pool Usage
+    Quota Non Paged Pool Usage
+    Pagefile Usage
+
+
+% ./cproc.exe
+Usage: C:\cygwin\home\Admin\sw\proc-memory\cproc.exe [cmdline]
+% ./cproc
+Usage: C:\cygwin\home\Admin\sw\proc-memory\cproc.exe [cmdline]
+
+Interest small difference in behavior there, but nothing big.  For the
+last one, I copied the compiled cproc.exe executable to a different
+directory, the one shown in the output.
+
+
+
+>dir
+10/04/2010  01:07 AM     254,166,745 longfile.txt
+
+Where longfile.txt is a copy of the file produced as the
+long-expected-output.txt from the fasta benchmark program.
+
+
+>find "e" longfile.txt
+
+That command takes many seconds to complete, perhaps about 2-3 minutes.
+Let's try something a bit faster.
+
+>copy \cygwin\home\Admin\git\clojure-benchmarks\fasta\output\medium-expected-output.txt medfile.txt
+>find "e" medfile.txt
+
+That only takes about 5-10 seconds to finish on my machine.
+
+
+
+>cproc find "e" medfile.txt
+Usage: cproc [cmdline]
+
+>cproc 'find "e" medfile.txt'
+Usage: cproc [cmdline]
+
+>cproc "find "e" medfile.txt"
+FIND: Parameter format not correct
+
+>cproc "find \"e\" medfile.txt"
+
+---------- MEDFILE.TXT
+>ONE Homo sapiens alu
+>TWO IUB ambiguity codes
+>THREE Homo sapiens frequency
+
+$ ./cproc 'find "e" medfile.txt'
+[ Same output as previous cmd.  I won't repeat it here. ]
+
+% ./cproc 'find "e" medfile.txt'
+[ Same output as previous cmd.  I won't repeat it here. ]
+
+For some reason I don't know, the previous command works in a "plain"
+Cygwin shell window, but not when I ran startxwin and tried to run it
+from a shell in an xterm window.  I even started the xterm window, saw
+it fail, then went back to the Cygwin "plain" shell window and saw it
+work, then went back to the xterm again and tried it and it failed again,
+simply exiting with exit status 1 and no output at all.
+
+$ ./cproc 'find "e" longfile.txt'
+[correct cmd output deleted]
+Process ID: 3388
+    user time (seconds): 18.05
+    kernel time (seconds): 14.59
+    Page Fault Count: 62837
+    Peak Working Set Size (kbytes): 251404
+    Quota Peak Paged Pool Usage: 554764
+    Quota Peak Non Paged Pool Usage: 2240
+    Peak Pagefile Usage: 1396736
+
+    Note that statistics below are probably worthless, since the
+    process has already exited and they reflect the current resources
+    used by the process.
+
+    Working Set Size (kbytes): 500
+    Quota Paged Pool Usage: 47472
+    Quota Non Paged Pool Usage: 1880
+    Pagefile Usage: 856064
+    
+
+7:10 - 9:28  elapsed wall clock time = 138 seconds
+
+Windows Task Manager showed CPU % at between 7% to 15% during the
+entire run of the find.exe command, probably averaging 10% or 11%.
+(18.05+14.59) / 138 = 23.6%.  I believe that the CPU % in Windows Task
+Manager, on my Intel Core 2 Duo machine with 2 cores, shows 50% usage
+for a process that uses 1 core 100%, so I should really scale this to
+(18.05+14.59) / (2*138) = 11.8%.  That looks like what I would expect,
+given the output of Windows Task Manager CPU %.
+
+The 251404 kbytes of Peak Working Set Size matches the "Peak Mem Usage"
+column output I saw in Windows Task Manager, so that is good.  The file
+longfile.txt is almost exactly that size, to the nearest Mbyte, so it
+appears that find.exe is allocating memory for the entire input file
+while it runs.  That seems odd to me that it would do that, but it seems
+plausible that it might do that.

@@ -13,7 +13,7 @@
 //#include <glibtop/fsusage.h>
 //#include <glibtop/mountlist.h>
 
-int debug = 0;
+int debug = 1;
 
 void usage(char *prog_name)
 {
@@ -115,7 +115,7 @@ void do_polling(void *arg)
     while (!stop_polling) {
         glibtop_get_proc_mem(&buf, pid);
         if (debug) {
-            fprintf(stderr, "buf.resident=%llu", buf.resident);
+            fprintf(stderr, " buf.flags=%llu size=%llu vsize=%llu resident=%llu share=%llu rss=%llu rss_rlim=%llu\n", buf.flags, buf.size, buf.vsize, buf.resident, buf.share, buf.rss, buf.rss_rlim);
         }
         if (buf.resident > global_maxmem) {
             global_maxmem = buf.resident;
@@ -268,7 +268,7 @@ int main(int argc, char **argv, char **envp)
             fprintf(stderr, "ncpu=%d", glibtop_global_server->ncpu);
         }
         fprintf(stderr, "CPU utilization:");
-        for (i = 0; i < glibtop_global_server->ncpu; i++) {
+        for (i = 0; i <= glibtop_global_server->ncpu; i++) {
             guint64 total = (cpu_end_buf.xcpu_total[i] -
                              cpu_start_buf.xcpu_total[i]);
             int cpu_busy_percent = 0;

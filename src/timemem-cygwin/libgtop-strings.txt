@@ -1,0 +1,8622 @@
+!<arch>
+/               1286178439  0     0     0       3950      `
+_glibtop_init_s
+_glibtop_init_r
+_glibtop_global_server
+_glibtop_open_l
+_glibtop_close_r
+_glibtop_call_l
+_glibtop_read_l
+_glibtop_read_data_l
+_glibtop_write_l
+_glibtop_get_proc_affinity_l
+_glibtop_get_proc_wd_l
+_glibtop_get_netlist_l
+_glibtop_get_ppp_l
+_glibtop_get_netload_l
+_glibtop_get_fsusage_l
+_glibtop_get_mountlist_l
+_glibtop_get_proc_open_files_l
+_glibtop_get_proc_map_l
+_glibtop_get_proc_args_l
+_glibtop_get_proc_segment_l
+_glibtop_get_proc_kernel_l
+_glibtop_get_proc_signal_l
+_glibtop_get_proc_time_l
+_glibtop_get_proc_mem_l
+_glibtop_get_proc_uid_l
+_glibtop_get_proc_state_l
+_glibtop_get_proclist_l
+_glibtop_get_sem_limits_l
+_glibtop_get_msg_limits_l
+_glibtop_get_shm_limits_l
+_glibtop_get_loadavg_l
+_glibtop_get_uptime_l
+_glibtop_get_swap_l
+_glibtop_get_mem_l
+_glibtop_get_cpu_l
+_glibtop_set_parameter_l
+_glibtop_get_parameter_l
+_glibtop_get_sysdeps_r
+_glibtop_server_features
+__glibtop_init_hook_s
+__glibtop_init_hook_p
+_glibtop_get_proc_affinity
+_glibtop_get_proc_wd
+_glibtop_get_sysdeps
+_glibtop_get_shm_limits
+_glibtop_get_sem_limits
+_glibtop_get_msg_limits
+_glibtop_get_loadavg
+_glibtop_get_mem
+_glibtop_get_mountlist
+_glibtop_get_netload
+_glibtop_get_netlist
+_glibtop_get_ppp
+_glibtop_get_proc_kernel
+_glibtop_get_proclist
+_glibtop_get_proc_argv
+_glibtop_get_proc_args
+_glibtop_get_proc_map
+_glibtop_get_proc_mem
+_glibtop_get_proc_open_files
+_glibtop_get_proc_segment
+_glibtop_get_proc_signal
+_glibtop_get_proc_state
+_glibtop_get_proc_time
+_glibtop_get_proc_uid
+_glibtop_get_swap
+_glibtop_get_sysinfo
+_glibtop_get_uptime
+_glibtop_get_fsusage
+_glibtop_get_cpu
+_glibtop_init
+_glibtop_close
+_glibtop_warn_io_vr
+_glibtop_warn_io
+_glibtop_warn_io_r
+_glibtop_warn_vr
+_glibtop_warn
+_glibtop_warn_r
+_glibtop_error_io_vr
+_glibtop_error_io
+_glibtop_error_io_r
+_glibtop_error_vr
+_glibtop_error
+_glibtop_error_r
+_glibtop_get_fsusage_s
+_glibtop_internet_addr
+_glibtop_make_connection
+_glibtop_get_mountlist_s
+_glibtop_get_proc_argv_l
+_glibtop_close_s
+__glibtop_init_cpu_s
+_glibtop_get_cpu_s
+_skip_token
+_safe_readlink
+_check_cpu_line
+_get_page_size
+_get_boot_time
+_try_file_to_buffer
+_file_to_buffer
+_get_scaled
+__glibtop_init_loadavg_s
+_glibtop_get_loadavg_s
+__glibtop_init_mem_s
+_glibtop_get_mem_s
+__glibtop_init_msg_limits_s
+_glibtop_get_msg_limits_s
+__glibtop_init_netlist_s
+_glibtop_get_netlist_s
+__glibtop_init_netload_s
+_glibtop_get_netload_s
+_glibtop_open_s
+__glibtop_init_ppp_s
+_glibtop_get_ppp_s
+__glibtop_init_proc_affinity_s
+_glibtop_get_proc_affinity_s
+__glibtop_init_proc_args_s
+_glibtop_get_proc_args_s
+__glibtop_init_proc_kernel_s
+_glibtop_get_proc_kernel_s
+__glibtop_init_proclist_s
+_glibtop_get_proclist_s
+__glibtop_init_proc_map_s
+_glibtop_get_proc_map_s
+__glibtop_init_proc_mem_s
+_glibtop_get_proc_mem_s
+__glibtop_init_proc_open_files_s
+_glibtop_get_proc_open_files_s
+__glibtop_init_proc_segment_s
+_glibtop_get_proc_segment_s
+__glibtop_init_proc_signal_s
+_glibtop_get_proc_signal_s
+__glibtop_init_proc_state_s
+_glibtop_get_proc_state_s
+__glibtop_init_proc_time_s
+_glibtop_get_proc_time_s
+__glibtop_init_proc_uid_s
+_glibtop_get_proc_uid_s
+__glibtop_init_proc_wd_s
+_glibtop_get_proc_wd_s
+__glibtop_init_sem_limits_s
+_glibtop_get_sem_limits_s
+__glibtop_init_shm_limits_s
+_glibtop_get_shm_limits_s
+_glibtop_sys_siglist
+__glibtop_init_swap_s
+_glibtop_get_swap_s
+_glibtop_get_sysinfo_s
+__glibtop_init_uptime_s
+_glibtop_get_uptime_s
+//                                              20        `
+glibtop_private.o/
+init.o/         1286178361  1004  513   100664  7645      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+C4ty
+GNU C 4.3.4 20090804 (release) 1
+init.c
+/home/Admin/sw/libgtop-2.28.1/lib
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+glibtop_sysdeps
+_glibtop_sysdeps
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+_glibtop_init_func_t
+glibtop_init_s
+init_fkt
+_init_server
+command
+temp
+temp
+temp
+temp2
+temp2
+glibtop_init_r
+_glibtop_global_server
+glibtop_global_server
+ glibtop_server_features
+ _glibtop_init_hook_s
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+init.c
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+init_hooks.h
+N*J@Mmk
+KWij
+-/[u
+glibtop
+LIBGTOP_SERVER
+/usr/bin/libgtop_server2
+LIBGTOP_RSH
+/usr/bin/ssh
+direct
+inet
+localhost
+unix
+pipe
+Unknown server method '%s'
+glibtop_init_s
+glibtop_init_r
+glibtop_global_server
+features
+server
+flags
+server_ptr
+.file
+init.c
+.text
+.data
+.bss
+.rdata
+_getenv
+_sscanf
+_g_free
+_strchr
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_init_s
+_glibtop_init_r
+__glibtop_global_server
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_global_server
+__glibtop_init_hook_s
+_glibtop_server_features
+_g_strdup
+_glibtop_error_r
+_glibtop_open_l
+_glibtop_open_s
+open.o/         1286178362  1004  513   100664  5922      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+open.c
+/home/Admin/sw/libgtop-2.28.1/lib
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_open_l
+server
+program_name
+flags
+connect_type
+version
+buffer
+sysdeps
+size
+nbytes
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+open.c
+stddef.h
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+:>rZ
+unix
+cannot make a pipe
+fork failed
+libgtop-server
+/usr/bin/libgtop_server2
+execl (%s)
+2.28.1
+Libgtop %s server version %s (%u,%u,%u,%u).
+Requested %u bytes but got %u.
+server version is not %s
+glibtop_open_l
+features
+.file
+open.c
+.text
+.data
+.bss
+.rdata
+_pipe
+_fork
+_dup2
+_execl
+_close
+_sprintf
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_open_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_make_connection
+_glibtop_error_io_r
+_glibtop_read_l
+_glibtop_error_r
+_glibtop_call_l
+_glibtop_init_s
+close.o/        1286178363  1004  513   100664  3812      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+close.c
+/home/Admin/sw/libgtop-2.28.1/lib
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_close_r
+server
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+close.c
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+close
+glibtop_close_r
+features
+.file
+close.c
+.text
+.data
+.bss
+.rdata
+_kill
+_close
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_close_r
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_call_l
+_glibtop_warn_io
+command.o/      1286178363  1004  513   100664  11535     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+command.c
+/home/Admin/sw/libgtop-2.28.1/lib
+size_t
+unsigned int
+short unsigned int
+signed char
+guint8
+unsigned char
+short int
+gint32
+guint32
+gint64
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+pid_t
+long double
+glibtop
+	_glibtop
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+swap
+fsusage
+netlist
+netload
+proc_wd
+glibtop_cpu
+	_glibtop_cpu
+user
+nice
+idle
+iowait
+softirq
+xcpu_total
+xcpu_user
+xcpu_nice
+xcpu_sys
+xcpu_idle
+xcpu_iowait
+xcpu_irq
+xcpu_softirq
+xcpu_flags
+glibtop_mem
+_glibtop_mem
+used
+free
+shared
+buffer
+cached
+user
+locked
+glibtop_swap
+_glibtop_swap
+used
+free
+pagein
+pageout
+glibtop_uptime
+_glibtop_uptime
+idletime
+boot_time
+glibtop_loadavg
+_glibtop_loadavg
+nr_running
+nr_tasks
+last_pid
+glibtop_shm_limits
+_glibtop_shm_limits
+shmmax
+shmmin
+shmmni
+shmseg
+shmall
+glibtop_msg_limits
+_glibtop_msg_limits
+msgpool
+msgmap
+msgmax
+msgmnb
+msgmni
+msgssz
+msgtql
+glibtop_sem_limits
+_glibtop_sem_limits
+semmap
+semmni
+semmns
+semmnu
+semmsl
+semopm
+semume
+semusz
+semvmx
+semaem
+glibtop_proclist
+_glibtop_proclist
+glibtop_proc_state
+_glibtop_proc_state
+state
+ruid
+rgid
+has_cpu
+processor
+last_processor
+glibtop_proc_uid
+	_glibtop_proc_uid
+euid
+egid
+suid
+sgid
+fsuid
+fsgid
+ppid
+pgrp
+session
+tpgid
+priority
+nice
+ngroups
+groups
+glibtop_proc_mem
+_glibtop_proc_mem
+vsize
+resident
+share
+rss_rlim
+glibtop_proc_time
+	_glibtop_proc_time
+start_time
+rtime
+utime
+stime
+cutime
+cstime
+timeout
+it_real_value
+xcpu_utime
+xcpu_stime
+glibtop_proc_signal
+_glibtop_proc_signal
+signal
+blocked
+sigignore
+sigcatch
+glibtop_proc_kernel
+_glibtop_proc_kernel
+k_flags
+min_flt
+maj_flt
+cmin_flt
+cmaj_flt
+kstk_esp
+kstk_eip
+nwchan
+wchan
+glibtop_proc_segment
+_glibtop_proc_segment
+text_rss
+shlib_rss
+data_rss
+stack_rss
+dirty_size
+start_code
+end_code
+start_stack
+glibtop_proc_args
+_glibtop_proc_args
+glibtop_proc_map
+_glibtop_proc_map
+glibtop_proc_open_files
+_glibtop_proc_open_files
+glibtop_proc_wd
+	_glibtop_proc_wd
+root
+glibtop_proc_affinity
+_glibtop_proc_affinity
+glibtop_mountlist
+_glibtop_mountlist
+glibtop_fsusage
+_glibtop_fsusage
+blocks
+bfree
+bavail
+files
+ffree
+block_size
+read
+write
+glibtop_netload
+_glibtop_netload
+if_flags
+subnet
+address
+packets_in
+packets_out
+packets_total
+bytes_total
+errors_in
+errors_out
+errors_total
+collisions
+address6
+prefix6
+scope6
+hwaddress
+glibtop_netlist
+_glibtop_netlist
+glibtop_ppp
+_glibtop_ppp
+state
+glibtop_union
+_glibtop_union
+swap
+fsusage
+netlist
+netload
+proc_wd
+glibtop_command
+_glibtop_command
+command
+parameter
+glibtop_response
+	_glibtop_response
+offset
+glibtop_response_union
+_glibtop_response_union
+data
+sysdeps
+glibtop_call_l
+server
+command
+send_size
+send_buf
+recv_size
+recv_buf
+cmnd
+response
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../include/glibtop
+command.c
+stddef.h
+glibconfig.h
+gtypes.h
+types.h
+../glibtop.h
+sysdeps.h
+cpu.h
+mem.h
+swap.h
+uptime.h
+loadavg.h
+shm_limits.h
+msg_limits.h
+sem_limits.h
+proclist.h
+procstate.h
+procuid.h
+procmem.h
+proctime.h
+procsignal.h
+prockernel.h
+procsegment.h
+procargs.h
+procmap.h
+procopenfiles.h
+procwd.h
+procaffinity.h
+mountlist.h
+fsusage.h
+netload.h
+netlist.h
+ppp.h
+union.h
+command.h
+!-/W=;f=K
+glibtop_call_l
+proc_segment
+proc_state
+msg_limits
+data_size
+proc_args
+mountlist
+proc_signal
+size
+bytes_out
+proc_affinity
+proc_open_files
+loadavg
+proc_uid
+proclist
+bytes_in
+uptime
+proc_kernel
+proc_map
+frequency
+number
+proc_mem
+features
+sem_limits
+flags
+total
+proc_time
+shm_limits
+.file
+command.c
+.text
+.data
+.bss
+_memcpy
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_call_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_init_r
+_glibtop_write_l
+_g_malloc
+_glibtop_read_l
+read.o/         1286178364  1004  513   100664  4340      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+read.c
+/home/Admin/sw/libgtop-2.28.1/lib
+signed char
+unsigned char
+short int
+short unsigned int
+unsigned int
+long long int
+long long unsigned int
+long int
+_ssize_t
+long unsigned int
+char
+size_t
+guint64
+double
+float
+pid_t
+ssize_t
+long double
+glibtop
+_glibtop
+	flags
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+glibtop_sysdeps
+_glibtop_sysdeps
+	flags
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+glibtop_read_l
+server
+size
+nread
+/usr/include/sys
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+../include/glibtop
+read.c
+_types.h
+stddef.h
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+read %d bytes
+read %d byte
+glibtop_read_l
+features
+.file
+read.c
+.text
+.data
+.bss
+.rdata
+_read
+___errno
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_read_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_libintl_ngettext
+_glibtop_init_r
+_glibtop_error_io_r
+read_data.o/    1286178365  1004  513   100664  4433      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+read_data.c
+/home/Admin/sw/libgtop-2.28.1/lib
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+	flags
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+glibtop_sysdeps
+_glibtop_sysdeps
+	flags
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+glibtop_read_data_l
+server
+size
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+read_data.c
+stddef.h
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+read data size
+libgtop-2.0
+read %lu bytes of data
+read %lu byte of data
+glibtop_read_data_l
+features
+.file
+read_data.c
+.text
+.data
+.bss
+.rdata
+_recv
+_read
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_read_data_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_libintl_ngettext
+_glibtop_init_r
+_g_dgettext
+_g_malloc
+_glibtop_error_io_r
+write.o/        1286178366  1004  513   100664  4183      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+write.c
+/home/Admin/sw/libgtop-2.28.1/lib
+signed char
+unsigned char
+short int
+short unsigned int
+unsigned int
+long long int
+long long unsigned int
+long int
+long unsigned int
+char
+size_t
+guint64
+double
+float
+pid_t
+long double
+glibtop
+_glibtop
+	flags
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+glibtop_sysdeps
+_glibtop_sysdeps
+	flags
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+glibtop_write_l
+server
+size
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+write.c
+stddef.h
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+wrote %d bytes
+wrote %d byte
+glibtop_write_l
+features
+.file
+write.c
+.text
+.data
+.bss
+.rdata
+_write
+___errno
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_write_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_libintl_ngettext
+_glibtop_init_r
+_glibtop_error_io_r
+lib.o/          1286178367  1004  513   100664  34267     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+BB@uS
+0[^]
+BB uV
+0[^]
+0[^]
+BA@uR
+0[^]
+BA uR
+0[^]
+0[^]
+0[^]
+0[^]
+ [^]
+ [^]
+B@@uL
+ [^]
+B@ uL
+ [^]
+ [^]
+ [^]
+ [^]
+ [^]
+GNU C 4.3.4 20090804 (release) 1
+lib.c
+/home/Admin/sw/libgtop-2.28.1/lib
+size_t
+unsigned int
+short unsigned int
+signed char
+guint8
+unsigned char
+short int
+guint16
+gint32
+guint32
+gint64
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+#<	T
+server_port
+sysdeps
+#H	]
+glibtop_sysdeps
+_glibtop_sysdeps
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_cpu
+_glibtop_cpu
+user
+nice
+idle
+iowait
+softirq
+#@	 
+xcpu_total
+xcpu_user
+xcpu_nice
+xcpu_sys
+xcpu_idle
+xcpu_iowait
+xcpu_irq
+xcpu_softirq
+xcpu_flags
+glibtop_mem
+_glibtop_mem
+used
+free
+shared
+buffer
+cached
+user
+locked
+glibtop_swap
+_glibtop_swap
+used
+free
+pagein
+pageout
+glibtop_uptime
+_glibtop_uptime
+uptime
+idletime
+boot_time
+glibtop_loadavg
+_glibtop_loadavg
+loadavg
+nr_running
+nr_tasks
+last_pid
+glibtop_shm_limits
+_glibtop_shm_limits
+shmmax
+shmmin
+shmmni
+shmseg
+shmall
+glibtop_msg_limits
+_glibtop_msg_limits
+msgpool
+msgmap
+msgmax
+msgmnb
+msgmni
+msgssz
+msgtql
+glibtop_sem_limits
+_glibtop_sem_limits
+semmap
+semmni
+semmns
+semmnu
+semmsl
+semopm
+semume
+semusz
+semvmx
+semaem
+glibtop_proclist
+_glibtop_proclist
+glibtop_proc_state
+_glibtop_proc_state
+state
+ruid
+rgid
+has_cpu
+processor
+last_processor
+glibtop_proc_uid
+_glibtop_proc_uid
+euid
+egid
+suid
+sgid
+fsuid
+fsgid
+ppid
+pgrp
+session
+tpgid
+priority
+nice
+ngroups
+groups
+glibtop_proc_mem
+_glibtop_proc_mem
+vsize
+resident
+share
+rss_rlim
+glibtop_proc_time
+_glibtop_proc_time
+start_time
+rtime
+utime
+stime
+cutime
+cstime
+timeout
+it_real_value
+#@	 
+xcpu_utime
+xcpu_stime
+glibtop_proc_signal
+_glibtop_proc_signal
+signal
+blocked
+sigignore
+sigcatch
+glibtop_proc_kernel
+_glibtop_proc_kernel
+k_flags
+min_flt
+maj_flt
+cmin_flt
+cmaj_flt
+kstk_esp
+kstk_eip
+nwchan
+wchan
+glibtop_proc_segment
+_glibtop_proc_segment
+text_rss
+shlib_rss
+data_rss
+stack_rss
+dirty_size
+start_code
+end_code
+start_stack
+glibtop_proc_args
+_glibtop_proc_args
+glibtop_map_entry
+_glibtop_map_entry
+start
+offset
+perm
+inode
+device
+#0	f
+shared_clean
+shared_dirty
+private_clean
+private_dirty
+filename
+glibtop_proc_map
+_glibtop_proc_map
+glibtop_open_files_entry
+_glibtop_open_files_entry
+type
+info
+glibtop_proc_open_files
+_glibtop_proc_open_files
+dest_host
+dest_port
+name
+name
+sock
+file
+localsock
+glibtop_proc_wd
+_glibtop_proc_wd
+root
+glibtop_proc_affinity
+_glibtop_proc_affinity
+glibtop_mountentry
+_glibtop_mountentry
+devname
+mountdir
+type
+glibtop_mountlist
+_glibtop_mountlist
+glibtop_fsusage
+_glibtop_fsusage
+blocks
+bfree
+bavail
+files
+ffree
+block_size
+read
+write
+glibtop_netload
+_glibtop_netload
+if_flags
+subnet
+address
+packets_in
+packets_out
+packets_total
+#8	C
+bytes_total
+errors_in
+errors_out
+errors_total
+collisions
+address6
+prefix6
+scope6
+hwaddress
+glibtop_netlist
+_glibtop_netlist
+glibtop_ppp
+_glibtop_ppp
+ !$J
+state
+_glibtop_missing_feature
+feature
+present
+old_required
+glibtop_get_proc_affinity_l
+glibtop_get_proc_wd_l
+glibtop_get_netlist_l
+glibtop_get_ppp_l
+device
+buf_device
+glibtop_get_netload_l
+interface
+glibtop_get_fsusage_l
+mount_dir
+glibtop_get_mountlist_l
+all_fs
+buf_all_fs
+glibtop_get_proc_open_files_l
+glibtop_get_proc_map_l
+glibtop_get_proc_args_l
+max_len
+buf_max_len
+glibtop_get_proc_segment_l
+glibtop_get_proc_kernel_l
+glibtop_get_proc_signal_l
+glibtop_get_proc_time_l
+glibtop_get_proc_mem_l
+glibtop_get_proc_uid_l
+glibtop_get_proc_state_l
+glibtop_get_proclist_l
+which
+buf_which
+buf_arg
+glibtop_get_sem_limits_l
+glibtop_get_msg_limits_l
+glibtop_get_shm_limits_l
+glibtop_get_loadavg_l
+glibtop_get_uptime_l
+glibtop_get_swap_l
+glibtop_get_mem_l
+glibtop_get_cpu_l
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../include/glibtop
+lib.c
+stddef.h
+glibconfig.h
+gtypes.h
+types.h
+../glibtop.h
+sysdeps.h
+cpu.h
+mem.h
+swap.h
+uptime.h
+loadavg.h
+shm_limits.h
+msg_limits.h
+sem_limits.h
+proclist.h
+procstate.h
+procuid.h
+procmem.h
+proctime.h
+procsignal.h
+prockernel.h
+procsegment.h
+procargs.h
+procmap.h
+procopenfiles.h
+procwd.h
+procaffinity.h
+mountlist.h
+fsusage.h
+netload.h
+netlist.h
+ppp.h
+W@*@
+	<=h
+glibtop_get_%s (): Client requested field mask %05lx, but only have %05lx.
+libgtop-2.0
+proc_affinity
+proc_wd
+netlist
+netload
+fsusage
+mountlist
+proc_open_files
+proc_map
+proc_args
+proc_segment
+proc_kernel
+proc_signal
+proc_time
+proc_mem
+proc_uid
+proc_state
+proclist
+sem_limits
+msg_limits
+shm_limits
+loadavg
+uptime
+swap
+glibtop_get_proc_affinity_l
+glibtop_get_proc_wd_l
+glibtop_get_netlist_l
+glibtop_get_ppp_l
+glibtop_get_netload_l
+glibtop_get_fsusage_l
+glibtop_get_mountlist_l
+glibtop_get_proc_open_files_l
+glibtop_get_proc_map_l
+glibtop_get_proc_args_l
+glibtop_get_proc_segment_l
+glibtop_get_proc_kernel_l
+glibtop_get_proc_signal_l
+glibtop_get_proc_time_l
+glibtop_get_proc_mem_l
+glibtop_get_proc_uid_l
+glibtop_get_proc_state_l
+glibtop_get_proclist_l
+glibtop_get_sem_limits_l
+glibtop_get_msg_limits_l
+glibtop_get_shm_limits_l
+glibtop_get_loadavg_l
+glibtop_get_uptime_l
+glibtop_get_swap_l
+glibtop_get_mem_l
+glibtop_get_cpu_l
+flags
+param_buf
+bytes_in
+number
+frequency
+send_size
+buf_pid
+retval
+bytes_out
+server
+features
+required
+size
+send_ptr
+total
+.file
+lib.c
+.text
+.data
+.bss
+.rdata
+_strlen
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_missing_feature
+_glibtop_get_proc_affinity_l
+_glibtop_get_proc_wd_l
+_glibtop_get_netlist_l
+_glibtop_get_ppp_l
+_glibtop_get_netload_l
+_glibtop_get_fsusage_l
+_glibtop_get_mountlist_l
+_glibtop_get_proc_open_files_l
+_glibtop_get_proc_map_l
+_glibtop_get_proc_args_l
+_glibtop_get_proc_segment_l
+_glibtop_get_proc_kernel_l
+_glibtop_get_proc_signal_l
+_glibtop_get_proc_time_l
+_glibtop_get_proc_mem_l
+_glibtop_get_proc_uid_l
+_glibtop_get_proc_state_l
+_glibtop_get_proclist_l
+_glibtop_get_sem_limits_l
+_glibtop_get_msg_limits_l
+_glibtop_get_shm_limits_l
+_glibtop_get_loadavg_l
+_glibtop_get_uptime_l
+_glibtop_get_swap_l
+_glibtop_get_mem_l
+_glibtop_get_cpu_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_warn_r
+_glibtop_error_r
+_g_dgettext
+_glibtop_get_cpu_s
+_glibtop_get_mem_s
+_glibtop_get_swap_s
+_glibtop_get_uptime_s
+_glibtop_get_loadavg_s
+_glibtop_get_shm_limits_s
+_glibtop_get_msg_limits_s
+_glibtop_get_sem_limits_s
+_glibtop_get_proclist_s
+_glibtop_get_proc_state_s
+_glibtop_get_proc_uid_s
+_glibtop_get_proc_mem_s
+_glibtop_get_proc_time_s
+_glibtop_get_proc_signal_s
+_glibtop_get_proc_kernel_s
+_glibtop_get_proc_segment_s
+_glibtop_get_proc_args_s
+_glibtop_get_proc_map_s
+_glibtop_get_proc_open_files_s
+_glibtop_get_mountlist_s
+_glibtop_get_fsusage_s
+_glibtop_get_netload_s
+_glibtop_get_ppp_s
+_glibtop_get_netlist_s
+_glibtop_get_proc_wd_s
+_glibtop_init_r
+_glibtop_call_l
+_glibtop_get_proc_affinity_s
+parameter.o/    1286178368  1004  513   100664  6768      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+parameter.c
+/home/Admin/sw/libgtop-2.28.1/lib
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+	_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_set_parameter_l
+server
+glibtop_get_parameter_l
+server
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+parameter.c
+stddef.h
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+glibtop_set_parameter (%u): Expected %lu bytes but got %lu.
+glibtop_set_parameter (%u): Cannot modify read-only value.
+glibtop_set_parameter_l
+glibtop_get_parameter_l
+data_ptr
+parameter
+features
+data_size
+.file
+parameter.c
+.text
+.data
+.bss
+.rdata
+_strlen
+_memcpy
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_set_parameter_l
+_glibtop_get_parameter_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_warn_r
+sysdeps.o/      1286178369  1004  513   100664  5370      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+`@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+sysdeps.c
+/home/Admin/sw/libgtop-2.28.1/lib
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+_glibtop_init_func_t
+glibtop_get_sysdeps_r
+server
+glibtop_server_features
+_glibtop_init_hook_s
+_glibtop_init_hook_p
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../include/glibtop
+sysdeps.c
+glibconfig.h
+types.h
+../glibtop.h
+sysdeps.h
+init_hooks.h
+;J=Y
+glibtop_get_sysdeps_r
+glibtop_server_features
+_glibtop_init_hook_s
+_glibtop_init_hook_p
+features
+.file
+sysdeps.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_get_sysdeps_r
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_server_features
+__glibtop_init_hook_s
+__glibtop_init_hook_p
+__glibtop_init_cpu_s
+__glibtop_init_mem_s
+__glibtop_init_swap_s
+__glibtop_init_uptime_s
+__glibtop_init_loadavg_s
+__glibtop_init_shm_limits_s
+__glibtop_init_msg_limits_s
+__glibtop_init_sem_limits_s
+__glibtop_init_proclist_s
+__glibtop_init_proc_state_s
+__glibtop_init_proc_uid_s
+__glibtop_init_proc_mem_s
+__glibtop_init_proc_time_s
+__glibtop_init_proc_signal_s
+__glibtop_init_proc_kernel_s
+__glibtop_init_proc_segment_s
+__glibtop_init_proc_args_s
+__glibtop_init_proc_map_s
+__glibtop_init_netload_s
+__glibtop_init_netlist_s
+__glibtop_init_proc_wd_s
+__glibtop_init_proc_affinity_s
+__glibtop_init_ppp_s
+default.o/      1286178371  1004  513   100664  21877     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+default.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+unsigned int
+short unsigned int
+signed char
+guint8
+unsigned char
+short int
+guint16
+gint32
+guint32
+gint64
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+guint
+float
+gpointer
+GPtrArray
+_GPtrArray
+pdata
+pid_t
+GHashTable
+_GHashTable
+long double
+glibtop
+_glibtop
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_cpu
+_glibtop_cpu
+user
+nice
+idle
+iowait
+softirq
+xcpu_total
+xcpu_user
+xcpu_nice
+xcpu_sys
+xcpu_idle
+xcpu_iowait
+xcpu_irq
+xcpu_softirq
+xcpu_flags
+glibtop_sysinfo
+_glibtop_sysinfo
+ncpu
+cpuinfo
+glibtop_entry
+_glibtop_entry
+labels
+values
+descriptions
+glibtop_mem
+_glibtop_mem
+used
+free
+shared
+buffer
+cached
+user
+locked
+glibtop_swap
+_glibtop_swap
+used
+free
+pagein
+pageout
+glibtop_uptime
+_glibtop_uptime
+uptime
+idletime
+boot_time
+glibtop_loadavg
+_glibtop_loadavg
+loadavg
+nr_running
+nr_tasks
+last_pid
+glibtop_shm_limits
+_glibtop_shm_limits
+shmmax
+shmmin
+shmmni
+shmseg
+shmall
+glibtop_msg_limits
+_glibtop_msg_limits
+msgpool
+msgmap
+msgmax
+msgmnb
+msgmni
+msgssz
+msgtql
+glibtop_sem_limits
+_glibtop_sem_limits
+semmap
+semmni
+semmns
+semmnu
+semmsl
+semopm
+semume
+semusz
+semvmx
+semaem
+glibtop_proclist
+_glibtop_proclist
+glibtop_proc_state
+_glibtop_proc_state
+state
+ruid
+rgid
+has_cpu
+processor
+last_processor
+glibtop_proc_uid
+_glibtop_proc_uid
+euid
+egid
+suid
+sgid
+fsuid
+fsgid
+ppid
+pgrp
+session
+tpgid
+priority
+nice
+ngroups
+groups
+glibtop_proc_mem
+_glibtop_proc_mem
+vsize
+resident
+share
+rss_rlim
+glibtop_proc_time
+_glibtop_proc_time
+start_time
+rtime
+utime
+stime
+cutime
+cstime
+timeout
+it_real_value
+xcpu_utime
+xcpu_stime
+glibtop_proc_signal
+_glibtop_proc_signal
+signal
+blocked
+sigignore
+sigcatch
+glibtop_proc_kernel
+_glibtop_proc_kernel
+k_flags
+min_flt
+maj_flt
+cmin_flt
+cmaj_flt
+kstk_esp
+kstk_eip
+nwchan
+wchan
+glibtop_proc_segment
+_glibtop_proc_segment
+text_rss
+shlib_rss
+data_rss
+stack_rss
+dirty_size
+start_code
+end_code
+start_stack
+glibtop_proc_args
+_glibtop_proc_args
+glibtop_map_entry
+_glibtop_map_entry
+start
+offset
+perm
+inode
+device
+shared_clean
+shared_dirty
+private_clean
+private_dirty
+filename
+glibtop_proc_map
+_glibtop_proc_map
+glibtop_open_files_entry
+_glibtop_open_files_entry
+type
+info
+glibtop_proc_open_files
+_glibtop_proc_open_files
+dest_host
+dest_port
+name
+name
+sock
+file
+localsock
+glibtop_proc_wd
+_glibtop_proc_wd
+root
+glibtop_proc_affinity
+_glibtop_proc_affinity
+glibtop_mountentry
+_glibtop_mountentry
+devname
+mountdir
+type
+glibtop_mountlist
+_glibtop_mountlist
+glibtop_fsusage
+_glibtop_fsusage
+H (J
+blocks
+bfree
+bavail
+files
+ffree
+block_size
+read
+write
+glibtop_netload
+_glibtop_netload
+if_flags
+subnet
+address
+packets_in
+packets_out
+packets_total
+bytes_total
+errors_in
+errors_out
+errors_total
+collisions
+address6
+prefix6
+scope6
+hwaddress
+glibtop_netlist
+_glibtop_netlist
+glibtop_ppp
+_glibtop_ppp
+state
+glibtop_get_proc_affinity
+glibtop_get_proc_wd
+glibtop_get_sysdeps
+glibtop_get_shm_limits
+glibtop_get_sem_limits
+glibtop_get_msg_limits
+glibtop_get_loadavg
+glibtop_get_mem
+glibtop_get_mountlist
+all_fs
+glibtop_get_netload
+interface
+glibtop_get_netlist
+glibtop_get_ppp
+device
+glibtop_get_proc_kernel
+glibtop_get_proclist
+which
+glibtop_get_proc_argv
+max_len
+glibtop_get_proc_args
+max_len
+glibtop_get_proc_map
+glibtop_get_proc_mem
+glibtop_get_proc_open_files
+glibtop_get_proc_segment
+glibtop_get_proc_signal
+glibtop_get_proc_state
+glibtop_get_proc_time
+glibtop_get_proc_uid
+glibtop_get_swap
+glibtop_get_sysinfo
+glibtop_get_uptime
+glibtop_get_fsusage
+mount_dir
+glibtop_get_cpu
+glibtop_init
+glibtop_close
+glibtop_global_server
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+default.c
+glibconfig.h
+gtypes.h
+garray.h
+types.h
+ghash.h
+glibtop.h
+sysdeps.h
+cpu.h
+sysinfo.h
+mem.h
+swap.h
+uptime.h
+loadavg.h
+shm_limits.h
+msg_limits.h
+sem_limits.h
+proclist.h
+procstate.h
+procuid.h
+procmem.h
+proctime.h
+procsignal.h
+prockernel.h
+procsegment.h
+procargs.h
+procmap.h
+procopenfiles.h
+procwd.h
+procaffinity.h
+mountlist.h
+fsusage.h
+netload.h
+netlist.h
+ppp.h
+glibtop_get_proc_affinity
+glibtop_get_proc_wd
+glibtop_get_sysdeps
+glibtop_get_shm_limits
+glibtop_get_sem_limits
+glibtop_get_msg_limits
+glibtop_get_loadavg
+glibtop_get_mem
+glibtop_get_mountlist
+glibtop_get_netload
+glibtop_get_netlist
+glibtop_get_ppp
+glibtop_get_proc_kernel
+glibtop_get_proclist
+glibtop_get_proc_argv
+glibtop_get_proc_args
+glibtop_get_proc_map
+glibtop_get_proc_mem
+glibtop_get_proc_open_files
+glibtop_get_proc_segment
+glibtop_get_proc_signal
+glibtop_get_proc_state
+glibtop_get_proc_time
+glibtop_get_proc_uid
+glibtop_get_swap
+glibtop_get_sysinfo
+glibtop_get_uptime
+glibtop_get_fsusage
+glibtop_get_cpu
+glibtop_init
+glibtop_close
+flags
+bytes_in
+number
+frequency
+features
+bytes_out
+size
+total
+.file
+default.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_get_proc_affinity
+_glibtop_get_proc_wd
+_glibtop_get_sysdeps
+_glibtop_get_shm_limits
+_glibtop_get_sem_limits
+_glibtop_get_msg_limits
+_glibtop_get_loadavg
+_glibtop_get_mem
+_glibtop_get_mountlist
+_glibtop_get_netload
+_glibtop_get_netlist
+_glibtop_get_ppp
+_glibtop_get_proc_kernel
+_glibtop_get_proclist
+_glibtop_get_proc_argv
+_glibtop_get_proc_args
+_glibtop_get_proc_map
+_glibtop_get_proc_mem
+_glibtop_get_proc_open_files
+_glibtop_get_proc_segment
+_glibtop_get_proc_signal
+_glibtop_get_proc_state
+_glibtop_get_proc_time
+_glibtop_get_proc_uid
+_glibtop_get_swap
+_glibtop_get_sysinfo
+_glibtop_get_uptime
+_glibtop_get_fsusage
+_glibtop_get_cpu
+_glibtop_init
+_glibtop_close
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_global_server
+_glibtop_close_r
+_glibtop_init_r
+_glibtop_get_cpu_l
+_glibtop_get_fsusage_l
+_glibtop_get_uptime_l
+_glibtop_get_sysinfo_s
+_glibtop_get_swap_l
+_glibtop_get_proc_uid_l
+_glibtop_get_proc_time_l
+_glibtop_get_proc_state_l
+_glibtop_get_proc_signal_l
+_glibtop_get_proc_segment_l
+_glibtop_get_proc_open_files_l
+_glibtop_get_proc_mem_l
+_glibtop_get_proc_map_l
+_glibtop_get_proc_args_l
+_glibtop_get_proc_argv_l
+_glibtop_get_proclist_l
+_glibtop_get_proc_kernel_l
+_glibtop_get_ppp_l
+_glibtop_get_netlist_l
+_glibtop_get_netload_l
+_glibtop_get_mountlist_l
+_glibtop_get_mem_l
+_glibtop_get_loadavg_l
+_glibtop_get_msg_limits_l
+_glibtop_get_sem_limits_l
+_glibtop_get_shm_limits_l
+_glibtop_get_sysdeps_r
+_glibtop_get_proc_wd_l
+_glibtop_get_proc_affinity_l
+error.o/        1286178371  1004  513   100664  8582      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+error.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+__gnuc_va_list
+__builtin_va_list
+va_list
+pid_t
+long double
+glibtop
+_glibtop
+	flags
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+glibtop_sysdeps
+_glibtop_sysdeps
+	flags
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+print_server_name
+glibtop_warn_io_vr
+error
+glibtop_warn_io
+glibtop_warn_io_r
+glibtop_warn_vr
+glibtop_warn
+glibtop_warn_r
+glibtop_error_io_vr
+error
+glibtop_error_io
+glibtop_error_io_r
+glibtop_error_vr
+glibtop_error
+glibtop_error_r
+glibtop_global_server
+/usr/lib/glib-2.0/include
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/include/sys
+../..
+../../include/glibtop
+error.c
+glibconfig.h
+stdarg.h
+types.h
+glibtop.h
+sysdeps.h
+7A7y7k7
+.xT@
+LibGTop-Server
+%s: 
+: %s
+glibtop_warn_io_vr
+glibtop_warn_io
+glibtop_warn_io_r
+glibtop_warn_vr
+glibtop_warn
+glibtop_warn_r
+glibtop_error_io_vr
+glibtop_error_io
+glibtop_error_io_r
+glibtop_error_vr
+glibtop_error
+glibtop_error_r
+features
+format
+server
+args
+.file
+error.c
+.text
+.data
+.bss
+.rdata
+_exit
+_fputc
+_fprintf
+___errno
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_print_server_name
+_glibtop_warn_io_vr
+_glibtop_warn_io
+_glibtop_warn_io_r
+_glibtop_warn_vr
+_glibtop_warn
+_glibtop_warn_r
+_glibtop_error_io_vr
+_glibtop_error_io
+_glibtop_error_io_r
+_glibtop_error_vr
+_glibtop_error
+_glibtop_error_r
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_global_server
+_vfprintf
+___getreent
+_g_strerror
+fsusage.o/      1286178371  1004  513   100664  4481      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+fsusage.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+fsblkcnt_t
+fsfilcnt_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_fsusage
+_glibtop_fsusage
+flags
+blocks
+bfree
+bavail
+files
+ffree
+block_size
+read
+write
+statvfs
+f_bsize
+f_frsize
+f_blocks
+f_bfree
+f_bavail
+f_files
+f_ffree
+f_favail
+f_fsid
+f_flag
+f_namemax
+_glibtop_get_fsusage_read_write
+server
+path
+glibtop_get_fsusage_s
+server
+path
+_glibtop_sysdeps_fsusage
+/usr/lib/glib-2.0/include
+/usr/include/sys
+/usr/include/cygwin
+../..
+../../include/glibtop
+fsusage.c
+glibconfig.h
+types.h
+types.h
+glibtop.h
+sysdeps.h
+fsusage.h
+statvfs.h
+	<g=-=/=:g
+glibtop_get_fsusage_s
+features
+.file
+fsusage.c
+.text
+.data
+.bss
+_statvfs
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_get_fsusage_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_init_r
+gnuslib.o/      1286178371  1004  513   100664  6451      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+gnuslib.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+u_short
+uint16_t
+uint32_t
+long double
+sa_family_t
+sockaddr
+sa_family
+sa_data
+in_port_t
+in_addr_t
+in_addr
+s_addr
+sockaddr_in
+sin_family
+sin_port
+sin_addr
+__pad
+hostent
+h_name
+h_aliases
+h_addrtype
+h_length
+h_addr_list
+servent
+s_name
+s_aliases
+s_port
+s_proto
+sockaddr_un
+sun_family
+sun_path
+__ntohs
+glibtop_internet_addr
+host
+numeric_addr
+connect_to_internet_server
+serverhost
+port
+peeraddr_in
+connect_to_unix_server
+server
+glibtop_make_connection
+hostarg
+portarg
+/usr/include/asm
+/usr/include/sys
+/usr/include
+/usr/include/cygwin
+gnuslib.c
+byteorder.h
+types.h
+stdint.h
+socket.h
+in.h
+netdb.h
+socket.h
+un.h
+gethostbyname (%s)
+unable to find %s in /etc/hosts or from YP
+gtopd
+unable to create socket
+unable to connect to remote
+GNU-SECURE
+/tmp/lgtddir%d/lgtd
+unable to connect to local
+LIBGTOP_HOST
+LIBGTOP_PORT
+unix
+glibtop_internet_addr
+glibtop_make_connection
+.file
+gnuslib.c
+.text
+.data
+.bss
+.rdata
+_getenv
+_atoi
+_geteuid
+_getuid
+_socket
+_connect
+_sprintf
+_write
+_strlen
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+_glibtop_internet_addr
+_connect_to_internet_server
+_connect_to_unix_server
+_glibtop_make_connection
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+_inet_addr
+_gethostbyname
+_glibtop_warn_io
+_glibtop_error
+_getservbyname
+_glibtop_error_io
+mountlist.o/    1286178371  1004  513   100664  10797     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+`@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+mountlist.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+gsize
+char
+double
+long int
+gchar
+gint
+gboolean
+long unsigned int
+guint
+float
+gpointer
+GArray
+_GArray
+data
+_LOCK_T
+_off64_t
+_fpos_t
+_fpos64_t
+_ssize_t
+wint_t
+__wch
+__wchb
+__count
+__value
+_mbstate_t
+_flock_t
+pid_t
+__dev32_t
+dev_t
+__ULong
+_Bigint
+_next
+_maxwds
+_sign
+_wds
+__tm
+__tm_sec
+__tm_min
+__tm_hour
+__tm_mday
+__tm_mon
+__tm_year
+__tm_wday
+__tm_yday
+__tm_isdst
+_fnargs
+_dso_handle
+_fntypes
+_is_cxa
+_atexit
+_next
+_ind
+_fns
+__sbuf
+_base
+_size
+_reent
+_errno
+_stdin
+_stdout
+_stderr
+_inc
+_emergency
+_current_category
+_current_locale
+__sdidinit
+__cleanup
+_result
+_result_k
+_p5s
+_freelist
+_cvtlen
+_cvtbuf
+_new
+_atexit
+_atexit0
+_sig_func
+__sglue
+__sf
+__sFILE64
+_flags
+_file
+_lbfsize
+_data
+_cookie
+_read
+_write
+_seek
+_close
+_ubuf
+_nbuf
+_blksize
+_flags2
+_offset
+_seek64
+_lock
+_mbstate
+__FILE
+_glue
+_next
+_niobs
+_iobs
+_rand48
+_seed
+_mult
+_add
+_unused_rand
+_strtok_last
+_asctime_buf
+_localtime_buf
+_gamma_signgam
+_rand_next
+_r48
+_mblen_state
+_mbtowc_state
+_wctomb_state
+_l64a_buf
+_signal_buf
+_getdate_err
+_mbrlen_state
+_mbrtowc_state
+_mbsrtowcs_state
+_wcrtomb_state
+_wcsrtombs_state
+_h_errno
+_nextf
+_nmalloc
+_reent
+_unused
+long double
+FILE
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_mountentry
+_glibtop_mountentry
+devname
+mountdir
+type
+glibtop_mountlist
+_glibtop_mountlist
+flags
+number
+total
+size
+me_devname
+me_mountdir
+me_type
+me_dev
+me_next
+mntent
+mnt_fsname
+mnt_dir
+mnt_type
+mnt_opts
+mnt_freq
+mnt_passno
+ignore_mount_entry
+ignored
+!read_filesystem_list
+"mount_list
+"mtail
+"__n
+"__s
+"__p
+$%mnt
+%devopt
+$%__n
+%__s
+%__p
+&mntent
+glibtop_get_mountlist_s
+(server
+)buf
+)all_fs
+*entries
+*cur
+*next
+mount_array
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/include/cygwin
+/usr/include
+../..
+../../include/glibtop
+mountlist.c
+glibconfig.h
+gtypes.h
+garray.h
+lock.h
+_types.h
+stddef.h
+types.h
+types.h
+reent.h
+signal.h
+stdio.h
+glibtop.h
+sysdeps.h
+mountlist.h
+mntent.h
+;=ibu;v;[q=
+/etc/mtab
+dev=
+autofs
+binfmt_misc
+ctfs
+devfs
+devpts
+fusectl
+linprocfs
+mntfs
+mqueue
+none
+nsfd
+objfs
+openpromfs
+proc
+procfs
+rpc_pipefs
+securityfs
+supermount
+sysfs
+tmpfs
+unknown
+usbdevfs
+usbfs
+glibtop_get_mountlist_s
+_on_exit_args
+mount_entry
+features
+.file
+mountlist.c
+.text
+.data
+.bss
+.rdata
+_strstr
+_bsearch
+_g_free
+_strcmp
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_get_mountlist_s
+_ignored.9380
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_setmntent
+_getmntent
+_g_malloc
+_g_strdup
+_strtoull
+_endmntent
+_g_array_new
+_glibtop_init_r
+_g_strlcpy
+_g_array_append_vals
+_g_array_free
+procargs.o/     1286178371  1004  513   100664  4868      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+procargs.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/common
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+guint
+float
+gpointer
+GPtrArray
+_GPtrArray
+pdata
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_args
+_glibtop_proc_args
+flags
+size
+split_args0
+args0
+size
+argv
+glibtop_get_proc_argv_l
+server
+max_len
+args0
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+procargs.c
+stddef.h
+glibconfig.h
+gtypes.h
+garray.h
+types.h
+glibtop.h
+sysdeps.h
+procargs.h
+f<\~2Y
+glibtop_get_proc_argv_l
+features
+.file
+procargs.c
+.text
+.data
+.bss
+_strlen
+_g_free
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_get_proc_argv_l
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_g_ptr_array_new
+_g_strdup
+_g_ptr_array_add
+_g_ptr_array_free
+_glibtop_get_proc_args_l
+lt1-close.o/    1286178371  1004  513   100664  3283      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+close.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_close_s
+server
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+close.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+glibtop_close_s
+features
+.file
+close.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_glibtop_close_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+cpu.o/          1286178371  1004  513   100664  6503      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+cpu.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_cpu
+_glibtop_cpu
+flags
+total
+user
+nice
+idle
+iowait
+softirq
+frequency
+xcpu_total
+xcpu_user
+xcpu_nice
+xcpu_sys
+xcpu_idle
+xcpu_iowait
+xcpu_irq
+xcpu_softirq
+xcpu_flags
+skip_line
+check_cpu_line_warn
+line
+_g_boolean_var_
+_glibtop_init_cpu_s
+glibtop_get_cpu_s
+buffer
+_glibtop_sysdeps_cpu
+ _glibtop_sysdeps_cpu_smp
+!__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+cpu.c
+glibtop_private.h
+glibconfig.h
+gtypes.h
+types.h
+glibtop.h
+sysdeps.h
+cpu.h
+ctype.h
+|$*2T
+w<hr
+w<Zul
+/proc/stat
+'%s' does not start with 'cpu%u'
+_glibtop_init_cpu_s
+glibtop_get_cpu_s
+features
+server
+.file
+cpu.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_cpu_s
+_glibtop_get_cpu_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_check_cpu_line
+_glibtop_warn_io_r
+_file_to_buffer
+_skip_token
+_strtoull
+/0              1286178371  1004  513   100664  14167     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+[^_]
+[^_]
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+glibtop_private.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+__gnuc_va_list
+__builtin_va_list
+va_list
+_LOCK_T
+_off64_t
+_fpos_t
+_fpos64_t
+_ssize_t
+	wint_t
+__wch
+__wchb
+__count
+__value
+_mbstate_t
+_flock_t
+pid_t
+ssize_t
+__ULong
+_Bigint
+_next
+_maxwds
+_sign
+_wds
+__tm
+__tm_sec
+__tm_min
+__tm_hour
+__tm_mday
+__tm_mon
+__tm_year
+__tm_wday
+__tm_yday
+__tm_isdst
+_fnargs
+_dso_handle
+_fntypes
+_is_cxa
+_atexit
+_next
+_ind
+_fns
+__sbuf
+_base
+_size
+_reent
+_errno
+_stdin
+_stdout
+_stderr
+_inc
+_emergency
+_current_category
+_current_locale
+__sdidinit
+__cleanup
+_result
+_result_k
+_p5s
+_freelist
+_cvtlen
+_cvtbuf
+_new
+_atexit
+_atexit0
+_sig_func
+__sglue
+__sf
+__sFILE64
+_flags
+_file
+_lbfsize
+_data
+_cookie
+_read
+_write
+_seek
+_close
+_ubuf
+_nbuf
+_blksize
+_flags2
+_offset
+_seek64
+_lock
+_mbstate
+	__FILE
+_glue
+_next
+_niobs
+_iobs
+_rand48
+_seed
+_mult
+_add
+_unused_rand
+_strtok_last
+_asctime_buf
+_localtime_buf
+_gamma_signgam
+_rand_next
+_r48
+_mblen_state
+_mbtowc_state
+_wctomb_state
+_l64a_buf
+_signal_buf
+_getdate_err
+_mbrlen_state
+_mbrtowc_state
+_mbsrtowcs_state
+_wcrtomb_state
+_wcsrtombs_state
+_h_errno
+_nextf
+_nmalloc
+_reent
+_unused
+G_LOG_FLAG_RECURSION
+G_LOG_FLAG_FATAL
+G_LOG_LEVEL_ERROR
+G_LOG_LEVEL_CRITICAL
+G_LOG_LEVEL_WARNING
+G_LOG_LEVEL_MESSAGE
+G_LOG_LEVEL_INFO
+G_LOG_LEVEL_DEBUG
+G_LOG_LEVEL_MASK
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+FILE
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+TRY_FILE_TO_BUFFER
+TRY_FILE_TO_BUFFER_OK
+TRY_FILE_TO_BUFFER_OPEN
+TRY_FILE_TO_BUFFER_READ
+ next_token
+skip_token
+safe_readlink
+#path
+#buf
+(ret
+check_cpu_line
+*line
++start
+get_page_size
++pagesize
+ read_boot_time
+/line
+/size
+/stat
+/btime
+0out
+get_boot_time
++boot_time
+try_file_to_buffer
+#format
+6+path
+_(fd
+(len
+(nread
+file_to_buffer
+#filename
+get_scaled
+#key
+(ptr
+(next
+(value
+:__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+/usr/include
+../..
+../../include/glibtop
+glibtop_private.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+gtypes.h
+stdarg.h
+lock.h
+_types.h
+types.h
+reent.h
+signal.h
+glibtop.h
+stdio.h
+sysdeps.h
+gmessages.h
+ctype.h
+i.ic
+Could not read link %s : %s
+cpu%u
+/proc/stat
+fopen("/proc/stat")
+btime
+Huhu, bufsiz of %lu looks bad
+open (%s)
+read (%s)
+Could not read key '%s' in buffer '%s'
+skip_token
+safe_readlink
+check_cpu_line
+get_page_size
+get_boot_time
+try_file_to_buffer
+file_to_buffer
+get_scaled
+buffer
+bufsiz
+server
+_g_boolean_var_
+_on_exit_args
+features
+.file
+glibtop_private.c
+.text
+.data
+.bss
+.rdata
+__alloca
+_strstr
+_strlen
+_open
+_read
+_close
+_fopen
+_getline
+_strtoul
+_free
+_fclose
+_g_log
+___errno
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_skip_token
+_safe_readlink
+_check_cpu_line
+_get_page_size
+_pagesize.9608
+_get_boot_time
+_boot_time.9598
+_try_file_to_buffer
+_file_to_buffer
+_get_scaled
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__imp____ctype_ptr__
+_strtoull
+_g_vsnprintf
+_glibtop_error_io_r
+_getpagesize
+_g_snprintf
+_g_str_has_prefix
+_readlink
+_strerror
+loadavg.o/      1286178371  1004  513   100664  5273      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+t8</t4
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+loadavg.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_loadavg
+_glibtop_loadavg
+flags
+loadavg
+nr_running
+nr_tasks
+last_pid
+next_token
+_glibtop_init_loadavg_s
+server
+glibtop_get_loadavg_s
+server
+buffer
+_glibtop_sysdeps_loadavg
+_glibtop_sysdeps_loadavg_tasks
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+loadavg.c
+glibtop_private.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+loadavg.h
+ctype.h
+#+1U
+>h80
+/proc/loadavg
+_glibtop_init_loadavg_s
+glibtop_get_loadavg_s
+features
+.file
+loadavg.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_loadavg_s
+_glibtop_get_loadavg_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__imp____ctype_ptr__
+_file_to_buffer
+_g_ascii_strtod
+_strtoull
+mem.o/          1286178371  1004  513   100664  4374      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+mem.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_mem
+_glibtop_mem
+flags
+total
+used
+free
+shared
+buffer
+cached
+user
+locked
+_glibtop_init_mem_s
+server
+glibtop_get_mem_s
+server
+buffer
+_glibtop_sysdeps_mem
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+mem.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+mem.h
+ctype.h
+UkdL
+Igih
+/proc/meminfo
+MemTotal:
+MemFree:
+_glibtop_init_mem_s
+glibtop_get_mem_s
+features
+.file
+mem.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_mem_s
+_glibtop_get_mem_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_file_to_buffer
+_get_scaled
+msg_limits.o/   1286178371  1004  513   100664  4320      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+msg_limits.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_msg_limits
+_glibtop_msg_limits
+flags
+msgpool
+msgmap
+msgmax
+msgmnb
+msgmni
+msgssz
+msgtql
+msginfo
+msgmax
+msgmnb
+msgmni
+msgtql
+msgssz
+msgseg
+msg_spare
+_glibtop_init_msg_limits_s
+server
+glibtop_get_msg_limits_s
+server
+msginfo
+_glibtop_sysdeps_msg_limits
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include/cygwin
+msg_limits.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+msg_limits.h
+msg.h
+gl#+
+Y;gY;gY;gY;g
+_glibtop_init_msg_limits_s
+glibtop_get_msg_limits_s
+features
+.file
+msg_limits.c
+.text
+.data
+.bss
+_msgctl
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_msg_limits_s
+_glibtop_get_msg_limits_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+netlist.o/      1286178371  1004  513   100664  3850      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+netlist.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_netlist
+_glibtop_netlist
+flags
+number
+_glibtop_init_netlist_s
+server
+glibtop_get_netlist_s
+server
+_glibtop_sysdeps_netlist
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+netlist.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+netlist.h
+gj<=
+_glibtop_init_netlist_s
+glibtop_get_netlist_s
+features
+.file
+netlist.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_netlist_s
+_glibtop_get_netlist_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+netload.o/      1286178371  1004  513   100664  4264      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+netload.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+guint8
+unsigned char
+short int
+guint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_netload
+_glibtop_netload
+flags
+if_flags
+subnet
+address
+packets_in
+packets_out
+packets_total
+bytes_in
+bytes_out
+bytes_total
+errors_in
+errors_out
+errors_total
+collisions
+address6
+prefix6
+scope6
+hwaddress
+_glibtop_init_netload_s
+server
+glibtop_get_netload_s
+server
+interface
+_glibtop_sysdeps_netload
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+netload.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+netload.h
+gm!W/- =/
+_glibtop_init_netload_s
+glibtop_get_netload_s
+features
+.file
+netload.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_netload_s
+_glibtop_get_netload_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+lt2-open.o/     1286178371  1004  513   100664  4762      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+GNU C 4.3.4 20090804 (release) 1
+open.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+skip_line
+glibtop_open_s
+server
+program_name
+flags
+buffer
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+open.c
+glibtop_private.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+ctype.h
+?>d>
+yXCh
+w.C>/
+/proc/stat
+This machine has %d CPUs, %d are being monitored.
+glibtop_open_s
+features
+.file
+open.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_glibtop_open_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_file_to_buffer
+_check_cpu_line
+_glibtop_warn_r
+ppp.o/          1286178371  1004  513   100664  3844      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+ppp.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_ppp
+_glibtop_ppp
+flags
+state
+bytes_in
+bytes_out
+_glibtop_init_ppp_s
+server
+glibtop_get_ppp_s
+server
+device
+_glibtop_sysdeps_ppp
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+ppp.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+ppp.h
+gl!-/
+_glibtop_init_ppp_s
+glibtop_get_ppp_s
+features
+.file
+ppp.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_ppp_s
+_glibtop_get_ppp_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+procaffinity.o/ 1286178371  1004  513   100664  4026      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+procaffinity.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint16
+guint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_affinity
+_glibtop_proc_affinity
+flags
+number
+_glibtop_init_proc_affinity_s
+server
+glibtop_get_proc_affinity_s
+server
+_glibtop_sysdeps_proc_affinity
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+procaffinity.c
+glibconfig.h
+gtypes.h
+types.h
+glibtop.h
+sysdeps.h
+procaffinity.h
+gj<=
+_glibtop_init_proc_affinity_s
+glibtop_get_proc_affinity_s
+features
+.file
+procaffinity.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_proc_affinity_s
+_glibtop_get_proc_affinity_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+lt3-procargs.o/ 1286178371  1004  513   100664  4972      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+procargs.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint32
+long long int
+guint64
+long long unsigned int
+gsize
+char
+double
+long int
+gchar
+gint
+long unsigned int
+float
+GQuark
+GError
+_GError
+domain
+code
+message
+pid_t
+long double
+glibtop
+	_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_args
+_glibtop_proc_args
+flags
+size
+_glibtop_init_proc_args_s
+server
+glibtop_get_proc_args_s
+server
+max_len
+filename
+args
+length
+error
+_glibtop_sysdeps_proc_args
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+procargs.c
+glibconfig.h
+gtypes.h
+gquark.h
+gerror.h
+types.h
+glibtop.h
+sysdeps.h
+procargs.h
+w<<Av
+/proc/%d/cmdline
+_glibtop_init_proc_args_s
+glibtop_get_proc_args_s
+features
+.file
+procargs.c
+.text
+.data
+.bss
+.rdata
+_sprintf
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_proc_args_s
+_glibtop_get_proc_args_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_g_file_get_contents
+_g_error_free
+_g_realloc
+prockernel.o/   1286178371  1004  513   100664  4064      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+prockernel.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_kernel
+_glibtop_proc_kernel
+flags
+k_flags
+min_flt
+maj_flt
+cmin_flt
+cmaj_flt
+kstk_esp
+kstk_eip
+nwchan
+wchan
+_glibtop_init_proc_kernel_s
+server
+glibtop_get_proc_kernel_s
+server
+_glibtop_sysdeps_proc_kernel
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+prockernel.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+prockernel.h
+gm!W/- =/
+_glibtop_init_proc_kernel_s
+glibtop_get_proc_kernel_s
+features
+.file
+prockernel.c
+.text
+.data
+.bss
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_proc_kernel_s
+_glibtop_get_proc_kernel_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+proclist.o/     1286178371  1004  513   100664  8602      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+GNU C 4.3.4 20090804 (release) 1
+proclist.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+gint32
+gint64
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gchar
+long unsigned int
+guint
+float
+GArray
+_GArray
+data
+__uint32_t
+_off64_t
+time_t
+timespec
+tv_sec
+tv_nsec
+pid_t
+nlink_t
+timestruc_t
+off_t
+__dev32_t
+dev_t
+blksize_t
+__blkcnt64_t
+blkcnt_t
+__uid32_t
+uid_t
+__gid32_t
+gid_t
+__ino64_t
+ino_t
+mode_t
+long double
+glibtop
+_glibtop
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+stat
+st_dev
+st_ino
+st_mode
+st_nlink
+st_uid
+st_gid
+st_rdev
+st_size
+st_atim
+st_mtim
+st_ctim
+st_blksize
+st_blocks
+st_birthtim
+glibtop_sysdeps
+_glibtop_sysdeps
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proclist
+_glibtop_proclist
+number
+total
+size
+glibtop_proc_uid
+_glibtop_proc_uid
+euid
+egid
+suid
+sgid
+fsuid
+fsgid
+ppid
+pgrp
+session
+tpgid
+priority
+nice
+ngroups
+groups
+glibtop_proc_state
+_glibtop_proc_state
+state
+ruid
+rgid
+has_cpu
+processor
+last_processor
+dirent
+__d_version
+d_ino
+d_type
+__d_unused1
+__d_internal1
+d_name
+__DIR
+__d_cookie
+__d_dirent
+__d_dirname
+__d_position
+__d_fd
+__d_internal
+__handle
+__fh
+__flags
+DT_UNKNOWN
+DT_FIFO
+DT_CHR
+DT_DIR
+DT_BLK
+DT_REG
+DT_LNK
+DT_SOCK
+DT_WHT
+_glibtop_init_proclist_s
+server
+glibtop_get_proclist_s
+server
+which
+proc
+entry
+pids
+procuid
+procstate
+statb
+path
+path_stat
+_glibtop_sysdeps_proclist
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/machine
+/usr/include/sys
+/usr/include/cygwin
+../..
+../../include/glibtop
+proclist.c
+glibconfig.h
+gtypes.h
+garray.h
+_default_types.h
+_types.h
+types.h
+types.h
+glibtop.h
+stat.h
+sysdeps.h
+proclist.h
+procuid.h
+procstate.h
+dirent.h
+u=:ugc
+/proc
+/proc/%u
+_glibtop_init_proclist_s
+glibtop_get_proclist_s
+features
+flags
+.file
+proclist.c
+.text
+.data
+.bss
+.rdata
+_opendir
+_fstat
+_dirfd
+_readdir
+_strtoul
+_stat
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proclist_s
+_glibtop_get_proclist_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_g_array_sized_new
+_snprintf
+_glibtop_get_proc_state_s
+_glibtop_get_proc_uid_s
+_g_array_append_vals
+_closedir
+_g_array_free
+procmap.o/      1286178371  1004  513   100664  10163     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+procmap.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gchar
+long unsigned int
+guint
+float
+GArray
+_GArray
+	data
+	len
+_LOCK_T
+_off64_t
+_fpos_t
+_fpos64_t
+_ssize_t
+wint_t
+__wch
+__wchb
+	__count
+	__value
+_mbstate_t
+_flock_t
+pid_t
+__ULong
+_Bigint
+	_next
+	_maxwds
+	_sign
+	_wds
+__tm
+	__tm_sec
+	__tm_min
+	__tm_hour
+	__tm_mday
+	__tm_mon
+	__tm_year
+	__tm_wday
+	__tm_yday
+	__tm_isdst
+	_fnargs
+	_dso_handle
+	_fntypes
+	_is_cxa
+_atexit
+	_next
+	_ind
+	_fns
+__sbuf
+	_base
+	_size
+_reent
+_errno
+_stdin
+_stdout
+_stderr
+_inc
+_emergency
+_current_category
+_current_locale
+__sdidinit
+__cleanup
+_result
+_result_k
+_p5s
+_freelist
+_cvtlen
+_cvtbuf
+_new
+_atexit
+_atexit0
+_sig_func
+__sglue
+__sf
+__sFILE64
+	_flags
+	_file
+	_bf
+	_lbfsize
+	_data
+	_cookie
+# 	_read
+#$	_write
+#(	_seek
+#,	_close
+#0	_ub
+#4	_up
+#<	_ur
+#@	_ubuf
+#D	_nbuf
+_blksize
+_flags2
+_offset
+_seek64
+_lock
+_mbstate
+__FILE
+_glue
+_next
+_niobs
+_iobs
+_rand48
+_seed
+_mult
+_add
+_unused_rand
+_strtok_last
+_asctime_buf
+_localtime_buf
+_gamma_signgam
+_rand_next
+_r48
+_mblen_state
+_mbtowc_state
+_wctomb_state
+_l64a_buf
+_signal_buf
+_getdate_err
+_mbrlen_state
+_mbrtowc_state
+_mbsrtowcs_state
+_wcrtomb_state
+_wcsrtombs_state
+_h_errno
+_nextf
+_nmalloc
+_reent
+_unused
+long double
+glibtop
+_glibtop
+	method
+	error_method
+	input
+	output
+	socket
+	ncpu
+# 	real_ncpu
+#$	os_version_code
+#(	name
+#,	server_command
+#0	server_host
+#4	server_user
+#8	server_rsh
+#@	server_port
+#D	sysdeps
+#H	required
+	pid
+FILE
+glibtop_sysdeps
+_glibtop_sysdeps
+	cpu
+	mem
+	swap
+# 	uptime
+#(	loadavg
+#0	shm_limits
+#8	msg_limits
+#@	sem_limits
+#H	proclist
+#P	proc_state
+#X	proc_uid
+#`	proc_mem
+#h	proc_time
+#p	proc_signal
+#x	proc_kernel
+	proc_segment
+	proc_args
+	proc_map
+	proc_open_files
+	mountlist
+	fsusage
+	netlist
+	netload
+	ppp
+	proc_wd
+	proc_affinity
+glibtop_map_entry
+_glibtop_map_entry
+	start
+	end
+	offset
+	perm
+# 	inode
+#(	device
+#0	size
+#8	rss
+#@	shared_clean
+#H	shared_dirty
+#P	private_clean
+#X	private_dirty
+glibtop_proc_map
+_glibtop_proc_map
+	number
+	total
+	size
+_glibtop_init_proc_map_s
+server
+glibtop_get_proc_map_s
+server
+ procfilename
+} entry_list
+} maps
+ line
+uh line_size
+ud"new_entry_line
+"eof
+$perm
+$len
+$line_end
+$dev_major
+$dev_minor
+$start
+$end
+$offset
+$inode
+$entry
+'_glibtop_sysdeps_proc_map
+'_glibtop_sysdeps_map_entry
+(__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+/usr/include
+../..
+../../include/glibtop
+procmap.c
+stddef.h
+glibconfig.h
+gtypes.h
+garray.h
+lock.h
+_types.h
+types.h
+reent.h
+signal.h
+glibtop.h
+stdio.h
+sysdeps.h
+procmap.h
+ctype.h
+c1=;=:
+=;==
+ph>~w
+/proc/%u/maps
+%16llx-%16llx %4c %16llx %02hx:%02hx %llu%*[ ]%n
+_glibtop_init_proc_map_s
+glibtop_get_proc_map_s
+flags
+features
+_on_exit_args
+filename
+.file
+procmap.c
+.text
+.data
+.bss
+.rdata
+_fopen
+_getline
+_sscanf
+_free
+_fclose
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_map_s
+_glibtop_get_proc_map_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_g_array_sized_new
+_snprintf
+_g_strchomp
+_g_strchug
+_g_array_set_size
+_g_strlcpy
+_g_array_free
+procmem.o/      1286178371  1004  513   100664  5449      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+GNU C 4.3.4 20090804 (release) 1
+procmem.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_mem
+_glibtop_proc_mem
+flags
+size
+vsize
+resident
+share
+rss_rlim
+proc_file_to_buffer
+bufsiz
+proc_statm_to_buffer
+bufsiz
+_glibtop_init_proc_mem_s
+server
+glibtop_get_proc_mem_s
+server
+pagesize
+_glibtop_sysdeps_proc_mem
+__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+procmem.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+procmem.h
+ctype.h
+VfhZ
+>:>d>
+/proc/%d/statm
+_glibtop_init_proc_mem_s
+glibtop_get_proc_mem_s
+features
+buffer
+.file
+procmem.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_mem_s
+_glibtop_get_proc_mem_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_try_file_to_buffer
+_get_page_size
+_strtoull
+procopenfiles.o/1286178371  1004  513   100664  15799     `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+,[^_]
+,[^_]
+[^_]
+@[^]
+@[^]
+0[^]
+0[^]
+ [^]
+GNU C 4.3.4 20090804 (release) 1
+procopenfiles.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint16
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gchar
+long unsigned int
+guint
+float
+GArray
+_GArray
+data
+__uint32_t
+_LOCK_T
+_off64_t
+_fpos_t
+_fpos64_t
+_ssize_t
+wint_t
+__wch
+__wchb
+__count
+__value
+_mbstate_t
+_flock_t
+pid_t
+uint8_t
+uint16_t
+uint32_t
+__ino64_t
+__ULong
+_Bigint
+_next
+_maxwds
+_sign
+_wds
+__tm
+__tm_sec
+__tm_min
+__tm_hour
+__tm_mday
+__tm_mon
+__tm_year
+__tm_wday
+__tm_yday
+__tm_isdst
+_fnargs
+_dso_handle
+_fntypes
+_is_cxa
+_atexit
+_next
+_ind
+_fns
+__sbuf
+_base
+_size
+_reent
+_errno
+_stdin
+_stdout
+_stderr
+_inc
+_emergency
+_current_category
+_current_locale
+__sdidinit
+__cleanup
+_result
+_result_k
+_p5s
+_freelist
+_cvtlen
+_cvtbuf
+_new
+_atexit
+_atexit0
+_sig_func
+__sglue
+__sf
+__sFILE64
+_flags
+_file
+_lbfsize
+_data
+_cookie
+_read
+_write
+_seek
+_close
+_ubuf
+_nbuf
+_blksize
+_flags2
+_offset
+_seek64
+_lock
+_mbstate
+__FILE
+_glue
+_next
+_niobs
+_iobs
+_rand48
+_seed
+_mult
+_add
+_unused_rand
+_strtok_last
+_asctime_buf
+_localtime_buf
+_gamma_signgam
+_rand_next
+_r48
+_mblen_state
+_mbtowc_state
+_wctomb_state
+_l64a_buf
+_signal_buf
+_getdate_err
+_mbrlen_state
+_mbrtowc_state
+_mbsrtowcs_state
+_wcrtomb_state
+_wcsrtombs_state
+_h_errno
+_nextf
+_nmalloc
+_reent
+_unused
+GHashTable
+_GHashTable
+G_LOG_FLAG_RECURSION
+G_LOG_FLAG_FATAL
+G_LOG_LEVEL_ERROR
+G_LOG_LEVEL_CRITICAL
+G_LOG_LEVEL_WARNING
+G_LOG_LEVEL_MESSAGE
+G_LOG_LEVEL_INFO
+G_LOG_LEVEL_DEBUG
+G_LOG_LEVEL_MASK
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+FILE
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_file_type
+GLIBTOP_FILE_TYPE_FILE
+GLIBTOP_FILE_TYPE_PIPE
+GLIBTOP_FILE_TYPE_INETSOCKET
+GLIBTOP_FILE_TYPE_LOCALSOCKET
+GLIBTOP_FILE_TYPE_INET6SOCKET
+glibtop_open_files_entry
+_glibtop_open_files_entry
+type
+info
+glibtop_proc_open_files
+_glibtop_proc_open_files
+flags
+number
+total
+size
+dest_host
+dest_port
+name
+name
+sock
+file
+localsock
+dirent
+__d_version
+d_ino
+d_type
+__d_unused1
+__d_internal1
+d_name
+__DIR
+__d_cookie
+__d_dirent
+__d_dirname
+__d_position
+__d_fd
+__d_internal
+__handle
+__fh
+__flags
+__s6_addr
+__s6_addr16
+__s6_addr32
+in6_addr
+__u6
+LineParser
+Inet6SocketEntry
+host
+port
+InetSocketEntry
+host
+port
+LocalSocketEntry
+name
+ get_all_inet6_sockets
+ get_all_inet_sockets
+ get_all_local_sockets
+!skip_multiple_token
+"count
+_glibtop_init_proc_open_files_s
+$server
+%parse_file
+"parser
+"dict
+'line
+'size
+(eof
+)get_all
++parser
+,dict
+u`-%
+up1s
+glibtop_get_proc_open_files_s
+$server
++buf
++pid
+v,entries
+n,inet6_sockets
+n,inet_sockets
+n,local_sockets
+n4direntry
+4dir
+5found
+,tgt
+n,entry
+4sockfd
+'i6se
+'ise
+6lse
+9inet6_socket_parser
+$dict
++line
+,sock
+ut,addr
+\:error
+9inet_socket_parser
+$dict
++line
+,sock
+ut,addr
+h:error
+9local_socket_parser
+$dict
+$line
+'sock
+'use
+<_glibtop_sysdeps_proc_open_files
+=__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/machine
+/usr/include/sys
+/usr/include
+/usr/include/cygwin
+../..
+../../include/glibtop
+procopenfiles.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+gtypes.h
+garray.h
+_default_types.h
+lock.h
+_types.h
+types.h
+stdint.h
+types.h
+reent.h
+signal.h
+ghash.h
+glibtop.h
+stdio.h
+sysdeps.h
+procopenfiles.h
+dirent.h
+in6.h
+gmessages.h
+ctype.h
+whUAb
+=usu
+#+1g
+Cannot open '%s'
+/proc/%d/fd
+/proc/%d/fd/%s
+socket:[
+/proc/net/tcp6
+/proc/net/tcp
+/proc/net/unix
+pipe:[
+%*d: %*s %8x%8x%8x%8x:%4x %*x %*x:%*x %*x:%*x %*d %*d %*d %d
+%*d: %*x:%*x %8x:%4x %*x %*x:%*x %*x:%*x %*d %*d %*d %d
+_glibtop_init_proc_open_files_s
+glibtop_get_proc_open_files_s
+features
+_on_exit_args
+filename
+.file
+procopenfiles.c
+_get_all 
+.text
+.data
+.bss
+.rdata
+_fopen
+_g_log
+_getline
+_free
+_fclose
+_sscanf
+_strtoul
+_sprintf
+_opendir
+_readdir
+_atoi
+_g_free
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_open_files_s
+_glibtop_get_proc_open_files_s
+_inet6_socket_parser
+_inet_socket_parser
+_local_socket_parser
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_skip_token
+_g_hash_table_new_full
+_inet_ntop
+_g_malloc0
+_g_strchomp
+_g_strchug
+_g_hash_table_insert
+_g_array_new
+_g_snprintf
+_safe_readlink
+_g_hash_table_lookup
+_g_str_has_prefix
+_g_strlcpy
+_g_array_append_vals
+_closedir
+_g_hash_table_destroy
+_g_array_free
+_g_direct_equal
+_g_direct_hash
+procsegment.o/  1286178371  1004  513   100664  6921      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+procsegment.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_segment
+_glibtop_proc_segment
+flags
+text_rss
+shlib_rss
+data_rss
+stack_rss
+dirty_size
+start_code
+end_code
+start_stack
+proc_file_to_buffer
+proc_stat_to_buffer
+proc_stat_after_cmd
+_g_boolean_var_
+skip_multiple_token
+count
+proc_statm_to_buffer
+_glibtop_init_proc_segment_s
+server
+glibtop_get_proc_segment_s
+server
+pagesize
+ _glibtop_sysdeps_proc_segment
+ _glibtop_sysdeps_proc_segment_statm
+!__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+procsegment.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+procsegment.h
+ctype.h
+>:A07
+/proc/%d/stat
+/proc/%d/statm
+_glibtop_init_proc_segment_s
+glibtop_get_proc_segment_s
+buffer
+bufsiz
+features
+.file
+procsegment.c
+.text
+.data
+.bss
+.rdata
+_strrchr
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_segment_s
+_glibtop_get_proc_segment_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_skip_token
+_try_file_to_buffer
+_get_page_size
+_strtoull
+procsignal.o/   1286178371  1004  513   100664  5868      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+procsignal.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_signal
+_glibtop_proc_signal
+flags
+signal
+blocked
+sigignore
+sigcatch
+proc_file_to_buffer
+bufsiz
+proc_stat_to_buffer
+bufsiz
+proc_stat_after_cmd
+_g_boolean_var_
+skip_multiple_token
+count
+_glibtop_init_proc_signal_s
+server
+glibtop_get_proc_signal_s
+server
+ _glibtop_sysdeps_proc_signal
+!__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+procsignal.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+procsignal.h
+ctype.h
+gl#+1U
+/proc/%d/stat
+_glibtop_init_proc_signal_s
+glibtop_get_proc_signal_s
+buffer
+features
+.file
+procsignal.c
+.text
+.data
+.bss
+.rdata
+_strrchr
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_signal_s
+_glibtop_get_proc_signal_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_skip_token
+_try_file_to_buffer
+_strtoull
+procstate.o/    1286178371  1004  513   100664  7351      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+8(tc
+GNU C 4.3.4 20090804 (release) 1
+procstate.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+_off64_t
+time_t
+timespec
+tv_sec
+tv_nsec
+pid_t
+nlink_t
+timestruc_t
+off_t
+__dev32_t
+dev_t
+blksize_t
+__blkcnt64_t
+blkcnt_t
+__uid32_t
+uid_t
+__gid32_t
+gid_t
+__ino64_t
+ino_t
+mode_t
+long double
+glibtop
+	_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+stat
+`	?Y
+st_dev
+st_ino
+st_mode
+st_nlink
+st_uid
+st_gid
+st_rdev
+st_size
+st_atim
+st_mtim
+st_ctim
+st_blksize
+st_blocks
+st_birthtim
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_state
+_glibtop_proc_state
+flags
+state
+ruid
+rgid
+has_cpu
+processor
+last_processor
+proc_file_to_buffer
+bufsiz
+proc_stat_to_buffer
+bufsiz
+proc_stat_after_cmd
+next_token
+_glibtop_init_proc_state_s
+server
+glibtop_get_proc_state_s
+server
+statb
+ _glibtop_sysdeps_proc_state
+ _glibtop_sysdeps_proc_state_uid
+!__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+/usr/include/cygwin
+../..
+../../include/glibtop
+/usr/include
+procstate.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+_types.h
+types.h
+types.h
+glibtop.h
+stat.h
+sysdeps.h
+procstate.h
+ctype.h
+hl$*
+uf<@5
+ ic=>r
+/proc/%d
+/proc/%d/stat
+Bad data in /proc/%d/stat
+_glibtop_init_proc_state_s
+glibtop_get_proc_state_s
+buffer
+features
+_g_boolean_var_
+.file
+procstate.c
+.text
+.data
+.bss
+.rdata
+_strrchr
+_sprintf
+_stat
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_state_s
+_glibtop_get_proc_state_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__imp____ctype_ptr__
+_try_file_to_buffer
+_skip_token
+_glibtop_error_r
+_g_strlcpy
+proctime.o/     1286178371  1004  513   100664  7685      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+proctime.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_time
+_glibtop_proc_time
+flags
+start_time
+rtime
+utime
+stime
+cutime
+cstime
+timeout
+it_real_value
+frequency
+xcpu_utime
+xcpu_stime
+proc_file_to_buffer
+bufsiz
+proc_stat_to_buffer
+bufsiz
+proc_stat_after_cmd
+skip_multiple_token
+count
+check_cpu_line_warn
+line
+_glibtop_init_proc_time_s
+glibtop_get_proc_time_s
+!_glibtop_sysdeps_proc_time
+!_glibtop_sysdeps_proc_time_smp
+"__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+proctime.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+gtypes.h
+types.h
+glibtop.h
+sysdeps.h
+proctime.h
+ctype.h
+$*2T
+X9@;
+g-=;=h:>
+/proc/%d/stat
+/proc/%d/cpu
+'%s' does not start with 'cpu%u'
+_glibtop_init_proc_time_s
+glibtop_get_proc_time_s
+buffer
+features
+_g_boolean_var_
+server
+.file
+proctime.c
+.text
+.data
+.bss
+.rdata
+_strrchr
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_time_s
+_glibtop_get_proc_time_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+___udivdi3
+_try_file_to_buffer
+_check_cpu_line
+_glibtop_warn_io_r
+_get_boot_time
+_skip_token
+_strtoull
+procuid.o/      1286178371  1004  513   100664  7164      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+GNU C 4.3.4 20090804 (release) 1
+procuid.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+size_t
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+gint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_uid
+_glibtop_proc_uid
+flags
+euid
+egid
+suid
+sgid
+fsuid
+fsgid
+ppid
+pgrp
+session
+tpgid
+priority
+nice
+ngroups
+groups
+proc_file_to_buffer
+proc_status_to_buffer
+proc_stat_to_buffer
+proc_stat_after_cmd
+_g_boolean_var_
+skip_multiple_token
+count
+_glibtop_init_proc_uid_s
+server
+glibtop_get_proc_uid_s
+server
+ _glibtop_sysdeps_proc_uid
+!_glibtop_sysdeps_proc_uid_stat
+"__ctype_ptr__
+/usr/lib/gcc/i686-pc-cygwin/4.3.4/include
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+procuid.c
+glibtop_private.h
+stddef.h
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+procuid.h
+ctype.h
+hl#+
+/proc/%d/status
+Pid:
+Uid:
+Gid:
+/proc/%d/stat
+_glibtop_init_proc_uid_s
+glibtop_get_proc_uid_s
+buffer
+bufsiz
+features
+.file
+procuid.c
+.text
+.data
+.bss
+.rdata
+_strrchr
+_strstr
+_strtol
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_uid_s
+_glibtop_get_proc_uid_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_try_file_to_buffer
+_skip_token
+procwd.o/       1286178371  1004  513   100664  6824      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+procwd.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+guint32
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gint
+gboolean
+long unsigned int
+guint
+float
+gpointer
+GPtrArray
+_GPtrArray
+pdata
+__uint32_t
+pid_t
+__ino64_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_proc_wd
+_glibtop_proc_wd
+flags
+number
+root
+dirent
+__d_version
+d_ino
+d_type
+__d_unused1
+__d_internal1
+d_name
+__DIR
+__d_cookie
+__d_dirent
+__d_dirname
+__d_position
+__d_fd
+__d_internal
+__handle
+__fh
+__flags
+is_in
+array
+_glibtop_init_proc_wd_s
+server
+glibtop_get_proc_wd_s
+server
+dirs
+path
+task
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/machine
+/usr/include/sys
+/usr/include/cygwin
+../..
+../../include/glibtop
+/usr/include
+procwd.c
+glibconfig.h
+gtypes.h
+garray.h
+_default_types.h
+types.h
+types.h
+glibtop.h
+sysdeps.h
+procwd.h
+dirent.h
+ctype.h
+>=90
+/proc/%u/root
+/proc/%u/exe
+/proc/%u/cwd
+/proc/%u/task
+/proc/%u/task/%s/cwd
+_glibtop_init_proc_wd_s
+glibtop_get_proc_wd_s
+features
+.file
+procwd.c
+.text
+.data
+.bss
+.rdata
+_strcmp
+_opendir
+_readdir
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__glibtop_init_proc_wd_s
+_glibtop_get_proc_wd_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+__imp____ctype_ptr__
+_g_ptr_array_sized_new
+_g_snprintf
+_safe_readlink
+_g_strdup
+_closedir
+_g_ptr_array_add
+_g_ptr_array_free
+sem_limits.o/   1286178371  1004  513   100664  5116      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+@[_]
+GNU C 4.3.4 20090804 (release) 1
+sem_limits.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+time_t
+timespec
+tv_sec
+tv_nsec
+pid_t
+timestruc_t
+__uid32_t
+uid_t
+__gid32_t
+gid_t
+key_t
+mode_t
+long double
+glibtop
+	_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_sem_limits
+_glibtop_sem_limits
+flags
+semmap
+semmni
+semmns
+semmnu
+semmsl
+semopm
+semume
+semusz
+semvmx
+semaem
+ipc_perm
+cuid
+cgid
+mode
+semid_ds
+sem_perm
+sem_nsems
+sem_otim
+sem_ctim
+sem_base
+sem_spare4
+seminfo
+semmni
+semmns
+semmsl
+semopm
+semmnu
+semume
+semvmx
+semaem
+semmap
+semusz
+sem_spare
+semun
+	n"	
+	p"	
+array
+	q(	
+_glibtop_init_sem_limits_s
+server
+glibtop_get_sem_limits_s
+server
+seminfo
+_glibtop_sysdeps_sem_limits
+/usr/lib/glib-2.0/include
+/usr/include/sys
+/usr/include/cygwin
+../..
+../../include/glibtop
+sem_limits.c
+glibconfig.h
+types.h
+types.h
+glibtop.h
+sysdeps.h
+sem_limits.h
+ipc.h
+sem.h
+gl$*2TX@N:
+;gY;gY;gY;gY;gY;gY;gY;gY;g
+_glibtop_init_sem_limits_s
+glibtop_get_sem_limits_s
+features
+.file
+sem_limits.c
+.text
+.data
+.bss
+_semctl
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_sem_limits_s
+_glibtop_get_sem_limits_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+shm_limits.o/   1286178371  1004  513   100664  4268      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+shm_limits.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_shm_limits
+_glibtop_shm_limits
+flags
+shmmax
+shmmin
+shmmni
+shmseg
+shmall
+shminfo
+shmmax
+shmmin
+shmmni
+shmseg
+shmall
+shm_spare
+_glibtop_init_shm_limits_s
+server
+glibtop_get_shm_limits_s
+server
+shminfo
+_glibtop_sysdeps_shm_limits
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include/cygwin
+shm_limits.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+shm_limits.h
+shm.h
+gl#+
+Y;gY;gY;gY;g
+_glibtop_init_shm_limits_s
+glibtop_get_shm_limits_s
+features
+.file
+shm_limits.c
+.text
+.data
+.bss
+_shmctl
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_shm_limits_s
+_glibtop_get_shm_limits_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+siglist.o/      1286178371  1004  513   100664  3831      `
+.text
+0`.data
+.bss
+B/18
+B/30
+B.rdata
+`@/42
+GNU C 4.3.4 20090804 (release) 1
+siglist.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+long double
+glibtop_signame
+_glibtop_signame
+number
+name
+label
+glibtop_sys_siglist
+../../include/glibtop
+signal.h
+siglist.c
+SIGHUP
+Hangup (POSIX).
+SIGINT
+Interrupt (ANSI).
+SIGQUIT
+Quit (POSIX).
+SIGILL
+Illegal instruction (ANSI).
+SIGTRAP
+Trace trap (POSIX).
+SIGABRT
+Abort (ANSI).
+SIGBUS
+BUS error (4.2 BSD).
+SIGFPE
+Floating-point exception (ANSI).
+SIGKILL
+Kill, unblockable (POSIX).
+SIGUSR1
+User-defined signal 1 (POSIX).
+SIGSEGV
+Segmentation violation (ANSI).
+SIGUSR2
+User-defined signal 2 (POSIX).
+SIGPIPE
+Broken pipe (POSIX).
+SIGALRM
+Alarm clock (POSIX).
+SIGTERM
+Termination (ANSI).
+SIGCLD
+Same as SIGCHLD (System V).
+SIGCHLD
+Child status has changed (POSIX).
+SIGCONT
+Continue (POSIX).
+SIGSTOP
+Stop, unblockable (POSIX).
+SIGTSTP
+Keyboard stop (POSIX).
+SIGTTIN
+Background read from tty (POSIX).
+SIGTTOU
+Background write to tty (POSIX).
+SIGURG
+Urgent condition on socket (4.2 BSD).
+SIGXCPU
+CPU limit exceeded (4.2 BSD).
+SIGXFSZ
+File size limit exceeded (4.2 BSD).
+SIGVTALRM
+Virtual alarm clock (4.2 BSD).
+SIGPROF
+Profiling alarm clock (4.2 BSD).
+SIGWINCH
+Window size change (4.3 BSD, Sun).
+SIGPOLL
+Pollable event occurred (System V).
+SIGIO
+I/O now possible (4.2 BSD).
+SIGPWR
+Power failure restart (System V).
+SIGSYS
+Bad system call.
+glibtop_sys_siglist
+.file
+siglist.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_pubnames
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_pubnames
+_glibtop_sys_siglist
+swap.o/         1286178371  1004  513   100664  4782      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+swap.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_swap
+_glibtop_swap
+flags
+total
+used
+free
+pagein
+pageout
+_glibtop_init_swap_s
+server
+glibtop_get_swap_s
+server
+buffer
+_glibtop_sysdeps_swap
+_glibtop_sysdeps_swap_paging
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+swap.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+swap.h
+ctype.h
+#+1U
+/eg28
+/proc/meminfo
+SwapTotal:
+SwapFree:
+/proc/stat
+swap
+_glibtop_init_swap_s
+glibtop_get_swap_s
+features
+.file
+swap.c
+.text
+.data
+.bss
+.rdata
+_strstr
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_swap_s
+_glibtop_get_swap_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_get_scaled
+_file_to_buffer
+_skip_token
+_strtoull
+sysinfo.o/      1286178371  1004  513   100664  6467      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+B/111
+WVSP
+[^_]
+GNU C 4.3.4 20090804 (release) 1
+sysinfo.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+gchar
+long unsigned int
+guint
+float
+gpointer
+GPtrArray
+_GPtrArray
+pdata
+pid_t
+GHashTable
+_GHashTable
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_sysinfo
+_glibtop_sysinfo
+flags
+ncpu
+cpuinfo
+glibtop_entry
+_glibtop_entry
+labels
+values
+descriptions
+init_sysinfo
+server
+buffer
+processors
+_g_boolean_var_
+parts
+cpuinfo
+value
+glibtop_get_sysinfo_s
+server
+_glibtop_sysdeps_sysinfo
+sysinfo
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/glib-2.0/glib
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+sysinfo.c
+glibconfig.h
+gtypes.h
+garray.h
+types.h
+ghash.h
+glibtop.h
+sysdeps.h
+sysinfo.h
+ctype.h
+/proc/cpuinfo
+glibtop_get_sysinfo_s
+features
+.file
+sysinfo.c
+_sysinfo
+.text
+.data
+.bss
+.rdata
+__alloca
+_g_free
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_init_sysinfo
+_glibtop_get_sysinfo_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_ranges
+.debug_str
+_file_to_buffer
+_g_strsplit
+_g_ptr_array_new
+_g_hash_table_new_full
+_g_strsplit_set
+_g_strchomp
+_g_strchug
+_g_ptr_array_add
+_g_hash_table_insert
+_g_strfreev
+_g_str_equal
+_g_str_hash
+uptime.o/       1286178371  1004  513   100664  4409      `
+.text
+P`.data
+.bss
+B/18
+B/30
+B.rdata
+0@/42
+0B/55
+B/66
+B/82
+B/97
+GNU C 4.3.4 20090804 (release) 1
+uptime.c
+/home/Admin/sw/libgtop-2.28.1/sysdeps/cygwin
+unsigned int
+short unsigned int
+signed char
+unsigned char
+short int
+long long int
+guint64
+long long unsigned int
+char
+double
+long int
+long unsigned int
+float
+pid_t
+long double
+glibtop
+_glibtop
+flags
+method
+error_method
+input
+output
+socket
+ncpu
+real_ncpu
+os_version_code
+name
+server_command
+server_host
+server_user
+server_rsh
+server_port
+sysdeps
+required
+glibtop_sysdeps
+_glibtop_sysdeps
+flags
+swap
+uptime
+loadavg
+shm_limits
+msg_limits
+sem_limits
+proclist
+proc_state
+proc_uid
+proc_mem
+proc_time
+proc_signal
+proc_kernel
+proc_segment
+proc_args
+proc_map
+proc_open_files
+mountlist
+fsusage
+netlist
+netload
+proc_wd
+proc_affinity
+glibtop_uptime
+_glibtop_uptime
+flags
+uptime
+idletime
+boot_time
+_glibtop_init_uptime_s
+server
+glibtop_get_uptime_s
+server
+buffer
+_glibtop_sysdeps_uptime
+__ctype_ptr__
+/usr/lib/glib-2.0/include
+/usr/include/sys
+../..
+../../include/glibtop
+/usr/include
+uptime.c
+glibconfig.h
+types.h
+glibtop.h
+sysdeps.h
+uptime.h
+ctype.h
+/proc/uptime
+_glibtop_init_uptime_s
+glibtop_get_uptime_s
+features
+.file
+uptime.c
+.text
+.data
+.bss
+.rdata
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+__glibtop_init_uptime_s
+_glibtop_get_uptime_s
+.debug_abbrev
+.debug_info
+.debug_line
+.debug_frame
+.debug_loc
+.debug_pubnames
+.debug_aranges
+.debug_str
+_file_to_buffer
+_g_ascii_strtod
+_get_boot_time
