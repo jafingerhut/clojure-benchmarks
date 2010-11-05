@@ -71,6 +71,76 @@ Command terminated by signal 15
 	Page size (bytes): 4096
 	Exit status: 0
 ----- Windows XP SP3 + Cygwin -----------------------------------
+Admin@john-win ~/git/clojure-benchmarks/memuse
+% ../bin/timemem.exe './test-memuse-mingw.exe 51200'
+Attempting to allocate 51200 kbytes of memory...
+Succeeded.  Attempting to initialize it all...
+Initialization complete.  Exiting.
+
+Process ID: 3524
+    elapsed time (seconds): 0.14
+    user time (seconds): 0.13
+    kernel time (seconds): 0.03
+    Page Fault Count: 13020
+    Peak Working Set Size (kbytes): 52160   <-- NOTE: Units are kbytes.
+    Quota Peak Paged Pool Usage: 12372
+    Quota Peak Non Paged Pool Usage: 1208
+    Peak Pagefile Usage: 52764672
+
+The above works directly from a Cygwin bash shell, but this does not:
+
+Admin@john-win ~/git/clojure-benchmarks/knuc
+% /cygdrive/c/Program\ Files/Java/jrmc-4.0.1-1.6.0/bin/java -version
+java version "1.6.0_20"
+Java(TM) SE Runtime Environment (build 1.6.0_20-b02)
+Oracle JRockit(R) (build R28.0.1-21-133393-1.6.0_20-20100512-2132-windows-ia32, compiled mode)
+Admin@john-win ~/git/clojure-benchmarks/knuc
+% ../bin/timemem.exe '/cygdrive/c/Program\ Files/Java/jrmc-4.0.1-1.6.0/bin/java -version'
+CreateProcess failed (3).
+Exit 26
+
+Running it from a batch file does work.  Unless I find something less
+kludgy that works, I will use this method.
+
+In preparation, you must do these things in a Cygwin bash shell:
+
+% cd clojure-benchmarks
+% ./init.sh output
+% cd knuc
+% rm input/medium-input.txt
+% cp ../fasta/output/medium-expected-output.txt input/medium-input.txt
+% ./clj-compile.sh clj-1.2
+% cat clj-12-med.bat
+..\bin\timemem.exe "\Program Files\Java\jrmc-4.0.1-1.6.0\bin\java -server -Xmx1536m -classpath \cygwin\home\Admin\lein\swank-clj-1.2.0\lib\clojure-1.2.0.jar;.\obj\clj-1.2 knucleotide" < input\medium-input.txt > output\medium-clj-1.2-output.txt
+% ./clj-12-med.bat
+
+C:\cygwin\home\Admin\git\clojure-benchmarks\knuc>..\bin\timemem.exe "\Program Files\Java\jrmc-4.0.1-1.6.0\bin\java -server -Xmx1536m -classpath \cygwin\home\Admin\lein\swank-clj-1.2.0\lib\clojure-1.2.0.jar;.\obj\clj-1.2 knucleotide"  0<input\medium-input.txt 1>output\medium-clj-1.2-output.txt 
+Starting part 0
+Starting part 6
+Starting part 1
+Starting part 5
+Finished part 0
+Finished part 1
+Starting part 2
+Finished part 5
+Starting part 3
+Finished part 2
+Finished part 3
+Finished part 6
+Starting part 4
+Finished part 4
+
+Process ID: 2868
+    elapsed time (seconds): 16.61
+    user time (seconds): 25.63
+    kernel time (seconds): 0.30
+    Page Fault Count: 54231
+    Peak Working Set Size (kbytes): 110264
+    Quota Peak Paged Pool Usage: 78332
+    Quota Peak Non Paged Pool Usage: 23320
+    Peak Pagefile Usage: 172056576
+Exit 1  Admin@john-win ~/git/clojure-benchmarks/knuc
+
 ----------------------------------------
 
 (2) Given a full cmd line, run it a minimum of 4 times (configurable,
