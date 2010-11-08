@@ -43,6 +43,7 @@ typedef unsigned long long uint64;
 void PrintMemoryAndTimeInfo (DWORD processID)
 {
     HANDLE hProcess;
+    DWORD ExitCode;
     PROCESS_MEMORY_COUNTERS pmc;
     FILETIME CreationTime;
     FILETIME ExitTime;
@@ -57,6 +58,13 @@ void PrintMemoryAndTimeInfo (DWORD processID)
                            FALSE, processID);
     if (NULL == hProcess) {
         fprintf(stderr, " OpenProcess() returned NULL\n");
+        return;
+    }
+
+    if (GetExitCodeProcess(hProcess, &ExitCode)) {
+        fprintf(stderr, "    exit code: %d\n", ExitCode);
+    } else {
+        fprintf(stderr, " GetExitCodeProcess() returned FALSE\n");
         return;
     }
 
