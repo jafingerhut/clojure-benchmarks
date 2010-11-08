@@ -102,7 +102,8 @@ my $timemem_cmd;
 if ($os eq 'Cygwin') {
     $timemem_cmd = "..\\bin\\timemem";
 } elsif ($os eq 'Darwin') {
-    $timemem_cmd = "/usr/bin/time -lp";
+    #$timemem_cmd = "/usr/bin/time -lp";
+    $timemem_cmd = "../bin/timemem-darwin";
 } elsif ($os eq 'GNU/Linux') {
     $timemem_cmd = "/usr/bin/time -v";
 } else {
@@ -243,10 +244,10 @@ if ($os eq 'Cygwin') {
 		$user_sec = $1;
 	    } elsif (/^\s*sys\s+(.*)\s*$/) {
 		$sys_sec = $1;
-	    } elsif (/^\s+(\d+)\s+maximum resident set size\s*$/) {
+	    } elsif (/^\s*(\d+)\s+maximum resident set size\s*$/) {
 		# Mac OS X reports max RSS in units of bytes.  Convert
 		# to kbytes.
-		$max_rss_kbytes = $1 / 1024;
+		$max_rss_kbytes = big_int_string_to_float($1) / 1024;
 	    } else {
 		# Ignore the others
 	    }
@@ -344,6 +345,17 @@ if ($opts->{c}) {
     #        see if they can provide this measurement)
     # TBD: Description of hardware, e.g. # of CPU cores, type, and
     #     clock speed of each.
+
+    # Mac OS X command to get CPU details:
+    # /usr/sbin/system_profiler -detailLevel full SPHardwareDataType
+
+    # Command to get OS details in a format more like in "About This
+    # Mac" menu item:
+    # sw_vers
+
+    # Other similar commands mentioned at:
+    # http://serverfault.com/questions/14981/getting-cpu-information-from-command-line-in-mac-os-x-server
+
     printf ",%s", csv_str($os_full);
     printf "\n";
 } else {
@@ -389,4 +401,18 @@ sub csv_str {
     $csv_str = $str;
     $csv_str =~ s/"/""/g;
     return '"' . $csv_str . '"';
+}
+
+
+sub big_int_string_to_float {
+    my $str = shift;
+
+    #printf STDERR "jaf-debug: \$str=%s\n", $str;
+    my $i;
+    my $ret = 0.0;
+    for ($i = 0; $i < length($str); $i++) {
+	$ret = 10.0 * $ret + (ord(substr($str, $i, 1)) - ord('0'));
+	#printf STDERR "jaf-debug: \$i=%d \$ret=%s\n", $i, $ret;
+    }
+    return $ret;
 }
