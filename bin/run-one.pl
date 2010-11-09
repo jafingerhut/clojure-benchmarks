@@ -184,6 +184,11 @@ if ($verbose) {
 
 
 my ($elapsed_sec, $user_sec, $sys_sec, $max_rss_kbytes);
+my $num_cpus;
+my $usage_per_cpu = 'not calculated';
+my ($per_cpu_stats_start, $total_cpu_stats_start);
+my ($per_cpu_stats_end, $total_cpu_stats_end);
+
 # I want to run the program and read its stderr output.  I'll assume
 # that stdout is already being saved to a file, and ignore anything
 # that goes to stdout.
@@ -192,6 +197,9 @@ my ($elapsed_sec, $user_sec, $sys_sec, $max_rss_kbytes);
 # http://perldoc.perl.org/perlfaq8.html#How-can-I-capture-STDERR-from-an-external-command?
 
 local *CATCHERR = IO::File->new_tmpfile;
+if ($os eq 'GNU/Linux') {
+    ($per_cpu_stats_start, $total_cpu_stats_start) = linux_get_cpu_usage();
+}
 my $start_time = localtime();
 my $pid = open3(gensym, \*CATCHOUT, ">&CATCHERR", $cmd_to_run);
 while (<CATCHOUT>) {
@@ -199,6 +207,9 @@ while (<CATCHOUT>) {
 waitpid($pid, 0);
 my $child_exit_status = $? >> 8;
 my $end_time = localtime();
+if ($os eq 'GNU/Linux') {
+    ($per_cpu_stats_end, $total_cpu_stats_end) = linux_get_cpu_usage();
+}
 seek CATCHERR, 0, 0;
 
 #open(F,$cmd_to_run . "|") or die sprintf "Could not run command '%s'.  Aborting.\n", $cmd_to_run;
@@ -248,6 +259,8 @@ if ($os eq 'Cygwin') {
 		# Mac OS X reports max RSS in units of bytes.  Convert
 		# to kbytes.
 		$max_rss_kbytes = big_int_string_to_float($1) / 1024;
+	    } elsif (/^\s*Per core CPU utilization \((\d+) cores\): (.*)$/) {
+		($num_cpus, $usage_per_cpu) = ($1, $2);
 	    } else {
 		# Ignore the others
 	    }
@@ -308,6 +321,25 @@ if ($os eq 'Cygwin') {
     }
 }
 close(F);
+if ($os eq 'GNU/Linux') {
+   $num_cpus = $#{$per_cpu_stats_start} + 1;
+   printf STDERR "\$num_cpus=%s\n", $num_cpus;
+   $usage_per_cpu = '';
+   my $i;
+   for ($i = 0; $i < $num_cpus; $i++) {
+       my $total = ($per_cpu_stats_end->[$i]{total} -
+                    $per_cpu_stats_start->[$i]{total});
+       my $cpu_busy_percent = 0.0;
+       if ($total != 0) {
+           my $idle = ($per_cpu_stats_end->[$i]{idle} -
+                       $per_cpu_stats_start->[$i]{idle});
+           $cpu_busy_percent = sprintf "%d", (100.0 * (1.0 - (1.0 * $idle) / $total));
+       }
+       $usage_per_cpu .= sprintf " %d%%", $cpu_busy_percent;
+   }
+   # Remove leading space.
+   $usage_per_cpu = substr($usage_per_cpu, 1);
+}
 if ($verbose) {
     printf STDERR "\$elapsed_sec='%s'\n", $elapsed_sec;
     printf STDERR "\$user_sec='%s'\n", $user_sec;
@@ -329,7 +361,7 @@ if ($opts->{c}) {
     printf ",%s", $max_rss_kbytes;
     printf ",%s", csv_str($start_time);
     printf ",%s", csv_str($end_time);
-    # TBD: percent busy time for each cpu core
+    printf ",%s", csv_str($usage_per_cpu);
     # TBD: percent of cpu this job got while it ran
     printf ",%s", $cmd_exit_status;
     # TBD:
@@ -375,6 +407,7 @@ if ($opts->{c}) {
     printf "    Max resident set size (kb): %s\n", $max_rss_kbytes;
     printf "    Start time                : %s\n", $start_time;
     printf "    End time                  : %s\n", $end_time;
+    printf "    Per core CPU usage (%d cores): %s\n", $num_cpus, $usage_per_cpu;
     printf "    Exit status               : %s\n", $cmd_exit_status;
     printf "    OS description            : %s\n", $os_full;
 }
@@ -415,4 +448,48 @@ sub big_int_string_to_float {
 	#printf STDERR "jaf-debug: \$i=%d \$ret=%s\n", $i, $ret;
     }
     return $ret;
+}
+
+
+sub linux_get_cpu_usage {
+    my $per_cpu_stats = [];
+    my $total_cpu_stats = {};
+
+    my $filename = '/proc/stat';
+    open(F,"$filename") or die sprintf "Could not open file '%s' for reading.\n";
+    my $line = <F>;
+    if ($line =~ /^\s*cpu\s+(\d+) (\d+) (\d+) (\d+)/) {
+        $total_cpu_stats->{user} = $1;
+        $total_cpu_stats->{nice} = $2;
+        $total_cpu_stats->{sys} = $3;
+        $total_cpu_stats->{idle} = $4;
+        $total_cpu_stats->{total} = $1 + $2 + $3 + $4;
+        $total_cpu_stats->{frequency} = 100;
+    } else {
+        die sprintf "linux_get_cpu_usage: Expected cpu at beginning of line, but found the following line instead:\n%s", $line;
+    }
+
+    my $i = 0;
+    while ($line = <F>) {
+        #printf STDERR "\$i=%s \$line='%s'\n", $i, $line;
+        if ($line =~ /^\s*cpu(\d+) (\d+) (\d+) (\d+) (\d+)/) {
+            my ($cpu, $user, $nice, $sys, $idle) = ($1, $2, $3, $4, $5);
+            my $one_cpu_stats = {};
+            if ($i != $cpu) {
+               die sprintf "linux_get_cpu_usage: Expected cpu%d at beginning of line, but found cpu%d instead.\n", $i, $cpu;
+            }
+            $one_cpu_stats->{user} = $user;
+            $one_cpu_stats->{nice} = $nice;
+            $one_cpu_stats->{sys} = $sys;
+            $one_cpu_stats->{idle} = $idle;
+            $one_cpu_stats->{total} = $user + $nice + $sys + $idle;
+            $one_cpu_stats->{frequency} = 100;
+            $per_cpu_stats->[$i] = $one_cpu_stats;
+            $i++;
+        } else {
+            last;
+        }
+    }
+    close(F);
+    return ($per_cpu_stats, $total_cpu_stats);
 }
