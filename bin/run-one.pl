@@ -71,7 +71,7 @@ Examples of use on Windows XP + Cygwin:
   % ../bin/run-one.pl -i input\\medium-input.txt -o output\\medium-clj-1.2-output.txt \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -version
   [ ... output removed ... ]
 
-  % ../bin/run-one.pl -v -i input\\quick-input.txt -o output\\quick-clj-1.2-output.txt \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -server -Xmx1536m -classpath \"\\cygwin\\home\\Admin\\lein\\swank-clj-1.2.0\\lib\\clojure-1.2.0.jar;.\\obj\\clj-1.2\" knucleotide
+  % ../bin/run-one.pl -v -i input\\\\quick-input.txt -o output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
   [ ... output removed ... ]
 ";
 }
@@ -197,7 +197,7 @@ my ($per_cpu_stats_end, $total_cpu_stats_end);
 # http://perldoc.perl.org/perlfaq8.html#How-can-I-capture-STDERR-from-an-external-command?
 
 local *CATCHERR = IO::File->new_tmpfile;
-if ($os eq 'GNU/Linux') {
+if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
     ($per_cpu_stats_start, $total_cpu_stats_start) = linux_get_cpu_usage();
 }
 my $start_time = localtime();
@@ -207,7 +207,7 @@ while (<CATCHOUT>) {
 waitpid($pid, 0);
 my $child_exit_status = $? >> 8;
 my $end_time = localtime();
-if ($os eq 'GNU/Linux') {
+if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
     ($per_cpu_stats_end, $total_cpu_stats_end) = linux_get_cpu_usage();
 }
 seek CATCHERR, 0, 0;
@@ -321,7 +321,7 @@ if ($os eq 'Cygwin') {
     }
 }
 close(F);
-if ($os eq 'GNU/Linux') {
+if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
    $num_cpus = $#{$per_cpu_stats_start} + 1;
    printf STDERR "\$num_cpus=%s\n", $num_cpus;
    $usage_per_cpu = '';
@@ -459,11 +459,12 @@ sub linux_get_cpu_usage {
     open(F,"$filename") or die sprintf "Could not open file '%s' for reading.\n";
     my $line = <F>;
     if ($line =~ /^\s*cpu\s+(\d+) (\d+) (\d+) (\d+)/) {
-        $total_cpu_stats->{user} = $1;
-        $total_cpu_stats->{nice} = $2;
-        $total_cpu_stats->{sys} = $3;
-        $total_cpu_stats->{idle} = $4;
-        $total_cpu_stats->{total} = $1 + $2 + $3 + $4;
+	my ($user, $nice, $sys, $idle) = ($1, $2, $3, $4);
+        $total_cpu_stats->{user} = $user;
+        $total_cpu_stats->{nice} = $nice;
+        $total_cpu_stats->{sys} = $sys;
+        $total_cpu_stats->{idle} = $idle;
+        $total_cpu_stats->{total} = $user + $nice + $sys + $idle;
         $total_cpu_stats->{frequency} = 100;
     } else {
         die sprintf "linux_get_cpu_usage: Expected cpu at beginning of line, but found the following line instead:\n%s", $line;
