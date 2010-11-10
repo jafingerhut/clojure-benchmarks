@@ -17,6 +17,7 @@ use FindBin;
 use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
+use Math::BigInt;
 
 
 my $verbose = 0;
@@ -30,6 +31,9 @@ chomp $os;
 my $os_full = `uname -a`;
 chomp $os_full;
 
+my $install_dir = $FindBin::Bin;
+my $timemem_cmd = time_cmd_location($os, $install_dir);
+
 
 sub usage {
     print STDERR "usage: $progname [-h] [ file1 ... ]\n";
@@ -42,11 +46,23 @@ sub usage {
                   giving the name of each field in the output CSV
                   file, in addition to the statistics line.
     -s <os_name>  Can be used to specify one of the OS's: Cygwin,
-                  Darwin, GNU/Linux
+                  Darwin, GNU/Linux.  This command line option need
+                  only be used to override the default of '$os', which
+                  is detected via the output of the 'uname -o'
+                  command.
     -t <time_cmd> to specify the command to use to measure the running
-                  time and memory usage of the process.
+                  time and memory usage of the process.  This is only
+                  needed if you wish to override the default command,
+                  which for platform '$os' is:
+                  $timemem_cmd
     -i <input_file>
     -o <output_file>
+    TBD: -? <check_output_cmd>
+                  A command string used to check whether the output
+                  file's contents are correct.  This command should
+                  have a '%o' in it where the output file name should
+                  be, and $progname will replace that with the output
+                  file name.
     -l <language_implementation_description_string>
     -b <benchmark_problem_name>
 
@@ -79,11 +95,6 @@ Examples of use on Windows XP + Cygwin:
 my $opts = { };
 getopts('hvcns:t:i:o:l:b:', $opts);
 
-if ($opts->{h}) {
-    usage();
-    exit(0);
-}
-
 if ($opts->{v}) {
     $verbose = 1;
 }
@@ -95,21 +106,12 @@ if ($verbose) {
     printf STDERR "install dir='%s'\n", $FindBin::Bin;
 }
 
-# TBD: The default path to timemem should be based on full path name,
-# and where this script itself is installed.
-
-my $timemem_cmd;
-if ($os eq 'Cygwin') {
-    $timemem_cmd = "..\\bin\\timemem";
-} elsif ($os eq 'Darwin') {
-    #$timemem_cmd = "/usr/bin/time -lp";
-    $timemem_cmd = "../bin/timemem-darwin";
-} elsif ($os eq 'GNU/Linux') {
-    $timemem_cmd = "/usr/bin/time -v";
-} else {
-    printf STDERR "Unknown OS string '%s'.  Only 'Cygwin', 'Darwin', and 'GNU/Linux' are supported.  Aborting.";
-    exit 1;
+if ($opts->{h}) {
+    usage();
+    exit(0);
 }
+
+$timemem_cmd = time_cmd_location($os, $install_dir);
 
 if ($opts->{t}) {
     $timemem_cmd = $opts->{t};
@@ -231,7 +233,7 @@ if ($os eq 'Cygwin') {
 		$user_sec = $1;
 	    } elsif (/^\s+kernel time \(seconds\): (.*)\s*$/) {
 		$sys_sec = $1;
-	    } elsif (/^\s+Peak Working Set Size \(kbytes\): (.*)\s*$/) {
+	    } elsif (/^\s+Peak Working Set Size \(kbytes\): (\d+)\s*$/) {
 		$max_rss_kbytes = $1;
 	    } else {
 		# Ignore the others
@@ -257,8 +259,15 @@ if ($os eq 'Cygwin') {
 		$sys_sec = $1;
 	    } elsif (/^\s*(\d+)\s+maximum resident set size\s*$/) {
 		# Mac OS X reports max RSS in units of bytes.  Convert
-		# to kbytes.
-		$max_rss_kbytes = big_int_string_to_float($1) / 1024;
+		# to kbytes.  Use BigInt arithmetic, in case the
+		# integer is very large.
+		my $max_rss_kbytes_bi = Math::BigInt->new($1);
+		# Add 1023 before dividing (with truncation) by 1024,
+		# so that the net effect is to round the number of
+		# bytes up to the next whole number of kbytes.
+		$max_rss_kbytes_bi->badd(1023);
+		$max_rss_kbytes_bi->bdiv(1024);
+		$max_rss_kbytes = sprintf "%s", $max_rss_kbytes_bi;
 	    } elsif (/^\s*Per core CPU utilization \((\d+) cores\): (.*)$/) {
 		($num_cpus, $usage_per_cpu) = ($1, $2);
 	    } else {
@@ -309,7 +318,12 @@ if ($os eq 'Cygwin') {
 		# program to add the 'time' package.  You can search
 		# for it by name, or look for it in the 'Utils'
 		# category.
-		$max_rss_kbytes = $1 / 4;
+
+		# Use BigInt arithmetic, in case the integer is very
+		# large.
+		my $max_rss_kbytes_bi = Math::BigInt->new($1);
+		$max_rss_kbytes_bi->bdiv(4);
+		$max_rss_kbytes = sprintf "%s", $max_rss_kbytes_bi;
 	    } else {
 		# Ignore the others
 	    }
@@ -323,17 +337,30 @@ if ($os eq 'Cygwin') {
 close(F);
 if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
    $num_cpus = $#{$per_cpu_stats_start} + 1;
-   printf STDERR "\$num_cpus=%s\n", $num_cpus;
+   if ($verbose) {
+       printf STDERR "\$num_cpus=%s\n", $num_cpus;
+   }
    $usage_per_cpu = '';
    my $i;
    for ($i = 0; $i < $num_cpus; $i++) {
-       my $total = ($per_cpu_stats_end->[$i]{total} -
-                    $per_cpu_stats_start->[$i]{total});
-       my $cpu_busy_percent = 0.0;
-       if ($total != 0) {
-           my $idle = ($per_cpu_stats_end->[$i]{idle} -
-                       $per_cpu_stats_start->[$i]{idle});
-           $cpu_busy_percent = sprintf "%d", (100.0 * (1.0 - (1.0 * $idle) / $total));
+       my $cpu_busy_percent =
+	   cpu_busy_percent($per_cpu_stats_start->[$i]{idle},
+			    $per_cpu_stats_end->[$i]{idle},
+			    $per_cpu_stats_start->[$i]{total},
+			    $per_cpu_stats_end->[$i]{total});
+       my $cpu_busy_percent_without_bigints =
+	   cpu_busy_percent_without_bigints($per_cpu_stats_start->[$i]{idle},
+					    $per_cpu_stats_end->[$i]{idle},
+					    $per_cpu_stats_start->[$i]{total},
+					    $per_cpu_stats_end->[$i]{total});
+       if ($cpu_busy_percent ne $cpu_busy_percent_without_bigints) {
+	   die sprintf "For idle times %s %s and total times %s %s cpu_busy_percent() returned %s but cpu_busy_percent_without_bigints() returned %s\n",
+	       $per_cpu_stats_start->[$i]{idle},
+	       $per_cpu_stats_end->[$i]{idle},
+	       $per_cpu_stats_start->[$i]{total},
+	       $per_cpu_stats_end->[$i]{total},
+	       $cpu_busy_percent,
+	       $cpu_busy_percent_without_bigints;
        }
        $usage_per_cpu .= sprintf " %d%%", $cpu_busy_percent;
    }
@@ -437,20 +464,6 @@ sub csv_str {
 }
 
 
-sub big_int_string_to_float {
-    my $str = shift;
-
-    #printf STDERR "jaf-debug: \$str=%s\n", $str;
-    my $i;
-    my $ret = 0.0;
-    for ($i = 0; $i < length($str); $i++) {
-	$ret = 10.0 * $ret + (ord(substr($str, $i, 1)) - ord('0'));
-	#printf STDERR "jaf-debug: \$i=%d \$ret=%s\n", $i, $ret;
-    }
-    return $ret;
-}
-
-
 sub linux_get_cpu_usage {
     my $per_cpu_stats = [];
     my $total_cpu_stats = {};
@@ -464,7 +477,7 @@ sub linux_get_cpu_usage {
         $total_cpu_stats->{nice} = $nice;
         $total_cpu_stats->{sys} = $sys;
         $total_cpu_stats->{idle} = $idle;
-        $total_cpu_stats->{total} = $user + $nice + $sys + $idle;
+        $total_cpu_stats->{total} = add_big_ints([$user, $nice, $sys, $idle]);
         $total_cpu_stats->{frequency} = 100;
     } else {
         die sprintf "linux_get_cpu_usage: Expected cpu at beginning of line, but found the following line instead:\n%s", $line;
@@ -483,7 +496,7 @@ sub linux_get_cpu_usage {
             $one_cpu_stats->{nice} = $nice;
             $one_cpu_stats->{sys} = $sys;
             $one_cpu_stats->{idle} = $idle;
-            $one_cpu_stats->{total} = $user + $nice + $sys + $idle;
+	    $one_cpu_stats->{total} = add_big_ints([$user, $nice, $sys, $idle]);
             $one_cpu_stats->{frequency} = 100;
             $per_cpu_stats->[$i] = $one_cpu_stats;
             $i++;
@@ -493,4 +506,108 @@ sub linux_get_cpu_usage {
     }
     close(F);
     return ($per_cpu_stats, $total_cpu_stats);
+}
+
+
+# Take a list of strings containing integers as an argument, where the
+# strings can contain arbitrarily large integers.  Add them and return
+# the sum as a string.
+
+sub add_big_ints {
+    my $nums = shift;
+
+    my $str = shift @{$nums};
+    my $bigint_sum = Math::BigInt->new($str);
+    foreach $str (@{$nums}) {
+	my $x = Math::BigInt->new($str);
+	$bigint_sum->badd($x);
+    }
+    return sprintf "%s", $bigint_sum;
+}
+
+
+sub cpu_busy_percent {
+    my $idle1 = shift;
+    my $idle2 = shift;
+    my $total1 = shift;
+    my $total2 = shift;
+
+    my $total1_bi = Math::BigInt->new($total1);
+    my $total_bi = Math::BigInt->new($total2);
+    $total_bi->bsub($total1_bi);
+    if ($total_bi->is_zero()) {
+	return "0";
+    } else {
+	my $idle1_bi = Math::BigInt->new($idle1);
+	my $idle_bi = Math::BigInt->new($idle2);
+	$idle_bi->bsub($idle1_bi);
+
+	# Now calculate 100 - ((100 * $idle_bi) / $total_bi), rounded
+	# to nearest whole number.  To do that, we will calculate
+	# ((1000 * ($total_bi - $idle_bi)) / $total_bi), then do the
+	# rounding manually ourselves.  I'm sure that Perl's
+	# Math::BigInt package provides a more succinct way of doing
+	# this, but this will give the correct answer.
+        my $busy_bi = $idle_bi->copy();
+        $busy_bi->bsub($total_bi);
+        $busy_bi->bneg();
+	$busy_bi->bmul(1000);
+	$busy_bi->bdiv($total_bi);
+
+	my $last_digit_bi = $busy_bi->copy();
+	$last_digit_bi->bmod(10);
+	my $cpu_busy_percent_bi = $busy_bi->copy();
+	$cpu_busy_percent_bi->bdiv(10);
+	if ($last_digit_bi->bcmp(5) >= 0) {   # i.e. ($last_digit_bi >= 5)
+	    $cpu_busy_percent_bi->binc();
+	}
+	return sprintf "%s", $cpu_busy_percent_bi;
+    }
+}
+
+
+sub cpu_busy_percent_without_bigints {
+    my $idle1 = shift;
+    my $idle2 = shift;
+    my $total1 = shift;
+    my $total2 = shift;
+
+    my $total = ($total2 - $total1);
+    my $cpu_busy_percent = 0;
+    if ($total != 0) {
+	my $idle = ($idle2 - $idle1);
+	$cpu_busy_percent = sprintf "%d", (100.0 * (1.0 - (1.0 * $idle) / $total)) + 0.5;
+    }
+    return sprintf "%d", $cpu_busy_percent;
+}
+
+
+sub time_cmd_location {
+    my $os = shift;
+    my $install_dir = shift;
+
+    my $timemem_cmd;
+
+    if ($os eq 'Cygwin') {
+        # TBD: The default path to timemem should be based on full
+        # path name, and where this script itself is installed.
+
+	# TBD: I need some way to convert the Cygwin path to a
+	# DOS/Windows path here.  It is not as simple as replacing all
+	# / characters with \, because the command will be run from a
+	# BAT file, and the full path name must start from the Windows
+	# root directory, which is not the same as the Cygwin root
+	# directory for files inside of C:\cygwin.  Perhaps parsing
+	# the output of the 'mount' command on Cygwin and extracting
+	# out the necessary part will work.
+	$timemem_cmd = "..\\bin\\timemem";
+    } elsif ($os eq 'Darwin') {
+	$timemem_cmd = $install_dir . "/timemem-darwin";
+    } elsif ($os eq 'GNU/Linux') {
+	$timemem_cmd = "/usr/bin/time -v";
+    } else {
+	printf STDERR "Unknown OS string '%s'.  Only 'Cygwin', 'Darwin', and 'GNU/Linux' are supported.  Aborting.", $os;
+	exit 1;
+    }
+    return $timemem_cmd;
 }
