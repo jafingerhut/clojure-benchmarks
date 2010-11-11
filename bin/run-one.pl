@@ -21,10 +21,8 @@ use Math::BigInt;
 
 
 my $verbose = 0;
-
 my $full_progname = $0;
 my $progname = fileparse($full_progname);
-
 
 my $os = `uname -o`;
 chomp $os;
@@ -39,32 +37,52 @@ sub usage {
     print STDERR "usage: $progname [-h] [ file1 ... ]\n";
     print STDERR "
     -h            Show this help.
+
     -v            Enable debug messages.
+
+    -i <input_file>
+
+    -o <output_file>
+
+    -g <check_output_cmd>
+                  A command string used to check whether the output
+                  file's contents are good.  The command's exit status
+                  should be 0 (i.e. no error) if the output is good,
+                  or any non-zero value if the output is not good.
+
+                  This command should have a '%o' in it where the
+                  output file name should be, and $progname will
+                  replace that with the output file name.  This option
+                  should only be given if -o is also given.
+
     -c            Print output in CSV format, not really intended for
                   human consumption.
+
     -n            If -c is given, then also print a 'header line'
                   giving the name of each field in the output CSV
                   file, in addition to the statistics line.
+
     -s <os_name>  Can be used to specify one of the OS's: Cygwin,
                   Darwin, GNU/Linux.  This command line option need
                   only be used to override the default of '$os', which
                   is detected via the output of the 'uname -o'
                   command.
+
     -t <time_cmd> to specify the command to use to measure the running
                   time and memory usage of the process.  This is only
                   needed if you wish to override the default command,
                   which for platform '$os' is:
                   $timemem_cmd
-    -i <input_file>
-    -o <output_file>
-    TBD: -? <check_output_cmd>
-                  A command string used to check whether the output
-                  file's contents are correct.  This command should
-                  have a '%o' in it where the output file name should
-                  be, and $progname will replace that with the output
-                  file name.
+
+    The options below do not affect how the command is run or its
+    performance measured.  They are simply printed to the output for
+    inclusion in whatever results the user wishes to collect.  They
+    could be useful later for keeping track of which results are
+    which.
+
     -l <language_implementation_description_string>
     -b <benchmark_problem_name>
+    -f <source_code_file_name>
 
 Example of use on Linux or Mac OS X:
 
@@ -82,6 +100,20 @@ Example of use on Linux or Mac OS X:
       Exit status               : 0
       OS description            : Darwin our-imac.local 10.4.0 Darwin Kernel Version 10.4.0: Fri Apr 23 18:28:53 PDT 2010; root:xnu-1504.7.4~1/RELEASE_I386 i386 i386 iMac6,1 Darwin
 
+  % ../bin/run-one.pl -i input/quick-input.txt -o output/quick-clj-1.2-output.txt -g 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+      Command measured          : java -server -Xmx1536m -classpath /Users/andy/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+      Elapsed time (sec)        : 2.857
+      User CPU time (sec)       : 3.107
+      System CPU time (sec)     : 0.302
+      Max resident set size (kb): 80992
+      Start time                : Wed Nov 10 18:55:06 2010
+      End time                  : Wed Nov 10 18:55:08 2010
+      Per core CPU usage (2 cores): 92% 90%
+      Exit status               : 0
+      Command to check output   : diff --strip-trailing-cr --brief output/quick-expected-output.txt output/quick-clj-1.2-output.txt
+      Exit status of check cmd  : 0
+      OS description            : Darwin andys-mbp.local 9.8.0 Darwin Kernel Version 9.8.0: Wed Jul 15 16:55:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_I386 i386 i386 MacBookPro4,1 Darwin
+
 Examples of use on Windows XP + Cygwin:
 
   % ../bin/run-one.pl -i input\\medium-input.txt -o output\\medium-clj-1.2-output.txt \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -version
@@ -92,49 +124,31 @@ Examples of use on Windows XP + Cygwin:
 ";
 }
 
-my $opts = { };
-getopts('hvcns:t:i:o:l:b:', $opts);
+######################################################################
+# Get command line options
+######################################################################
 
-if ($opts->{v}) {
-    $verbose = 1;
-}
-if ($opts->{s}) {
-    $os = $opts->{s};
-}
+my $opts = { };
+getopts('hvi:o:g:cns:t:l:b:f:', $opts);
+
+$verbose = 1 if ($opts->{v});
+$os = $opts->{s} if ($opts->{s});
 if ($verbose) {
     printf STDERR "\$os='%s'\n", $os;
     printf STDERR "install dir='%s'\n", $FindBin::Bin;
 }
-
 if ($opts->{h}) {
     usage();
     exit(0);
 }
-
-$timemem_cmd = time_cmd_location($os, $install_dir);
-
-if ($opts->{t}) {
-    $timemem_cmd = $opts->{t};
-}
-my $input_file;
-if ($opts->{i}) {
-    $input_file = $opts->{i};
-}
-my $output_file;
-if ($opts->{o}) {
-    $output_file = $opts->{o};
-}
-my $language_implementation_desc_str = '';
-if ($opts->{l}) {
-    $language_implementation_desc_str = $opts->{l};
-}
-my $benchmark_name = '';
-if ($opts->{b}) {
-    $benchmark_name = $opts->{b};
-}
-my $source_file_name = '';
-
-
+$timemem_cmd         = (defined($opts->{t}) ? $opts->{t}
+			: time_cmd_location($os, $install_dir));
+my $input_file       = defined($opts->{i}) ? $opts->{i} : undef;
+my $output_file      = defined($opts->{o}) ? $opts->{o} : undef;
+my $language_implementation_desc_str = defined($opts->{l}) ? $opts->{l} : '';
+my $benchmark_name   = defined($opts->{b}) ? $opts->{b} : '';
+my $source_file_name = defined($opts->{f}) ? $opts->{f} : '';
+my $check_good_cmd   = defined($opts->{g}) ? $opts->{g} : undef;
 if ($#ARGV < 0) {
     printf STDERR "No command given.\n";
     usage();
@@ -145,14 +159,17 @@ if ($verbose) {
     printf STDERR "\$cmd_to_time='%s'\n", $cmd_to_time;
 }
 
+######################################################################
+# Construct command to run (and measure its performance)
+######################################################################
+
 my $cmd_str = '';
 my $cmd_begin = '';
 my $cmd_end = '';
 if ($os eq 'Cygwin') {
-    $cmd_begin = "\"";
-    $cmd_end = "\"";
+    $cmd_begin = '"';
+    $cmd_end = '"';
 }
-
 $cmd_str .= sprintf "%s %s%s%s", $timemem_cmd, $cmd_begin, $cmd_to_time, $cmd_end;
 if (defined($input_file)) {
     $cmd_str .= sprintf " < %s", $input_file;
@@ -185,6 +202,11 @@ if ($verbose) {
 }
 
 
+######################################################################
+# Run the command, and read performance stats from its standard error
+# output.
+######################################################################
+
 my ($elapsed_sec, $user_sec, $sys_sec, $max_rss_kbytes);
 my $num_cpus;
 my $usage_per_cpu = 'not calculated';
@@ -213,8 +235,6 @@ if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
     ($per_cpu_stats_end, $total_cpu_stats_end) = linux_get_cpu_usage();
 }
 seek CATCHERR, 0, 0;
-
-#open(F,$cmd_to_run . "|") or die sprintf "Could not run command '%s'.  Aborting.\n", $cmd_to_run;
 
 my $cmd_exit_status;
 if ($os eq 'Cygwin') {
@@ -373,6 +393,46 @@ if ($verbose) {
     printf STDERR "\$sys_sec='%s'\n", $sys_sec;
     printf STDERR "\$max_rss_kbytes='%s'\n", $max_rss_kbytes;
 }
+
+######################################################################
+# Run the command to check if the output file's contents are good, if
+# specified.
+######################################################################
+
+my $check_good_cmd_exit_status;
+if (defined($output_file) && defined($check_good_cmd)) {
+    $check_good_cmd =~ s/%o/$output_file/g;
+    system($check_good_cmd);
+    $check_good_cmd_exit_status = $?;
+    if ($check_good_cmd_exit_status == -1) {
+	printf STDERR "failed to execute cmd '%s': %s\n", $check_good_cmd, $!;
+	exit 1;
+    } elsif (($check_good_cmd_exit_status & 127) != 0) {
+	printf STDERR "check good cmd '%s' died with signal %d, %s coredump\n",
+	    $check_good_cmd,
+	    ($check_good_cmd_exit_status & 127),
+	    ($check_good_cmd_exit_status & 128) ? 'with' : 'without';
+    } else {
+	my $child_exit_status = $check_good_cmd_exit_status >> 8;
+	if ($child_exit_status != 0) {
+	    printf STDERR "check good cmd '%s' exited with error status %d\n",
+	        $check_good_cmd, $child_exit_status;
+	}
+    }
+}
+
+# Note: If $check_good_cmd_exit_status is 0, then everything is fine.
+
+# If it is not 0, then either it exited with a non-0 exit status, or
+# it was stopped without exiting normally, e.g. via a signal.  No
+# matter what non-0 value it is, we should conclude that we have not
+# verified that the output is good.
+
+
+######################################################################
+# Print the performance stats in the desired format.
+######################################################################
+
 if ($opts->{c}) {
     if ($opts->{n}) {
 	# TBD: Update this to match the order below
@@ -391,6 +451,8 @@ if ($opts->{c}) {
     printf ",%s", csv_str($usage_per_cpu);
     # TBD: percent of cpu this job got while it ran
     printf ",%s", $cmd_exit_status;
+    printf ",%s", csv_str($check_good_cmd);
+    printf ",%s", $check_good_cmd_exit_status;
     # TBD:
     #    description string for result summary:
     #        normal completion, output correct
@@ -436,6 +498,10 @@ if ($opts->{c}) {
     printf "    End time                  : %s\n", $end_time;
     printf "    Per core CPU usage (%d cores): %s\n", $num_cpus, $usage_per_cpu;
     printf "    Exit status               : %s\n", $cmd_exit_status;
+    if (defined($output_file) && defined($check_good_cmd)) {
+	printf "    Command to check output   : %s\n", $check_good_cmd;
+	printf "    Exit status of check cmd  : %s\n", $check_good_cmd_exit_status;
+    }
     printf "    OS description            : %s\n", $os_full;
 }
 
