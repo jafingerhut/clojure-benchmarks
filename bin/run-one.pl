@@ -34,15 +34,38 @@ my $timemem_cmd = time_cmd_location($os, $install_dir);
 
 
 sub usage {
-    print STDERR "usage: $progname [-h] [ file1 ... ]\n";
+    print STDERR "
+usage: $progname [-hvcn]
+               [ -a <log_file> ]
+               [ -i <input_file> ] [ -o <output_file> ]
+               [ -g <check_output_cmd> ]
+               [ -s <os_name> ] [ -t <time_cmd> ]
+               [ -l <language_implementation_description_string> ]
+               [ -b <benchmark_problem_name> ]
+               [ -f <source_code_file_name> ]
+               <measured_cmd> [ arg1 ... ]\n";
     print STDERR "
     -h            Show this help.
 
     -v            Enable debug messages.
 
-    -i <input_file>
+    -c            Print measurement output in CSV format, not really
+                  intended for human consumption.
 
-    -o <output_file>
+    -n            If -c is given, then also print a 'header line'
+                  giving the name of each field in the output CSV
+                  file, in addition to the measurements line.
+
+    -a <log_file> Append measurement output to file <log_file>,
+                  creating <log_file> if it does not exist already.
+
+    -i <input_file> Input file for <measured_cmd> (optional).  If
+                  provided, <measured_cmd> will be invoked with its
+                  standard input redirected from <input_file>.
+
+    -o <output_file> Similar to -i, except it is a file name where
+                  <measure_cmd>'s standard output will be redirected
+                  into, if provided.
 
     -g <check_output_cmd>
                   A command string used to check whether the output
@@ -54,13 +77,6 @@ sub usage {
                   output file name should be, and $progname will
                   replace that with the output file name.  This option
                   should only be given if -o is also given.
-
-    -c            Print output in CSV format, not really intended for
-                  human consumption.
-
-    -n            If -c is given, then also print a 'header line'
-                  giving the name of each field in the output CSV
-                  file, in addition to the statistics line.
 
     -s <os_name>  Can be used to specify one of the OS's: Cygwin,
                   Darwin, GNU/Linux.  This command line option need
@@ -90,15 +106,7 @@ Example of use on Linux or Mac OS X:
   [ ... output removed ... ]
 
   % ../bin/run-one.pl -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
-      Command measured          : java -server -Xmx1536m -classpath /Users/andy/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
-      Elapsed time (sec)        : 82.35
-      User CPU time (sec)       : 26.34
-      System CPU time (sec)     : 0.65
-      Max resident set size (kb): 0
-      Start time                : Sun Nov  7 20:01:20 2010
-      End time                  : Sun Nov  7 20:02:42 2010
-      Exit status               : 0
-      OS description            : Darwin our-imac.local 10.4.0 Darwin Kernel Version 10.4.0: Fri Apr 23 18:28:53 PDT 2010; root:xnu-1504.7.4~1/RELEASE_I386 i386 i386 iMac6,1 Darwin
+  [ ... output removed ... ]
 
   % ../bin/run-one.pl -i input/quick-input.txt -o output/quick-clj-1.2-output.txt -g 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
       Command measured          : java -server -Xmx1536m -classpath /Users/andy/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
@@ -116,7 +124,7 @@ Example of use on Linux or Mac OS X:
 
 Examples of use on Windows XP + Cygwin:
 
-  % ../bin/run-one.pl -i input\\medium-input.txt -o output\\medium-clj-1.2-output.txt \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -version
+  % ../bin/run-one.pl -i input\\\\medium-input.txt -o output\\\\medium-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -version
   [ ... output removed ... ]
 
   % ../bin/run-one.pl -v -i input\\\\quick-input.txt -o output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
@@ -129,7 +137,7 @@ Examples of use on Windows XP + Cygwin:
 ######################################################################
 
 my $opts = { };
-getopts('hvi:o:g:cns:t:l:b:f:', $opts);
+getopts('hvcna:i:o:g:s:t:l:b:f:', $opts);
 
 $verbose = 1 if ($opts->{v});
 $os = $opts->{s} if ($opts->{s});
@@ -143,6 +151,7 @@ if ($opts->{h}) {
 }
 $timemem_cmd         = (defined($opts->{t}) ? $opts->{t}
 			: time_cmd_location($os, $install_dir));
+my $log_file         = defined($opts->{a}) ? $opts->{a} : undef;
 my $input_file       = defined($opts->{i}) ? $opts->{i} : undef;
 my $output_file      = defined($opts->{o}) ? $opts->{o} : undef;
 my $language_implementation_desc_str = defined($opts->{l}) ? $opts->{l} : '';
@@ -157,6 +166,13 @@ if ($#ARGV < 0) {
 my $cmd_to_time = join(' ', @ARGV);
 if ($verbose) {
     printf STDERR "\$cmd_to_time='%s'\n", $cmd_to_time;
+}
+
+my $log = *STDOUT;
+if (defined($log_file)) {
+    open($log, ">>$log_file")
+	or die sprintf "Could not open log file '%s' for appending: %s",
+	                $log_file, $!;
 }
 
 ######################################################################
@@ -472,29 +488,29 @@ if ($opts->{c}) {
 	    if ($first) {
 		$first = 0;
 	    } else {
-		printf ",";
+		printf $log ",";
 	    }
-	    printf "%s", csv_str($field_name);
+	    printf $log "%s", csv_str($field_name);
 	}
-	printf "\n";
+	printf $log "\n";
     }
-    printf "%s", csv_str($benchmark_name);
-    printf ",%s", csv_str($language_implementation_desc_str);
-    printf ",%s", csv_str($source_file_name);
-    printf ",%s", csv_str($cmd_to_time);
-    printf ",%s", $elapsed_sec;
-    printf ",%s", $user_sec;
-    printf ",%s", $sys_sec;
-    printf ",%s", $max_rss_kbytes;
-    printf ",%s", csv_str($start_time);
-    printf ",%s", csv_str($end_time);
-    printf ",%s", $num_cpus;
-    printf ",%s", csv_str($usage_per_cpu);
+    printf $log "%s", csv_str($benchmark_name);
+    printf $log ",%s", csv_str($language_implementation_desc_str);
+    printf $log ",%s", csv_str($source_file_name);
+    printf $log ",%s", csv_str($cmd_to_time);
+    printf $log ",%s", $elapsed_sec;
+    printf $log ",%s", $user_sec;
+    printf $log ",%s", $sys_sec;
+    printf $log ",%s", $max_rss_kbytes;
+    printf $log ",%s", csv_str($start_time);
+    printf $log ",%s", csv_str($end_time);
+    printf $log ",%s", $num_cpus;
+    printf $log ",%s", csv_str($usage_per_cpu);
     # TBD: percent of cpu this job got while it ran
-    printf ",%s", $cmd_exit_status;
-    printf ",%s", csv_str(defined($check_good_cmd) ? $check_good_cmd : '');
-    printf ",%s", (defined($check_good_cmd_exit_status)
-		   ? $check_good_cmd_exit_status : '');
+    printf $log ",%s", $cmd_exit_status;
+    printf $log ",%s", csv_str(defined($check_good_cmd) ? $check_good_cmd : '');
+    printf $log ",%s", (defined($check_good_cmd_exit_status)
+			? $check_good_cmd_exit_status : '');
     # TBD:
     #    description string for result summary:
     #        normal completion, output correct
@@ -519,32 +535,32 @@ if ($opts->{c}) {
     # Other similar commands mentioned at:
     # http://serverfault.com/questions/14981/getting-cpu-information-from-command-line-in-mac-os-x-server
 
-    printf ",%s", csv_str($os_full);
-    printf "\n";
+    printf $log ",%s", csv_str($os_full);
+    printf $log "\n";
 } else {
     if ($benchmark_name ne '') {
-	printf "    Benchmark name: %s\n", $benchmark_name;
+	printf $log "    Benchmark name            : %s\n", $benchmark_name;
     }
     if ($language_implementation_desc_str ne '') {
-	printf "    Language implementation: %s\n", $language_implementation_desc_str;
+	printf $log "    Language implementation   : %s\n", $language_implementation_desc_str;
     }
     if ($source_file_name ne '') {
-	printf "    Source file name: %s\n", $source_file_name;
+	printf $log "    Source file name          : %s\n", $source_file_name;
     }
-    printf "    Command measured          : %s\n", $cmd_to_time;
-    printf "    Elapsed time (sec)        : %s\n", $elapsed_sec;
-    printf "    User CPU time (sec)       : %s\n", $user_sec;
-    printf "    System CPU time (sec)     : %s\n", $sys_sec;
-    printf "    Max resident set size (kb): %s\n", $max_rss_kbytes;
-    printf "    Start time                : %s\n", $start_time;
-    printf "    End time                  : %s\n", $end_time;
-    printf "    Per core CPU usage (%d cores): %s\n", $num_cpus, $usage_per_cpu;
-    printf "    Exit status               : %s\n", $cmd_exit_status;
+    printf $log "    Command measured          : %s\n", $cmd_to_time;
+    printf $log "    Elapsed time (sec)        : %s\n", $elapsed_sec;
+    printf $log "    User CPU time (sec)       : %s\n", $user_sec;
+    printf $log "    System CPU time (sec)     : %s\n", $sys_sec;
+    printf $log "    Max resident set size (kb): %s\n", $max_rss_kbytes;
+    printf $log "    Start time                : %s\n", $start_time;
+    printf $log "    End time                  : %s\n", $end_time;
+    printf $log "    Per core CPU usage (%d cores): %s\n", $num_cpus, $usage_per_cpu;
+    printf $log "    Exit status               : %s\n", $cmd_exit_status;
     if (defined($output_file) && defined($check_good_cmd)) {
-	printf "    Command to check output   : %s\n", $check_good_cmd;
-	printf "    Exit status of check cmd  : %s\n", $check_good_cmd_exit_status;
+	printf $log "    Command to check output   : %s\n", $check_good_cmd;
+	printf $log "    Exit status of check cmd  : %s\n", $check_good_cmd_exit_status;
     }
-    printf "    OS description            : %s\n", $os_full;
+    printf $log "    OS description            : %s\n", $os_full;
 }
 
 exit 0;
