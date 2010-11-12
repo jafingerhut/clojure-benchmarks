@@ -393,6 +393,21 @@ if ($verbose) {
     printf STDERR "\$sys_sec='%s'\n", $sys_sec;
     printf STDERR "\$max_rss_kbytes='%s'\n", $max_rss_kbytes;
 }
+if (!(defined($elapsed_sec) && defined($user_sec) &&
+      defined($sys_sec) && defined($max_rss_kbytes) &&
+      defined($num_cpus) && defined($usage_per_cpu) &&
+      defined($cmd_exit_status)))
+{
+    printf STDERR "
+One or more of the following values were not found in the output:
+    elapsed, user, or kernel/system times
+    maximum resident/working set size
+    number of CPU cores, or their utilization
+    command exit status
+This is likely due to a change in the output format of the command
+$timemem_cmd, and requires a corresponding change to $progname";
+    exit 1;
+}
 
 ######################################################################
 # Run the command to check if the output file's contents are good, if
@@ -435,8 +450,33 @@ if (defined($output_file) && defined($check_good_cmd)) {
 
 if ($opts->{c}) {
     if ($opts->{n}) {
-	# TBD: Update this to match the order below
-	printf "\"OS description\",\"Language implementation\",\"Benchmark name\",\"Source file name\",\"Start time\",\"End time\",\"Command measured\",elapsed_sec,user_sec,sys_sec,max_rss_kbytes\n";
+	my $field_names = [ "Benchmark name",
+			    "Language implementation",
+			    "Source file name",
+			    "Command measured",
+			    "Elapsed sec",
+			    "User sec",
+			    "System sec",
+			    "Max RSS KiBytes",
+			    "Start time",
+			    "End time",
+			    "Num CPU cores",
+			    "Usage per CPU core",
+			    "Exit status",
+			    "Command used to check output",
+			    "Exit status of command used to check output",
+			    "OS description" ];
+	my $field_name;
+	my $first = 1;
+	foreach $field_name (@{$field_names}) {
+	    if ($first) {
+		$first = 0;
+	    } else {
+		printf ",";
+	    }
+	    printf "%s", csv_str($field_name);
+	}
+	printf "\n";
     }
     printf "%s", csv_str($benchmark_name);
     printf ",%s", csv_str($language_implementation_desc_str);
@@ -448,11 +488,13 @@ if ($opts->{c}) {
     printf ",%s", $max_rss_kbytes;
     printf ",%s", csv_str($start_time);
     printf ",%s", csv_str($end_time);
+    printf ",%s", $num_cpus;
     printf ",%s", csv_str($usage_per_cpu);
     # TBD: percent of cpu this job got while it ran
     printf ",%s", $cmd_exit_status;
-    printf ",%s", csv_str($check_good_cmd);
-    printf ",%s", $check_good_cmd_exit_status;
+    printf ",%s", csv_str(defined($check_good_cmd) ? $check_good_cmd : '');
+    printf ",%s", (defined($check_good_cmd_exit_status)
+		   ? $check_good_cmd_exit_status : '');
     # TBD:
     #    description string for result summary:
     #        normal completion, output correct
@@ -525,8 +567,14 @@ sub csv_str {
     my $csv_str;
 
     $csv_str = $str;
-    $csv_str =~ s/"/""/g;
-    return '"' . $csv_str . '"';
+    # Try to only put double-quotes around strings that need them.
+    # Note that while strings containing spaces might not need double
+    # quotes, I'll go ahead and be extra-safe by doing so.
+    if ($csv_str =~ /,|"|\s|\n/) {
+	$csv_str =~ s/"/""/g;
+	return '"' . $csv_str . '"';
+    }
+    return $csv_str;
 }
 
 
