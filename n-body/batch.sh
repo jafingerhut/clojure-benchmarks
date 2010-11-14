@@ -10,8 +10,8 @@ BENCHMARK="n-body"
 # The compiled GHC executable crashes on my Mac.  Leaving it out of
 # the default list of languages for now.
 
-#ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1"
-ALL_LANGUAGES="sbcl perl java clj-1.2 clj-1.3-alpha1"
+#ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+ALL_LANGUAGES="sbcl perl java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -87,6 +87,6 @@ do
 	echo "( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
 	( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 
-	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee --append ${CONSOLE}
+	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
     done
 done

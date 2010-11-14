@@ -18,11 +18,11 @@ these do if you are curious):
 
     ./init.sh output
 
-    # Run Java, Clojure 1.2, and Clojure 1.3 alpha1 versions of all of
-    # the benchmark programs.  Takes somewhere around 60 to 90 mins on
-    # my system.
+    # Run Java, Clojure 1.2, Clojure 1.3 alpha1, and Clojure 1.3
+    # alpha3 versions of all of the benchmark programs.  Takes
+    # somewhere around 60 to 90 mins on my system.
 
-    ./run-all.sh long java clj-1.2 clj-1.3-alpha1
+    ./run-all.sh long java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3
 
 Systems on which this has been tested:
 Mac OS X 10.5.8

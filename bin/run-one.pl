@@ -18,13 +18,19 @@ use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
 use Math::BigInt;
+use XML::Parser;
 
 
 my $verbose = 0;
 my $full_progname = $0;
 my $progname = fileparse($full_progname);
 
-my $os = `uname -o`;
+my $os = `uname -o 2>/dev/null`;
+if ($? != 0) {
+    # Then likely we are running on a Mac OS X system with the default
+    # uname installation, which accepts -s but not -o option.
+    $os = `uname -s 2>/dev/null`;
+}
 chomp $os;
 my $os_full = `uname -a`;
 chomp $os_full;
@@ -151,6 +157,12 @@ if ($opts->{h}) {
 }
 $timemem_cmd         = (defined($opts->{t}) ? $opts->{t}
 			: time_cmd_location($os, $install_dir));
+if ($timemem_cmd =~ /^(\S+)/) {
+    my $cmd = $1;
+    if (! -x $cmd) {
+	die sprintf "There is no command '$cmd' to measure performance for your command\n";
+    }
+}
 my $log_file         = defined($opts->{a}) ? $opts->{a} : undef;
 my $input_file       = defined($opts->{i}) ? $opts->{i} : undef;
 my $output_file      = defined($opts->{o}) ? $opts->{o} : undef;

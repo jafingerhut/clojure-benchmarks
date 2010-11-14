@@ -19,7 +19,13 @@
 # On Windows+Cygwin, it appears that these characters are only needed
 # in classpath arguments to the Java run time.
 
-OS=`uname -o`
+OS=`uname -o 2>/dev/null`
+if [ $? -ne 0 ]
+then
+    # Option -o does not exist in Mac OS X default version of uname
+    # command.
+    OS=`uname -s 2>/dev/null`
+fi
 #echo "Debug OS=:${OS}:"
 if [ "$OS" == "Cygwin" ]
 then
@@ -51,9 +57,12 @@ then
     then
         CLOJURE_JAR_DIR="${HOME_DIR}\\lein\\clj-1.3.0-alpha1\\lib"
         CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.3.0-alpha1.jar"
-        #CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.3.0-alpha1.jar;${CLOJURE_JAR_DIR}\\complete-1.3.1-20100923.180543-12-bin.jar"
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha3" ]
+    then
+        CLOJURE_JAR_DIR="${HOME_DIR}\\lein\\clj-1.3.0-alpha3\\lib"
+        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.3.0-alpha3.jar"
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
         exit 1
     fi
 
@@ -111,9 +120,12 @@ then
     then
         CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha1/lib"
         CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha1.jar"
-        #CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha1.jar:${CLOJURE_JAR_DIR}/complete-1.3.1-20100923.180543-12-bin.jar"
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha3" ]
+    then
+        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha3/lib"
+        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
         exit 1
     fi
 
