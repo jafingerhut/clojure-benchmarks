@@ -12,8 +12,6 @@ shift
 
 source ../env.sh
 
-JVM_OPTS="-server -Xmx768m"
-
 # The latest Mac OS X Java release apparently disables escape
 # analysis, and also prints a warning to the output about it.
 # Aug 25, 2010   Mac OS X 10.6.4
@@ -28,5 +26,5 @@ JVM_OPTS="-server -Xmx768m"
 
 JVM_OPTS="-server"
 
-1>&2 echo $JAVA ${JVM_OPTS} ${JAVA_PROFILING} -classpath ${PS_FULL_CLJ_CLASSPATH} mandelbrot "$@"
-          "${JAVA}" ${JVM_OPTS} ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" mandelbrot "$@"
+1>&2 echo ${TIME_CMD} $JAVA ${JVM_OPTS} ${JVM_MAX_MEM} ${JAVA_PROFILING} -classpath ${PS_FULL_CLJ_CLASSPATH} mandelbrot "$@"
+          ${TIME_CMD} "${JAVA}" ${JVM_OPTS} ${JVM_MAX_MEM} ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" mandelbrot "$@"
