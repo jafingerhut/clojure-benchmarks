@@ -212,9 +212,9 @@ main (int argc, char **argv, char **envp)
                 (elapsed_msec % 1000));
 
         // User, sys times
-        fprintf(stderr, "user %9ld.%03ld\n", r.ru_utime.tv_sec,
+        fprintf(stderr, "user %9ld.%03d\n", r.ru_utime.tv_sec,
                 r.ru_utime.tv_usec / 1000);
-        fprintf(stderr, "sys  %9ld.%03ld\n", r.ru_stime.tv_sec,
+        fprintf(stderr, "sys  %9ld.%03d\n", r.ru_stime.tv_sec,
                 r.ru_stime.tv_usec / 1000);
 
         // Maximum resident set size
