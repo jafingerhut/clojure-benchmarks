@@ -1,8 +1,8 @@
 ;;   The Computer Language Benchmarks Game
 ;;   http://shootout.alioth.debian.org/
 
-;; contributed by Andy Fingerhut.  Speed improvements contributed by
-;; Stuart Halloway.
+;; contributed by Andy Fingerhut.
+;; Speed improvements contributed by Stuart Halloway.
 
 (ns fannkuchredux
   (:require clojure.string)
