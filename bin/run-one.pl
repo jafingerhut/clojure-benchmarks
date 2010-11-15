@@ -108,13 +108,13 @@ usage: $progname [-hvcn]
 
 Example of use on Linux or Mac OS X:
 
-  % ../bin/run-one.pl -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -version
+  % $progname -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -version
   [ ... output removed ... ]
 
-  % ../bin/run-one.pl -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+  % $progname -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
   [ ... output removed ... ]
 
-  % ../bin/run-one.pl -i input/quick-input.txt -o output/quick-clj-1.2-output.txt -g 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+  % $progname -i input/quick-input.txt -o output/quick-clj-1.2-output.txt -g 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
       Command measured          : java -server -Xmx1536m -classpath /Users/andy/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
       Elapsed time (sec)        : 2.857
       User CPU time (sec)       : 3.107
@@ -130,10 +130,10 @@ Example of use on Linux or Mac OS X:
 
 Examples of use on Windows XP + Cygwin:
 
-  % ../bin/run-one.pl -i input\\\\medium-input.txt -o output\\\\medium-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -version
+  % $progname -i input\\\\medium-input.txt -o output\\\\medium-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -version
   [ ... output removed ... ]
 
-  % ../bin/run-one.pl -v -i input\\\\quick-input.txt -o output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
+  % $progname -v -i input\\\\quick-input.txt -o output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
   [ ... output removed ... ]
 ";
 }
