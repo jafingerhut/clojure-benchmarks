@@ -255,4 +255,153 @@ haven't tried it myself.
 
 http://www.johnmacfarlane.net/Gitit%20on%20Ubuntu
 
+
 ----------------------------------------------------------------------
+Some features of Clojure that are definitely slow, and whether these
+Clojure programs use those features
+----------------------------------------------------------------------
+
+The following notes come from a reply to a question on Stack Overflow
+about why the Clojure programs are slower than the Scala programs.
+
+    http://stackoverflow.com/questions/4148382/why-does-clojure-do-worse-than-scala-in-the-alioth-benchmarks
+
+----------------------------------------
+For example the following features in Clojure are all very cool and
+useful for development convenience, but incur some runtime performance
+overhead:
+
+    * Lazy sequences and lists
+    * Dynamic Java interoperability using reflection
+    * Runtime function composition / first class functions
+    * Multimethods / dynamic dispatch
+    * Dynamic compilation with eval or on the REPL
+    * BigInteger arithmetic
+
+If you want absolute maximum performance (at the cost of some extra
+complexity), you would want to rewrite code to avoid these and use
+things like:
+
+    * Static type hinting (to avoid reflection)
+    * Transients
+    * Macros (for compile time code manipulation)
+    * Protocols
+    * Java primitives and arrays
+    * loop / recur for iteration
+----------------------------------------
+
+I have attempted to categorize which Clojure programs in this
+collection use the features above, and which do not, in an Excel
+spreadsheet.  See the file results/clojure-features-used.xls.  This
+spreadsheet should be easily readable using Open Office or one of its
+derivatives, as no "fancy features" are used in it.  It is simply a
+more convenient way for me to record this information in table form,
+and later rearrange and view them in different ways, than a text file.
+
+----------------------------------------------------------------------
+Do these programs fall into a microbenchmark pitfall?
+----------------------------------------------------------------------
+
+Cliff Click's slides for his talk "How NOT To Write A Microbenchmark",
+given at JavaOne 2002 (Sun's 2002 Worldwide Java Developer
+Conference).
+
+    http://www.azulsystems.com/events/javaone_2002/microbenchmarks.pdf
+
+I mention this because (1) it is worth reading for anyone interested
+in benchmarks, to avoid pitfalls, and (2) so I can make a list of
+pitfalls mentioned in there, and for each Clojure program describe
+whether I believe it has fallen into that pitfall.
+
+Are these programs microbenchmarks?  According to the definition on
+p. 8, yes.  These programs are relatively small, in some cases the
+datasets are "large" (i.e. hundreds of megabytes, but none are a
+gigabyte).
+
+Whether over 99% of the time is spent in a few lines of code depends
+upon what you mean be "a few".  In knucleotide.clj-8b.clj, almost all
+of the compute time is spent in the last 13 lines of the function
+tally-dna-subs-with-len.  In nbody.clj-12.clj, most of the time is
+spent in the last 10 lines of the function advance, which calls the
+5-line p-dt! and the 18-line v-dt!, which in turn calls the 4-line
+v+!, for a total of 27 lines of "hot code" in a 252-line file.
+
+These programs are not really intended to discover some particular
+fact, and remove all other variables, _unless_ your goal is to
+discover how well this particular program performs on the task at
+hand.  For example, the knucleotide benchmark programs do not measure
+only the hash table implementation performance, because there is at
+least some work in doing other things, but that is certainly one of
+the more significant portions of the run time of the program.
+
+
+
+Cliff Click's advice (summarized greatly):
+
++ Is there loop unrolling going on behind the scenes? (pp. 17-18) See
+  Note 1 below.
+
++ "Beware 'hidden' Cache Blowout" - Does the data set fit into L1
+   cache? (p. 28-29)  See Note 1 below.
+
++ Explicitly Handle GC: Either don't allocate in main loops, so no GC
+  pauses, or run long enough to reach GC steady state. (p. 30) TBD:
+  Consider adding instrumentation to measure total GC time in each run
+  involving a JVM.
+
++ Know what you test (p. 32) - use profiler to measure where most of
+  the time is spent, and report that with the results.
+
++ Be aware of system load - How to verify total CPU time taken by all
+  other processes on the system?  I can eyeball it if I watch the
+  Activity Monitor on a Mac, or top on Linux, Windows Task Manager on
+  Windows, but is there an automated way to easily determine the total
+  CPU time used by all other processes during a particular time
+  interval?
+
++ Be aware of clock granularity (p. 33): This should not be an issue
+  since all of the Clojure programs run for at least 10 sec, and clock
+  granularity is definitely better than 0.1 sec.  (TBD: Verify these
+  numbers)
+
++ Run to steady state, at least 10 sec (p. 33): In many of these
+  programs, each iteration is doing something a bit different, but the
+  general idea of running at least 10 sec is a good one.
+
++ Fixed size datasets (p. 34): Every run with input data has the same
+  input file.  For each one, state the size of the input data that
+  actually needs to be "worked on".
+
++ Constant amount of work per iteration (p. 34): This is not really
+  relevant for these benchmarks, if we are only paying attention to
+  the total time to complete the benchmark run.  It is only relevant
+  if we are trying to calculate a time per iteration of some loop,
+  which we are not.
+
++ Avoid the 'eqntott Syndrome' (p. 34): Again, we are not looking at
+  run times of separate iterations and comparing them to each other.
+  There is some warmup time of doing JIT compilation in all of these
+  runs, but it is there every single time, and it is there for Clojure
+  _and_ Java, and any other JVM-based language implementation.
+
++ Avoid 'dead' loops (p. 35): The final answer is always printed, and
+  the computation is non-trivial in all cases I can recall.  Good to
+  verify this for each benchmark program individually.
+
++ Be explicit about GC (p. 36): Does this mean to measure it and
+  report it separately?
+
++ JIT performance may change over time.  Warmup loop + test code
+  before ANY timing (p. 36): This is relevant if we want to measure
+  the time per iteration of some loop.  That is not the goal for these
+  benchmark programs.  We only care about the time to get the final
+  result.
+
+----------------------------------------------------------------------
+Profiling results
+----------------------------------------------------------------------
+
+TBD: Record a summary for the fastest known Clojure programs, or maybe
+all of them, where they spend the most time, i.e. the call stacks that
+(combined) take up at least half of the program execution time,
+according to a Java profiler.
