@@ -313,36 +313,95 @@ in benchmarks, to avoid pitfalls, and (2) so I can make a list of
 pitfalls mentioned in there, and for each Clojure program describe
 whether I believe it has fallen into that pitfall.
 
-Are these programs microbenchmarks?  According to the definition on
-p. 8, yes.  These programs are relatively small, in some cases the
-datasets are "large" (i.e. hundreds of megabytes, but none are a
-gigabyte).
+Are the shootout benchmark programs microbenchmarks?  Dr. Click gives
+his definition on p. 8, and several examples throughout his talk.  The
+shootout benchmark programs are relatively small, and in some cases
+the datasets are "large" (i.e. hundreds of megabytes, but none are a
+gigabyte).  However, there is a significant difference between these
+benchmarks vs. the examples in Dr. Click's slides: the goal with these
+benchmarks is to measure the entire run time of the whole program, not
+some smaller part of it.  We aren't trying to see whether a particular
+function call takes 7 microsec versus 15 microsec.  We are trying to
+find out how much time is required for all of the calls made together
+during the entire run, and find a program that is as fast as possible
+for that total time.
 
-Whether over 99% of the time is spent in a few lines of code depends
-upon what you mean be "a few".  In knucleotide.clj-8b.clj, almost all
-of the compute time is spent in the last 13 lines of the function
-tally-dna-subs-with-len.  In nbody.clj-12.clj, most of the time is
-spent in the last 10 lines of the function advance, which calls the
-5-line p-dt! and the 18-line v-dt!, which in turn calls the 4-line
-v+!, for a total of 27 lines of "hot code" in a 252-line file.
+Now it is true that for most of these programs, 99% of the time is
+spent in relatively small fraction of the lines of code.  For example,
+in knucleotide.clj-8b.clj, almost all of the compute time is spent in
+the last 13 lines of the function tally-dna-subs-with-len.  In
+nbody.clj-12.clj, most of the time is spent in the last 10 lines of
+the function advance, which calls the 5-line p-dt! and the 18-line
+v-dt!, which in turn calls the 4-line v+!, for a total of 27 lines of
+"hot code" in a 252-line file.
 
-These programs are not really intended to discover some particular
-fact, and remove all other variables, _unless_ your goal is to
-discover how well this particular program performs on the task at
-hand.  For example, the knucleotide benchmark programs do not measure
-only the hash table implementation performance, because there is at
-least some work in doing other things, but that is certainly one of
-the more significant portions of the run time of the program.
+One piece of advice from Dr. Click's slides that is most relevant is
+"Know what you test" (title of p. 32).  These shootout benchmark
+programs are not intended to discover some particular fact, and remove
+all other variables, _unless_ your goal is to discover how well this
+particular program performs on the task at hand.  For example, the
+knucleotide benchmark programs do not measure only the performance of
+the hash table implementation (because there is at least some work in
+doing other things, like reading in a file that is hundreds of
+megabytes long), but that is certainly the most significant portion of
+the program's run time.
 
+In general, when comparing Java and Clojure run times, or any two
+languages implemented on the Java Virtual Machine in this collection
+of benchmarks, realize that the following run times are _included_ in
+the times that you see reported:
+
+    JVM initialization time
+    loading classes from compiled class files
+    time spent reading the input data file (if any) and writing output
+    any time spent doing JIT compilation
+    any time spent performing garbage collection
+
+The following times are _not_ included in the times you see reported:
+
+    Compiling source files to class files
+
+All of the Clojure programs are ahead of time (or AOT) compiled, and
+compiled class files are saved on disk, before the measurement clock
+is started.
+
+Is this fair?  In the sense that the same kinds of processing time are
+included in measurements of both Java and Clojure, it is fair.  Is it
+what _you_ personally want to measure?  That depends upon what you
+want to measure.  You are welcome to measure other things about these
+programs if you wish, and report the times you get.
+
+Because the goal here is to measure the entire run time of these
+programs, "warming up the JVM" via JIT compilation is all included.
+There is no reason (with this goal) to first run the JVM until it is
+warmed up, and then run "the real test".  Warmup is part of the real
+test.
+
+In all of these programs, there should be little or no dead code to be
+eliminated.  All results calculated are printed out in some form.
+Sometimes only a small summary of the the calculated results are
+actually printed, but it is always intended to be a summary such that
+there are no known compilers that are "smart" enough to figure out
+that they could reduce the processing required in order to print the
+desird results.  Could a human do that?  In some cases, it is pretty
+easy for a human to change the program to produce the same output in a
+similar way.  For example, in the k-nucleotide benchmark the program
+must print out the number of occurrences of the substring "GGT" in a
+large input string.  However, the instructions for the benchmark
+require that first a table is made that maps _all_ length 3 substrings
+of the input string to a count of the number of occurrences, then
+extract out the entry for "GGT" and print its count.  Obviously a
+person can change the program to reduce the time and space required if
+the goal is only to calculate counts for the substring "GGT", but it
+is breaking the rules of the benchmark to do so.
 
 
 Cliff Click's advice (summarized greatly):
 
-+ Is there loop unrolling going on behind the scenes? (pp. 17-18) See
-  Note 1 below.
++ Is there loop unrolling going on behind the scenes? (pp. 17-18)
 
 + "Beware 'hidden' Cache Blowout" - Does the data set fit into L1
-   cache? (p. 28-29)  See Note 1 below.
+   cache? (p. 28-29)
 
 + Explicitly Handle GC: Either don't allocate in main loops, so no GC
   pauses, or run long enough to reach GC steady state. (p. 30) TBD:
