@@ -18,7 +18,6 @@ use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
 use Math::BigInt;
-use XML::Parser;
 
 
 my $verbose = 0;
@@ -41,7 +40,7 @@ my $timemem_cmd = time_cmd_location($os, $install_dir);
 
 sub usage {
     print STDERR "
-usage: $progname [-hvcn]
+usage: $progname [-hvcnx]
                [ -a <log_file> ]
                [ -i <input_file> ] [ -o <output_file> ]
                [ -g <check_output_cmd> ]
@@ -54,6 +53,8 @@ usage: $progname [-hvcn]
     -h            Show this help.
 
     -v            Enable debug messages.
+
+    -x            Print measurement output in XML format.
 
     -c            Print measurement output in CSV format, not really
                   intended for human consumption.
@@ -143,7 +144,7 @@ Examples of use on Windows XP + Cygwin:
 ######################################################################
 
 my $opts = { };
-getopts('hvcna:i:o:g:s:t:l:b:f:', $opts);
+getopts('hvcnxa:i:o:g:s:t:l:b:f:', $opts);
 
 $verbose = 1 if ($opts->{v});
 $os = $opts->{s} if ($opts->{s});
@@ -154,6 +155,20 @@ if ($verbose) {
 if ($opts->{h}) {
     usage();
     exit(0);
+}
+if ($opts->{c} and $opts->{x}) {
+    printf STDERR
+"Should supply at most one of the -c (CSV) and -x (XML) options for selecting
+the output format.\n";
+    usage();
+    exit(1);
+}
+if ($opts->{n} and !($opts->{c})) {
+    printf STDERR
+"Option -n has no effect, and should not be given, unless -c (CSV)
+output format is selected.\n";
+    usage();
+    exit(1);
 }
 $timemem_cmd         = (defined($opts->{t}) ? $opts->{t}
 			: time_cmd_location($os, $install_dir));
@@ -549,6 +564,41 @@ if ($opts->{c}) {
 
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
+} elsif ($opts->{x}) {
+    use XML::Twig;
+    XML::Twig->set_pretty_print('indented');
+    my $mlist  = XML::Twig::Elt->new('MeasurementList');
+    my $tag_text_pairs = [];
+    if ($benchmark_name ne '') {
+	push @{$tag_text_pairs}, 'benchmark_name', $benchmark_name;
+    }
+    if ($language_implementation_desc_str ne '') {
+	push @{$tag_text_pairs},
+	    'language_implementation', $language_implementation_desc_str;
+    }
+    if ($source_file_name ne '') {
+	push @{$tag_text_pairs}, 'source_file_name', $source_file_name;
+    }
+    push @{$tag_text_pairs}, 'command_measured', $cmd_to_time;
+    push @{$tag_text_pairs}, 'elapsed_time_sec', $elapsed_sec;
+    push @{$tag_text_pairs}, 'user_cpu_time_sec', $user_sec;
+    push @{$tag_text_pairs}, 'system_cpu_time_sec', $sys_sec;
+    push @{$tag_text_pairs},
+        'maximum_resident_set_size_kibibytes', $max_rss_kbytes;
+    push @{$tag_text_pairs}, 'start_time', $start_time;
+    push @{$tag_text_pairs}, 'end_time', $end_time;
+    push @{$tag_text_pairs}, 'number_of_cpu_cores', $num_cpus;
+    push @{$tag_text_pairs}, 'cpu_usage_per_core', $usage_per_cpu;
+    push @{$tag_text_pairs}, 'exit_status', $cmd_exit_status;
+    if (defined($output_file) && defined($check_good_cmd)) {
+	push @{$tag_text_pairs}, 'command_to_check_output', $check_good_cmd;
+	push @{$tag_text_pairs}, 'exit_status_of_check_cmd', $check_good_cmd_exit_status;
+    }
+    push @{$tag_text_pairs}, 'operating_system', $os_full;
+
+    add_measurement_at_list_end($mlist, $tag_text_pairs);
+    printf "<?xml version=\"1.0\"?>\n";
+    $mlist->print;
 } else {
     if ($benchmark_name ne '') {
 	printf $log "    Benchmark name            : %s\n", $benchmark_name;
@@ -817,4 +867,22 @@ sub time_cmd_location {
 	exit 1;
     }
     return $timemem_cmd;
+}
+
+
+sub add_measurement_at_list_end {
+    my $mlist = shift;
+    my $tag_text_pairs = shift;
+
+    my $m = XML::Twig::Elt->new('Measurement');
+    my $n = $#{$tag_text_pairs};
+    my $i;
+    for ($i = 0; $i < $n; $i += 2) {
+	my $tag = $tag_text_pairs->[$i];
+	my $text = $tag_text_pairs->[$i+1];
+	my $x = XML::Twig::Elt->new($tag);
+	$x->set_text($text);
+	$x->paste('last_child', $m);
+    }
+    $m->paste('last_child', $mlist);
 }
