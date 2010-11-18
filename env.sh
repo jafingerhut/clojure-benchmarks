@@ -47,20 +47,22 @@ then
     # Windows+Cygwin Clojure
     ######################################################################
 
-    HOME_DIR='C:\cygwin\home\Admin'
+    HOME_DIR=`cygpath -w "$HOME"`
     if [ "${CLJ_VERSION:=clj-1.2}" == "clj-1.2" ]
     then
         # Let default Clojure version be 1.2.0 if none is specified.
-        CLOJURE_JAR_DIR="${HOME_DIR}\\lein\\swank-clj-1.2.0\\lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.2.0.jar;${CLOJURE_JAR_DIR}\\clojure-contrib-1.2.0.jar"
+        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/swank-clj-1.2.0/lib"`
+        CLOJURE_CLASSPATH_PART1=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.2.0.jar"`
+        CLOJURE_CLASSPATH_PART2=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-contrib-1.2.0.jar"`
+        CLOJURE_CLASSPATH="${CLOJURE_CLASSPATH_PART1};${CLOJURE_CLASSPATH_PART2}"
     elif [ "$CLJ_VERSION" == "clj-1.3-alpha1" ]
     then
-        CLOJURE_JAR_DIR="${HOME_DIR}\\lein\\clj-1.3.0-alpha1\\lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.3.0-alpha1.jar"
+        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha1/lib"`
+        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha1.jar"`
     elif [ "$CLJ_VERSION" == "clj-1.3-alpha3" ]
     then
-        CLOJURE_JAR_DIR="${HOME_DIR}\\lein\\clj-1.3.0-alpha3\\lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}\\clojure-1.3.0-alpha3.jar"
+        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha3/lib"`
+        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"`
     else
         1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
         exit 1
