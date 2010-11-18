@@ -7,7 +7,7 @@ these do if you are curious):
     # creates directories 'lein' and '.m2' in your home directory
     # (takes about 1.5 mins on my system after Leiningen is
     # installed), or (2) edit env.sh to specify the location of your
-    # Clojure JAR files.
+    # Java VM and javac compiler, and Clojure JAR files.
 
     # Leiningen installation: http://github.com/technomancy/leiningen
     ./lein-init.sh
@@ -29,6 +29,21 @@ Mac OS X 10.5.8
 Mac OS X 10.6.4
 Ubuntu 10.4 LTS
 Windows XP SP3 + Cygwin 1.7.7
+    You need a Java Development Kit installed.  A Java Virtual Machine
+    with no Java compiler (javac) is not enough.  You need a compiler for
+    Java source files that are used in the "./init.sh output" step above
+    to create the input files.  You also need a JVM to run Leiningen,
+    if you use that.
+
+    Packages that should be installed using the Cygwin Setup package
+    manager in order for this to work:
+    wget (in category Web) - needed if you use Leiningen
+    git (in category Devel) - optional, but useful for getting updated
+        versions of clojure-contrib from github.com
+    perl - optional for the steps described in this file right now,
+        but needed if you want to run any of the included Perl scripts,
+        which might soon become the recommended way to make time and
+        memory measurements of the benchmark programs.
 
 Tested with recent Java 1.6.0.X HotSpot JVMs from Sun, and JRockit
 from Oracle on Windows XP.
