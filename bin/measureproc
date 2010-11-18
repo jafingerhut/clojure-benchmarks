@@ -565,6 +565,9 @@ if ($opts->{c}) {
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 } elsif ($opts->{x}) {
+    # TBD: Try learning how to use library XML::LibXML instead of
+    # XML::Twig, since that is easily installable on Cygwin, whereas
+    # XML::Twig is not.
     use XML::Twig;
     XML::Twig->set_pretty_print('indented');
     my $mlist  = XML::Twig::Elt->new('MeasurementList');
@@ -806,6 +809,10 @@ sub time_cmd_location {
 	# longest one.  Then remove that prefix from $install_dir,
 	# replace it with the corresponding Windows prefix that
 	# appears before the word 'on', and replace "/"s with "\"s.
+
+	# TBD: See if there is a way to use the 'cygpath' program in
+	# Cygwin to do some of this work for us.  I'm probably
+	# reinventing a wheel here, and perhaps badly.
 
 	my $longest_matching_cygwin_prefix = '';
 	my $corresponding_windows_prefix = '';
