@@ -39,17 +39,18 @@
 (defn revcomp-buf-and-write [#^java.lang.StringBuilder buf
 			     #^java.io.BufferedWriter wrtr
 			     #^ints comp]
-  (let [len (.length buf)]
+  (let [len (.length buf)
+        nl (int \newline)]
     (when (> len 0)
       (loop [begin (int 0)
 	     end (int (dec len))]
 	(when (<= begin end)
 	  ;; then reverse and complement two more characters, working
 	  ;; from beginning and end towards the middle
-	  (let [b (int (if (= (.charAt buf begin) \newline)
+	  (let [b (int (if (= (int (.charAt buf begin)) nl)
                          (inc begin)
                          begin))
-		e (int (if (= (.charAt buf end) \newline)
+		e (int (if (= (int (.charAt buf end)) nl)
                          (dec end)
                          end))]
 	    (when (<= b e)
