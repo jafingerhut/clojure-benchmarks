@@ -18,6 +18,7 @@ use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
 use Math::BigInt;
+use XML::LibXML;
 
 
 my $verbose = 0;
@@ -565,12 +566,18 @@ if ($opts->{c}) {
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 } elsif ($opts->{x}) {
-    # TBD: Try learning how to use library XML::LibXML instead of
-    # XML::Twig, since that is easily installable on Cygwin, whereas
-    # XML::Twig is not.
-    use XML::Twig;
-    XML::Twig->set_pretty_print('indented');
-    my $mlist  = XML::Twig::Elt->new('MeasurementList');
+    # Create a new document
+    my $xmldoc = XML::LibXML::Document->new();
+
+    # ... with root element having tag MeasurementList
+    my $mlist = $xmldoc->createElement('MeasurementList');
+    $xmldoc->setDocumentElement($mlist);
+
+    # ... and that root element has a first child with tag Measurement
+    my $measurement = $xmldoc->createElement('Measurement');
+    $mlist->appendChild($measurement);
+    
+    # Now fill in the fields of that measurement
     my $tag_text_pairs = [];
     if ($benchmark_name ne '') {
 	push @{$tag_text_pairs}, 'benchmark_name', $benchmark_name;
@@ -599,9 +606,10 @@ if ($opts->{c}) {
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
 
-    add_measurement_at_list_end($mlist, $tag_text_pairs);
-    printf "<?xml version=\"1.0\"?>\n";
-    $mlist->print;
+    add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
+
+    # and finally print out the XML file.
+    print $xmldoc->toString(1);
 } else {
     if ($benchmark_name ne '') {
 	printf $log "    Benchmark name            : %s\n", $benchmark_name;
@@ -877,19 +885,19 @@ sub time_cmd_location {
 }
 
 
-sub add_measurement_at_list_end {
-    my $mlist = shift;
+sub add_children_to_elem {
+    my $xmldoc = shift;
+    my $elem = shift;
     my $tag_text_pairs = shift;
 
-    my $m = XML::Twig::Elt->new('Measurement');
     my $n = $#{$tag_text_pairs};
     my $i;
     for ($i = 0; $i < $n; $i += 2) {
-	my $tag = $tag_text_pairs->[$i];
-	my $text = $tag_text_pairs->[$i+1];
-	my $x = XML::Twig::Elt->new($tag);
-	$x->set_text($text);
-	$x->paste('last_child', $m);
+	my $tag_str = $tag_text_pairs->[$i];
+	my $text_str = $tag_text_pairs->[$i+1];
+	my $child = $xmldoc->createElement($tag_str);
+	my $text = XML::LibXML::Text->new($text_str);
+	$child->appendChild($text);
+	$elem->appendChild($child);
     }
-    $m->paste('last_child', $mlist);
 }
