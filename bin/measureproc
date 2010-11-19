@@ -183,11 +183,11 @@ if (!GetOptions('help' => \$help,
 		'input-file=s' => \$input_file,
 		'output-file=s' => \$output_file,
 		'check-output-cmd=s' => \$check_output_cmd,
-		'os' => \$os_from_cmd_line,
-		'time-cmd' => \$time_cmd_from_cmd_line,
-		'language' => \$language_implementation_desc_str,
-		'benchmark' => \$benchmark_name,
-		'source-file-name' => \$source_file_name
+		'os=s' => \$os_from_cmd_line,
+		'time-cmd=s' => \$time_cmd_from_cmd_line,
+		'language=s' => \$language_implementation_desc_str,
+		'benchmark=s' => \$benchmark_name,
+		'source-file-name=s' => \$source_file_name
                ))
 {
     usage();
@@ -237,11 +237,13 @@ if ($verbose) {
     printf STDERR "\$cmd_to_time='%s'\n", $cmd_to_time;
 }
 
-my $log = *STDOUT;
+my $log;
 if (defined($log_file)) {
     open($log, ">>$log_file")
 	or die sprintf "Could not open log file '%s' for appending: %s",
 	                $log_file, $!;
+} else {
+    $log = $STDOUT;
 }
 
 ######################################################################
@@ -495,6 +497,8 @@ $timemem_cmd, and requires a corresponding change to $progname";
 my $check_output_cmd_exit_status;
 if (defined($output_file) && defined($check_output_cmd)) {
     $check_output_cmd =~ s/%o/$output_file/g;
+    # TBD: Don't let anything sent to stdout of $check_output_cmd get
+    # to our stdout, because it could mess up our XML file output.
     system($check_output_cmd);
     $check_output_cmd_exit_status = $?;
     if ($check_output_cmd_exit_status == -1) {
@@ -673,7 +677,7 @@ if ($output_format_csv) {
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
 
     # and finally print out the XML file.
-    print $xmldoc->toString(1);
+    print $log $xmldoc->toString(1);
 
 } else {
 
