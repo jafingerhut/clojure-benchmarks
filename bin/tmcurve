@@ -1,0 +1,449 @@
+: # use perl -*-Perl-*-
+eval 'exec perl -S "$0" ${1+"$@"}'
+    if 0;
+# -*cperl-*-
+
+use strict;
+use Getopt::Long;
+use File::Basename;
+# File::Temp is a library for creating temporary files.
+use File::Temp qw/ tempfile tempdir /;
+# FindBin is a library to find the directory in which the script is
+# installed.  This can be useful for making it easy to install other
+# auxiliary files needed by the script all in one place, and no matter
+# where someone installs 'the whole package' of files, the script can
+# find them, without needing hand-editing.
+use FindBin;
+use XML::LibXML;
+
+
+my $verbose = 0;
+my $full_progname = $0;
+my $progname = fileparse($full_progname);
+
+my $install_dir = $FindBin::Bin;
+my $measureproc_cmd = $install_dir . "/measureproc";
+if (! -x $measureproc_cmd) {
+    printf STDERR
+"Expected to find measureproc command at the following path, but it is
+either not there, or not executable:
+    $measureproc_cmd
+";
+    exit 1;
+}
+
+my $min_mb_ever_to_use = 16;
+# 2048 is too large for 32-bit JRockit on Windows
+my $max_mb_ever_to_use = 2048 - 16;
+my $starting_mb = 128;
+my $precision_mb = 16;
+my $repeat_count = 3;
+my $min_unique_mb_values = 3;
+my $max_unique_mb_values = 5;
+my $run_time_decrease_percentage = 8;
+my $delta_mb = 8;
+my $check_output_cmd = undef;
+
+
+sub usage {
+    print STDERR
+"usage: $progname [ --help ] [ --verbose ]
+               [ --results-file <results_file> ]
+               [ --min <min_mb> ]  (default $min_mb_ever_to_use)
+               [ --max <max_mb> ]  (default $max_mb_ever_to_use)
+               [ --start <starting_mb> ]  (default $starting_mb)
+               [ --precision <precision_mb> ]  (default $precision_mb)
+               [ --repeat-count <repeat_count> ]  (default $repeat_count)
+               [ --min-unique-mb-values <min_mb_values> ]
+                                          (default $min_unique_mb_values)
+               [ --max-unique-mb-values <max_mb_values> ]
+                                          (default $max_unique_mb_values)
+               [ --run-time-decrease <run_time_decrease> ]
+                                          (default $run_time_decrease_percentage)
+               [ --delta <delta_mb> ]  (default $delta_mb)
+
+                 These options are passed on to measureproc
+                 unmodified, and have the same meaning as documented
+                 there:
+                 [ --input-file <input_file> ]
+                 [ --output-file <output_file> ]
+                 [ --check-output-cmd <check_output_cmd> ]
+                 [ --os <os_name> ]
+                 [ --time-cmd <time_cmd> ]
+                 [ --language <language_implementation_description_string> ]
+                 [ --benchmark <benchmark_problem_name> ]
+                 [ --source-file-name <source_file_name> ]
+
+               <measured_cmd> [ args, with %mb where MB value should go ... ]
+
+The purpose of $progname is to:
+
+    (1) Determine the smallest memory required for <measured_cmd> to
+        run, within a configurable precision.  It uses binary search
+        to find this value.
+
+    (2) Once this minimum required memory is determined, run the
+        command repeatedly with that memory limit, and then for larger
+        memory limits, to see if the program gets significantly faster
+        when permitted more memory.  For example, a larger memory
+        limit might make the program execute faster if it leads to
+        fewer and faster garbage collections.  (Note that this is not
+        _automatically_ true in all cases -- it depends upon the
+        details of the garbage collection method in use and the
+        pattern of memory allocation in the application.)
+
+The <measured_cmd> [ args ... ] is a command that will be executed
+with the arguments that you specify, except that somewhere in those
+arguments should be one or more occurrences of the string %mb.  When
+<measured_cmd> is invoked, all occurrences of %mb are replaced with
+the number of megabytes.  For example:
+
+    java -server -Xmx%mb -cp \$HOME/.clojure/clojure-1.2.0.jar:. nbody
+
+The number represents the amount of memory the command should use.
+$progname does not enforce this memory limit.  The command should do
+so itself based upon the value of %mb given in the command line.
+
+$progname repeatedly executes <measured_cmd> with different values for
+%mb, trying to find the smallest value where it succeeds.  It uses
+binary search to find the smallest such value, to within an accuracy
+of <precision_mb> (default value $precision_mb).
+
+Success is determined by running the command <check_output_cmd>.  This
+command should read the output file specified by --output-file, and
+have an exit status of 0 if that file is good, otherwise it should
+have a non-0 exit status.
+
+TBD: Document all arguments that are not also arguments to
+measureproc.
+";
+}
+
+my $help = 0;
+my $results_file;
+my $input_file;
+my $output_file;
+my $check_output_cmd;
+my $os_from_cmd_line;
+my $time_cmd_from_cmd_line;
+my $language_implementation_desc_str;
+my $benchmark_name;
+my $source_file_name;
+Getopt::Long::Configure('require_order');
+if (!GetOptions('help' => \$help,
+		'verbose+' => \$verbose,
+                'results-file=s' => \$results_file,
+                'min=i' => \$min_mb_ever_to_use,
+                'max=i' => \$max_mb_ever_to_use,
+                'start=i' => \$starting_mb,
+                'precision=i' => \$precision_mb,
+                'repeat-count=i' => \$repeat_count,
+                'min-unique-mb-values=i' => \$min_unique_mb_values,
+                'run-time-decrease=f' => \$run_time_decrease_percentage,
+                'delta=i' => \$delta_mb,
+
+		# These are the options passed on to measureproc
+		'input-file=s' => \$input_file,
+		'output-file=s' => \$output_file,
+		'check-output-cmd=s' => \$check_output_cmd,
+		'os=s' => \$os_from_cmd_line,
+		'time-cmd=s' => \$time_cmd_from_cmd_line,
+		'language=s' => \$language_implementation_desc_str,
+		'benchmark=s' => \$benchmark_name,
+		'source-file-name=s' => \$source_file_name
+               ))
+{
+    usage();
+    exit(1);
+}
+
+if ($help) {
+    usage();
+    exit(0);
+}
+if ((1 <= $min_mb_ever_to_use) &&
+    ($min_mb_ever_to_use <= $starting_mb) &&
+    ($starting_mb <= $max_mb_ever_to_use) &&
+    ($precision_mb >= 1) &&
+    ($repeat_count >= 1) &&
+    (1 <= $min_unique_mb_values) &&
+    ($min_unique_mb_values <= $max_mb_ever_to_use) &&
+    ($run_time_decrease_percentage >= 1) &&
+    ($delta_mb >= 1)
+    )
+{
+    # Good
+} else {
+    printf STDERR
+"The arguments must satisfy these conditions:
+    1  <=  <min_mb>  <=  <starting_mb>  <=  <max_mb>
+    <precision_mb>  >=  1
+    <repeat_count>  >=  1
+    1  <=  <min_mb_values>  <=  <max_mb_values>
+    <run_time_decrease>  >=  1
+    <delta_mb>  >=  1
+
+You have violated one or more of these conditions.
+";
+    usage();
+    exit 1;
+}
+
+if (defined($check_output_cmd) &&
+    defined($output_file))
+{
+    # Good
+} else {
+    printf STDERR
+"You must specify an output file and a command to check it, or else
+the binary search will have no way to verify whether the command is
+successful.
+";
+    usage();
+    exit 1;
+}
+
+my $nargs = 1 + $#ARGV;
+if ($nargs < 1) {
+    printf STDERR
+"You must specify a command to be run.
+";
+    usage();
+    exit 1;
+}
+
+#my $tempdir = tempdir( CLEANUP => 1 );
+my $tempdir = tempdir( CLEANUP => 0 );
+
+my $largest_fail_mb = undef;
+my $smallest_success_mb = undef;
+
+my $mb = $starting_mb;
+
+printf "Looking for smallest memory size that succeeds.\n" if ($verbose >= 1);
+my $success = cmd_succeeds($mb);
+printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+if ($success) {
+    # Then look for smaller memory limit that fails.
+    $smallest_success_mb = $mb;
+    while ($mb > $min_mb_ever_to_use) {
+	if ($mb / 2 >= $min_mb_ever_to_use) {
+	    $mb = $mb / 2;
+	} else {
+	    $mb = $min_mb_ever_to_use;
+	}
+	my $success = cmd_succeeds($mb);
+	printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+	if ($success) {
+	    $smallest_success_mb = $mb;
+	    # Keep going
+	} else {
+	    # Found it.
+	    $largest_fail_mb = $mb;
+	    last;
+	}
+    }
+    if (!defined($largest_fail_mb)) {
+	printf "Tried down to %d MB and all tests succeeded.\n",
+	    $smallest_success_mb if ($verbose >= 1);
+	exit 0;
+    }
+} else {
+    # Then look for larger memory limit that succeeds.
+    $largest_fail_mb = $mb;
+    while ($mb * 2 <= $max_mb_ever_to_use) {
+	$mb = $mb * 2;
+	my $success = cmd_succeeds($mb);
+	printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+	if ($success) {
+	    # Found it.
+	    $smallest_success_mb = $mb;
+	    last;
+	} else {
+	    $largest_fail_mb = $mb;
+	    # Keep going
+	}
+    }
+    if (!defined($smallest_success_mb)) {
+	printf "Tried up to %d MB but all tests failed.\n", $largest_fail_mb
+	    if ($verbose >= 1);
+	exit 0;
+    }
+}
+
+printf "Now perform binary search on range [%d,%d]\n",
+    $largest_fail_mb, $smallest_success_mb if ($verbose >= 1);
+while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
+    $mb = ($largest_fail_mb + $smallest_success_mb) / 2;
+    my $success = cmd_succeeds($mb);
+    if ($success) {
+	$smallest_success_mb = $mb;
+    } else {
+	$largest_fail_mb = $mb;
+    }
+    printf "mb=%d %s   new range [%d,%d]\n",
+        $mb, success_str($success), $largest_fail_mb, $smallest_success_mb
+	    if ($verbose >= 1);
+}
+printf "Succeeded at %d MB, failed at %d MB\n",
+    $smallest_success_mb, $largest_fail_mb
+        if ($verbose >= 1);
+
+exit 0;
+
+
+sub success_str {
+    my $success = shift;
+    return ($success ? "succeed" : "fail");
+}
+
+
+sub cmd_words {
+    my $mb = shift;
+    
+    # Replace %mb wherever it occurs in what is left of ARGV after
+    # option processing above.
+
+    # Make sure to make a copy of @ARGV so we don't clobber it.
+    my @argv_copy = @ARGV;
+    my $cmd_words = [];
+    foreach my $cmd_word (@argv_copy) {
+	$cmd_word =~ s/%mb/$mb/;
+	push @{$cmd_words}, $cmd_word;
+    }
+    return $cmd_words;
+}
+
+
+sub run_measure_cmd {
+    my $mb = shift;
+
+    my $cmd_to_measure_words = cmd_words($mb);
+    printf "Running command with mb=%d: '%s' ...\n",
+        $mb, join(' ', @{$cmd_to_measure_words}) if ($verbose >= 2);
+
+    # Note: We use --log-file option to record XML output in a temp
+    # file, then read that file in.  This is slightly simpler than
+    # reading measureproc's output here, although that is certainly
+    # possible using something like open3 instead of system.  I don't
+    # want to cause system() to invoke a shell for processing things
+    # like > for redirecting stdout, since that might cause problems
+    # with munging the arguments, depending upon what characters they
+    # have in them.
+
+    # Create args for measureproc command, including --xml
+
+    my $args = [];
+    push @{$args}, '--xml';
+    my ($fh, $temp_log_filename) = tempfile( DIR => $tempdir );
+    # Do I need to close this before opening the file for reading?  Or
+    # could I simply use it to read the file from the beginning?
+    # Seems safer to close this and open the file by name later.
+    close $fh;
+    push @{$args}, '--log-file', $temp_log_filename;
+    if (defined($input_file)) {
+	push @{$args}, '--input-file', $input_file;
+    }
+    push @{$args}, '--output-file', $output_file;
+    push @{$args}, '--check-output-cmd', $check_output_cmd;
+    if (defined($os_from_cmd_line)) {
+	push @{$args}, '--os', $os_from_cmd_line;
+    }
+    if ($time_cmd_from_cmd_line) {
+	push @{$args}, '--time-cmd', $time_cmd_from_cmd_line;
+    }
+    if ($language_implementation_desc_str) {
+	push @{$args}, '--language', $language_implementation_desc_str;
+    }
+    if ($benchmark_name) {
+	push @{$args}, '--benchmark', $benchmark_name;
+    }
+    if ($source_file_name) {
+	push @{$args}, '--source-file-name', $source_file_name;
+    }
+
+    # Append the words for the command to be measured.
+    foreach my $cmd_word (@{$cmd_to_measure_words}) {
+	push @{$args}, $cmd_word;
+    }
+
+    printf "    %s '%s'\n", $measureproc_cmd, join("' '", @{$args})
+	if ($verbose >= 2);
+    
+    # Run measureproc
+    my $exit_status = system $measureproc_cmd, @{$args};
+
+    # At least for now, and perhaps always, ignore exit status of
+    # measureproc.  It is really the exit status codes of the measured
+    # command and the check output command that we care about.
+
+    if (-r $temp_log_filename) {
+	my $parser = XML::LibXML->new();
+	my $tree = $parser->parse_file($temp_log_filename);
+	my $root = $tree->getDocumentElement;
+	my $all_measurements = $root->findnodes('Measurement');
+	# There should only be one element in that list.
+	my $measurement_xml_info = $all_measurements->[0];
+
+	my $success = 0;
+	my $measured_cmd_exit_status =
+	    $measurement_xml_info->findvalue('exit_status');
+	my $exit_status_of_check_cmd =
+	    $measurement_xml_info->findvalue('exit_status_of_check_cmd');
+	printf "    exit_status=%s exit_status_of_check_cmd=%s",
+	    $measured_cmd_exit_status, $exit_status_of_check_cmd
+		if ($verbose >= 2);
+	if (defined($measured_cmd_exit_status) &&
+	    ($measured_cmd_exit_status == 0) &&
+	    defined($exit_status_of_check_cmd) &&
+	    ($exit_status_of_check_cmd == 0))
+	{
+	    $success = 1;
+	}
+	printf " success=%d\n", $success if ($verbose >= 2);
+	return ($success, $measurement_xml_info);
+    } else {
+	printf "Temporary log file '%s' created for measureproc was not created.  Assume failure." if ($verbose >= 1);
+	return (0, undef);
+    }
+}
+
+
+sub cmd_succeeds {
+    my $mb = shift;
+
+    my ($success, $measurement_xml_info) = run_measure_cmd($mb);
+    if (defined($measurement_xml_info)) {
+	# Add $measurement_xml_info info to a log file that holds all
+	# measurement data.
+	my $tree;
+	my $root;
+	if (-r $results_file) {
+	    # Append the new results to the existing results file.
+	    my $parser = XML::LibXML->new();
+	    $tree = $parser->parse_file($results_file);
+	    $root = $tree->getDocumentElement;
+	} else {
+	    # Create a new XML file with the current results.
+	    $tree = XML::LibXML::Document->new();
+	    $root = $tree->createElement('MeasurementList');
+	    $tree->setDocumentElement($root);
+	}
+	# Add a separate field to $measurement_xml_info to record the
+	# value of $mb.  Yes, it should be buried in the command line,
+	# but having a separate field will make it easier to extract
+	# and use later.
+	my $new_elem = $tree->createElement('tmcurve_mb_argument');
+	my $text = XML::LibXML::Text->new($mb);
+	$new_elem->appendChild($text);
+	$measurement_xml_info->appendChild($new_elem);
+
+	$root->appendChild($measurement_xml_info);
+	my $fh;
+	open $fh, ">", $results_file;
+	# TBD: Check for failure to open the file for writing.
+	print $fh $tree->toString(1);
+	close $fh;
+    }
+    return $success;
+}
