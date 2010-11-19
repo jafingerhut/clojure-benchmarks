@@ -26,7 +26,7 @@ set -ex
 
 if [ "$OS" == "Cygwin" ]
 then
-    ../bin/tmcurve --verbose --results-file results.xml --input input\\${INPUT_SIZE}-input.txt --output output\\${INPUT_SIZE}-clj-1.2-output.txt --check-output-cmd "diff --strip-trailing-cr --brief output/${INPUT_SIZE}-expected-output.txt output/${INPUT_SIZE}-clj-1.2-output.txt" \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -server -Xmx%mbm -classpath "\\cygwin\\home\\Administrator\\lein\\swank-clj-1.2.0\\lib\\clojure-1.2.0.jar;.\\obj\\clj-1.2" ${BENCHMARK}
+    ../bin/tmcurve --verbose --sorted-summary --results-file results.xml --input input\\${INPUT_SIZE}-input.txt --output output\\${INPUT_SIZE}-clj-1.2-output.txt --check-output-cmd "diff --strip-trailing-cr --brief output/${INPUT_SIZE}-expected-output.txt output/${INPUT_SIZE}-clj-1.2-output.txt" \\Program\ Files\\Java\\jrmc-4.0.1-1.6.0\\bin\\java -server -Xmx%mbm -classpath "\\cygwin\\home\\Administrator\\lein\\swank-clj-1.2.0\\lib\\clojure-1.2.0.jar;.\\obj\\clj-1.2" ${BENCHMARK}
 else
-    ../bin/tmcurve --verbose --results-file results.xml --input input/${INPUT_SIZE}-input.txt --output output/${INPUT_SIZE}-clj-1.2-output.txt --check "diff --strip-trailing-cr --brief output/${INPUT_SIZE}-expected-output.txt %o" java -server -Xmx%mbm -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 ${BENCHMARK}
+    ../bin/tmcurve --verbose --sorted-summary --results-file results.xml --input input/${INPUT_SIZE}-input.txt --output output/${INPUT_SIZE}-clj-1.2-output.txt --check "diff --strip-trailing-cr --brief output/${INPUT_SIZE}-expected-output.txt %o" java -server -Xmx%mbm -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 ${BENCHMARK}
 fi
