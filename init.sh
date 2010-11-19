@@ -6,6 +6,25 @@ then
     MAKE_EXPECTED_OUTPUT_FILES=1
 fi
 
+OS=`uname -o 2>/dev/null`
+if [ $? -ne 0 ]
+then
+    # Option -o does not exist in Mac OS X default version of uname
+    # command.
+    OS=`uname -s 2>/dev/null`
+fi
+
+# It is nice to avoid creating multiple copies of large files, but on
+# Cygwin we measure the cpu and memory usage of commands using
+# timemem.exe in a DOS/Windows batch file, and redirecting input files
+# from Cygwin symbolic links does not work.  So just make a copy.
+if [ "$OS" == "Cygwin" ]
+then
+    LINK_OR_COPY="cp"
+else
+    LINK_OR_COPY="ln -s"
+fi
+
 # Some of the input and expected output files are quite large.  Rather
 # than waste space on github, it seems best to use one of the
 # benchmark programs to generate them, where possible.  I'll pick
@@ -46,17 +65,17 @@ cd knuc
 mkdir ./input
 cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-ln -s ../../fasta/output/knuc-expected-output.txt quick-input.txt
-ln -s ../../fasta/output/medium-expected-output.txt medium-input.txt
-ln -s ../../fasta/output/long-expected-output.txt long-input.txt
+${LINK_OR_COPY} ../../fasta/output/knuc-expected-output.txt quick-input.txt
+${LINK_OR_COPY} ../../fasta/output/medium-expected-output.txt medium-input.txt
+${LINK_OR_COPY} ../../fasta/output/long-expected-output.txt long-input.txt
 cd ../..
 cd rcomp
 mkdir ./input
 cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-ln -s ../../fasta/output/quick-expected-output.txt quick-input.txt
-ln -s ../../fasta/output/medium-expected-output.txt medium-input.txt
-ln -s ../../fasta/output/long-expected-output.txt long-input.txt
+${LINK_OR_COPY} ../../fasta/output/quick-expected-output.txt quick-input.txt
+${LINK_OR_COPY} ../../fasta/output/medium-expected-output.txt medium-input.txt
+${LINK_OR_COPY} ../../fasta/output/long-expected-output.txt long-input.txt
 cd ../..
 
 # rlines isn't one of the benchmarks from the shootout web site.  I
@@ -73,8 +92,8 @@ cd ../..
 cd regex-dna
 mkdir ./input
 cd ./input
-ln -s ../../fasta/output/knuc-expected-output.txt quick-input.txt
-ln -s ../../fasta/output/regexdna-expected-output.txt long-input.txt
+${LINK_OR_COPY} ../../fasta/output/knuc-expected-output.txt quick-input.txt
+${LINK_OR_COPY} ../../fasta/output/regexdna-expected-output.txt long-input.txt
 cd ../..
 
 if [ $MAKE_EXPECTED_OUTPUT_FILES == 0 ]
