@@ -48,6 +48,7 @@ my $check_output_cmd = undef;
 sub usage {
     print STDERR
 "usage: $progname [ --help ] [ --verbose ]
+               [ --sorted-summary ]
                [ --results-file <results_file> ]
                [ --min <min_mb> ]  (default $min_mb_ever_to_use)
                [ --max <max_mb> ]  (default $max_mb_ever_to_use)
@@ -120,6 +121,7 @@ measureproc.
 }
 
 my $help = 0;
+my $sorted_summary = 0;
 my $results_file;
 my $input_file;
 my $output_file;
@@ -132,6 +134,7 @@ my $source_file_name;
 Getopt::Long::Configure('require_order');
 if (!GetOptions('help' => \$help,
 		'verbose+' => \$verbose,
+                'sorted-summary' => \$sorted_summary,
                 'results-file=s' => \$results_file,
                 'min=i' => \$min_mb_ever_to_use,
                 'max=i' => \$max_mb_ever_to_use,
@@ -169,8 +172,7 @@ if ((1 <= $min_mb_ever_to_use) &&
     (1 <= $min_unique_mb_values) &&
     ($min_unique_mb_values <= $max_mb_ever_to_use) &&
     ($run_time_decrease_percentage >= 1) &&
-    ($delta_mb >= 1)
-    )
+    ($delta_mb >= 1))
 {
     # Good
 } else {
@@ -203,6 +205,20 @@ successful.
     exit 1;
 }
 
+if (defined($input_file) &&
+    ! -r $input_file)
+{
+    my $msg = 'that file is not readable';
+    if (! -x $input_file) {
+	$msg = 'no such file exists';
+    }
+    printf STDERR
+"You specified an input file '%s', but %s
+",
+        $input_file, $msg;
+    exit 1;
+}
+
 my $nargs = 1 + $#ARGV;
 if ($nargs < 1) {
     printf STDERR
@@ -219,10 +235,12 @@ my $largest_fail_mb = undef;
 my $smallest_success_mb = undef;
 
 my $mb = $starting_mb;
+my $summaries_to_sort = {};
 
 printf "Looking for smallest memory size that succeeds.\n" if ($verbose >= 1);
 my ($success, $measurement_xml_info) = cmd_succeeds($mb);
 print_status($mb, $success, $measurement_xml_info);
+my $do_binary_search = 1;
 if ($success) {
     # Then look for smaller memory limit that fails.
     $smallest_success_mb = $mb;
@@ -245,7 +263,7 @@ if ($success) {
     if (!defined($largest_fail_mb)) {
 	printf "Tried down to %d MB and all tests succeeded.\n",
 	    $smallest_success_mb if ($verbose >= 1);
-	exit 0;
+	$do_binary_search = 0;
     }
 } else {
     # Then look for larger memory limit that succeeds.
@@ -269,28 +287,37 @@ if ($success) {
     if (!defined($smallest_success_mb)) {
 	printf "Tried up to %d MB but all tests failed.\n", $largest_fail_mb
 	    if ($verbose >= 1);
-	exit 0;
+	$do_binary_search = 0;
     }
 }
 
-printf "Now perform binary search on range [%d,%d]\n",
-    $largest_fail_mb, $smallest_success_mb
-        if ($verbose >= 1);
-while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
-    $mb = ($largest_fail_mb + $smallest_success_mb) / 2;
-    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
-    if ($success) {
-	$smallest_success_mb = $mb;
-    } else {
-	$largest_fail_mb = $mb;
+if ($do_binary_search) {
+    printf "Now perform binary search on range [%d,%d]\n",
+        $largest_fail_mb, $smallest_success_mb
+	    if ($verbose >= 1);
+    while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
+	$mb = ($largest_fail_mb + $smallest_success_mb) / 2;
+	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	if ($success) {
+	    $smallest_success_mb = $mb;
+	} else {
+	    $largest_fail_mb = $mb;
+	}
+	my $extra_info =
+	    sprintf "new range [%d,%d]", $largest_fail_mb, $smallest_success_mb;
+	print_status($mb, $success, $measurement_xml_info, $extra_info);
     }
-    my $extra_info =
-	sprintf "new range [%d,%d]", $largest_fail_mb, $smallest_success_mb;
-    print_status($mb, $success, $measurement_xml_info, $extra_info);
+    printf "Succeeded at %d MB, failed at %d MB\n",
+        $smallest_success_mb, $largest_fail_mb
+	    if ($verbose >= 1);
 }
-printf "Succeeded at %d MB, failed at %d MB\n",
-    $smallest_success_mb, $largest_fail_mb
-        if ($verbose >= 1);
+
+if ($sorted_summary) {
+    printf "\n";
+    foreach $mb (sort { $a <=> $b } keys %{$summaries_to_sort}) {
+	printf "%s", $summaries_to_sort->{$mb};
+    }
+}
 
 exit 0;
 
@@ -458,21 +485,25 @@ sub print_status {
     my $measurement_xml_info = shift;
     my $extra_stuff = shift;
 
-    if ($verbose >= 1) {
-	my $cpu_sec =
-	    $measurement_xml_info->findvalue('user_cpu_time_sec') +
-	    $measurement_xml_info->findvalue('system_cpu_time_sec');
-	my $max_rss_kb = 
-	    $measurement_xml_info->findvalue('maximum_resident_set_size_kibibytes');
-	my $max_rss_mb = max_rss_mb($max_rss_kb);
-	printf "Max heap=%d MB %s  cpu=%s sec  Max RSS=%.1f MB  RSS-heap=%.1f MB",
-	    $mb, success_str($success), $cpu_sec,
-	    $max_rss_mb, $max_rss_mb - $mb;
-	if (defined($extra_stuff)) {
-	    printf "  %s", $extra_stuff;
-	}
-	printf "\n";
+    my $cpu_sec =
+	$measurement_xml_info->findvalue('user_cpu_time_sec') +
+	$measurement_xml_info->findvalue('system_cpu_time_sec');
+    my $max_rss_kb = 
+	$measurement_xml_info->findvalue('maximum_resident_set_size_kibibytes');
+    my $max_rss_mb = max_rss_mb($max_rss_kb);
+    my $line = sprintf "Max heap=%d MB %s  cpu=%s sec  Max RSS=%.1f MB  RSS-heap=%.1f MB",
+        $mb, success_str($success), $cpu_sec, $max_rss_mb, $max_rss_mb - $mb;
+    if (defined($extra_stuff)) {
+	$line .= sprintf "  %s", $extra_stuff;
     }
+    $line .= "\n";
+    if ($verbose >= 1) {
+	printf "%s", $line;
+    }
+    if (!defined($summaries_to_sort->{$mb})) {
+	$summaries_to_sort->{$mb} = '';
+    }
+    $summaries_to_sort->{$mb} .= $line;
 }
 
 
