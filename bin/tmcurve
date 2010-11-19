@@ -21,6 +21,14 @@ my $verbose = 0;
 my $full_progname = $0;
 my $progname = fileparse($full_progname);
 
+my $os = `uname -o 2>/dev/null`;
+if ($? != 0) {
+    # Then likely we are running on a Mac OS X system with the default
+    # uname installation, which accepts -s but not -o option.
+    $os = `uname -s 2>/dev/null`;
+}
+chomp $os;
+
 my $install_dir = $FindBin::Bin;
 my $measureproc_cmd = $install_dir . "/measureproc";
 if (! -x $measureproc_cmd) {
@@ -205,18 +213,29 @@ successful.
     exit 1;
 }
 
-if (defined($input_file) &&
-    ! -r $input_file)
-{
-    my $msg = 'that file is not readable';
-    if (! -x $input_file) {
-	$msg = 'no such file exists';
+if (defined($input_file)) {
+    if ($os eq 'Cygwin' && -l $input_file) {
+	printf STDERR
+"On Cygwin, $progname uses a DOS/Windows batch file to run the command
+and collect cpu and memory usage.  When redirecting input from a file,
+this fails if the input file is a Cygwin symbolic link.
+
+$input_file is a Cygwin symbolic link.  Try copying the file to where
+the symbolic link is, or use the file name of the original file.
+";
+	exit 1;
     }
-    printf STDERR
+    if (! -r $input_file) {
+	my $msg = 'that file is not readable';
+	if (! -x $input_file) {
+	    $msg = 'no such file exists';
+	}
+	printf STDERR
 "You specified an input file '%s', but %s
 ",
-        $input_file, $msg;
-    exit 1;
+            $input_file, $msg;
+	exit 1;
+    }
 }
 
 my $nargs = 1 + $#ARGV;
