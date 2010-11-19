@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 if [ $# -lt 1 ]; then
     1>&2 echo "usage: `basename $0` { quick | medium | long} [ benchmark-name args ]"
