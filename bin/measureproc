@@ -4,21 +4,22 @@ eval 'exec perl -S "$0" ${1+"$@"}'
 # -*cperl-*-
 
 use strict;
-use Getopt::Std;
+use Getopt::Long;
 use File::Basename;
-# A library for creating temporary files
+# File::Temp is a library for creating temporary files.
 use File::Temp qw/ tempfile tempdir /;
-# A library to find the directory in which the script is installed.
-# This can be useful for making it easy to install other auxiliary
-# files needed by the script all in one place, and no matter where
-# someone installs 'the whole package' of files, the script can find
-# them, without needing hand-editing.
+# FindBin is a library to find the directory in which the script is
+# installed.  This can be useful for making it easy to install other
+# auxiliary files needed by the script all in one place, and no matter
+# where someone installs 'the whole package' of files, the script can
+# find them, without needing hand-editing.
 use FindBin;
 use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
 use Math::BigInt;
 use XML::LibXML;
+use Cwd;
 
 
 my $verbose = 0;
@@ -34,69 +35,80 @@ if ($? != 0) {
 chomp $os;
 my $os_full = `uname -a`;
 chomp $os_full;
+my $cwd = cwd();
 
 my $install_dir = $FindBin::Bin;
 my $timemem_cmd = time_cmd_location($os, $install_dir);
 
 
 sub usage {
-    print STDERR "
-usage: $progname [-hvcnx]
-               [ -a <log_file> ]
-               [ -i <input_file> ] [ -o <output_file> ]
-               [ -g <check_output_cmd> ]
-               [ -s <os_name> ] [ -t <time_cmd> ]
-               [ -l <language_implementation_description_string> ]
-               [ -b <benchmark_problem_name> ]
-               [ -f <source_code_file_name> ]
-               <measured_cmd> [ arg1 ... ]\n";
-    print STDERR "
-    -h            Show this help.
+    print STDERR
+"usage: $progname [ --help ] [ --verbose ]
+               [ --xml ]
+               [ --csv ] [ --name-row ]
+               [ --log-file <log_file> ]
+               [ --input-file <input_file> ]
+               [ --output-file <output_file> ]
+               [ --check-output-cmd <check_output_cmd> ]
+               [ --os <os_name> ]
+               [ --time-cmd <time_cmd> ]
+               [ --language <language_implementation_description_string> ]
+               [ --benchmark <benchmark_problem_name> ]
+               [ --source-file-name <source_file_name> ]
+               <measured_cmd> [ arg1 ... ]
 
-    -v            Enable debug messages.
+    --help        Show this help.
 
-    -x            Print measurement output in XML format.
+    --verbose     Enable debug messages.
 
-    -c            Print measurement output in CSV format, not really
+    --xml         Print measurement output in XML format.
+
+    --csv         Print measurement output in CSV format, not really
                   intended for human consumption.
 
-    -n            If -c is given, then also print a 'header line'
+    --name-row    If --csv is given, then also print a 'header line'
                   giving the name of each field in the output CSV
                   file, in addition to the measurements line.
 
-    -a <log_file> Append measurement output to file <log_file>,
+    --log-file <log_file>
+                  Append measurement output to file <log_file>,
                   creating <log_file> if it does not exist already.
 
-    -i <input_file> Input file for <measured_cmd> (optional).  If
+    --input-file <input_file>
+                  Input file for <measured_cmd> (optional).  If
                   provided, <measured_cmd> will be invoked with its
                   standard input redirected from <input_file>.
 
-    -o <output_file> Similar to -i, except it is a file name where
-                  <measure_cmd>'s standard output will be redirected
-                  into, if provided.
+    --output-file <output_file>
+                  Similar to --input-file, except it is a file name
+                  where <measure_cmd>'s standard output will be
+                  redirected into, if provided.
 
-    -g <check_output_cmd>
+    --check-output-cmd <check_output_cmd>
                   A command string used to check whether the output
                   file's contents are good.  The command's exit status
                   should be 0 (i.e. no error) if the output is good,
                   or any non-zero value if the output is not good.
 
-                  This command should have a '%o' in it where the
-                  output file name should be, and $progname will
-                  replace that with the output file name.  This option
-                  should only be given if -o is also given.
+                  This command string may have occurences of %o in it.
+                  If so, $progname will replace all such occurrences
+                  with the output file name.  This option should only
+                  be given if --output-file is also given.
 
-    -s <os_name>  Can be used to specify one of the OS's: Cygwin,
-                  Darwin, GNU/Linux.  This command line option need
-                  only be used to override the default of '$os', which
-                  is detected via the output of the 'uname -o'
-                  command.
+    --os <os_name>
+                  Can be used to specify one of the supported OSs:
+                      Cygwin
+                      Darwin
+                      GNU/Linux
+                  This command line option need only be used to
+                  override the default of '$os', which is detected via
+                  the output of the 'uname -o' command.
 
-    -t <time_cmd> to specify the command to use to measure the running
+    --time-cmd <time_cmd>
+                  Specify the command to use to measure the running
                   time and memory usage of the process.  This is only
                   needed if you wish to override the default command,
-                  which for platform '$os' is:
-                  $timemem_cmd
+                  which for platform '$os' is: $timemem_cmd
 
     The options below do not affect how the command is run or its
     performance measured.  They are simply printed to the output for
@@ -104,19 +116,22 @@ usage: $progname [-hvcnx]
     could be useful later for keeping track of which results are
     which.
 
-    -l <language_implementation_description_string>
-    -b <benchmark_problem_name>
-    -f <source_code_file_name>
+    --language <language_implementation_description_string>
+    --benchmark <benchmark_problem_name>
+    --source-file-name <source_file_name>
+
+Note that command line options can be abbreviated to the shortest
+prefix that uniquely identifies them.
 
 Example of use on Linux or Mac OS X:
 
-  % $progname -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -version
+  % $progname --input input/medium-input.txt --output output/medium-clj-1.2-output.txt java -version
   [ ... output removed ... ]
 
-  % $progname -i input/medium-input.txt -o output/medium-clj-1.2-output.txt java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+  % $progname --input input/medium-input.txt --output output/medium-clj-1.2-output.txt java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
   [ ... output removed ... ]
 
-  % $progname -i input/quick-input.txt -o output/quick-clj-1.2-output.txt -g 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
+  % $progname --input input/quick-input.txt --output output/quick-clj-1.2-output.txt --check 'diff --strip-trailing-cr --brief output/quick-expected-output.txt %o' java -server -Xmx1536m -classpath ~/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
       Command measured          : java -server -Xmx1536m -classpath /Users/andy/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar:./obj/clj-1.2 knucleotide
       Elapsed time (sec)        : 2.857
       User CPU time (sec)       : 3.107
@@ -132,10 +147,10 @@ Example of use on Linux or Mac OS X:
 
 Examples of use on Windows XP + Cygwin:
 
-  % $progname -i input\\\\medium-input.txt -o output\\\\medium-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -version
+  % $progname --input input\\\\medium-input.txt --output output\\\\medium-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -version
   [ ... output removed ... ]
 
-  % $progname -v -i input\\\\quick-input.txt -o output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
+  % $progname --verbose --input input\\\\quick-input.txt --output output\\\\quick-clj-1.2-output.txt \\\\Program\\ Files\\\\Java\\\\jrmc-4.0.1-1.6.0\\\\bin\\\\java -server -Xmx1536m -classpath \"\\\\cygwin\\\\home\\\\Admin\\\\lein\\\\swank-clj-1.2.0\\\\lib\\\\clojure-1.2.0.jar;.\\\\obj\\\\clj-1.2\" knucleotide
   [ ... output removed ... ]
 ";
 }
@@ -144,48 +159,74 @@ Examples of use on Windows XP + Cygwin:
 # Get command line options
 ######################################################################
 
-my $opts = { };
-getopts('hvcnxa:i:o:g:s:t:l:b:f:', $opts);
+my $help;
+my $csv;
+my $output_format_xml;
+my $output_format_csv;
+my $print_csv_name_row;
+my $log_file;
+my $input_file;
+my $output_file;
+my $check_output_cmd;
+my $os_from_cmd_line;
+my $time_cmd_from_cmd_line;
+my $language_implementation_desc_str = '';
+my $benchmark_name = '';
+my $source_file_name = '';
+Getopt::Long::Configure('require_order');
+if (!GetOptions('help' => \$help,
+		'verbose' => \$verbose,
+		'xml' => \$output_format_xml,
+		'csv' => \$output_format_csv,
+		'name-row' => \$print_csv_name_row,
+		'log-file=s' => \$log_file,
+		'input-file=s' => \$input_file,
+		'output-file=s' => \$output_file,
+		'check-output-cmd=s' => \$check_output_cmd,
+		'os' => \$os_from_cmd_line,
+		'time-cmd' => \$time_cmd_from_cmd_line,
+		'language' => \$language_implementation_desc_str,
+		'benchmark' => \$benchmark_name,
+		'source-file-name' => \$source_file_name
+               ))
+{
+    usage();
+    exit(1);
+}
 
-$verbose = 1 if ($opts->{v});
-$os = $opts->{s} if ($opts->{s});
+$os = $os_from_cmd_line if (defined($os_from_cmd_line));
 if ($verbose) {
     printf STDERR "\$os='%s'\n", $os;
     printf STDERR "install dir='%s'\n", $FindBin::Bin;
 }
-if ($opts->{h}) {
+if ($help) {
     usage();
     exit(0);
 }
-if ($opts->{c} and $opts->{x}) {
+if ($output_format_csv and $output_format_xml) {
     printf STDERR
-"Should supply at most one of the -c (CSV) and -x (XML) options for selecting
-the output format.\n";
+"Should supply at most one of the --csv and --xml options for
+selecting the output format.
+";
     usage();
     exit(1);
 }
-if ($opts->{n} and !($opts->{c})) {
+if ($print_csv_name_row and !$output_format_csv) {
     printf STDERR
-"Option -n has no effect, and should not be given, unless -c (CSV)
-output format is selected.\n";
+"Option --name-row has no effect, and should not be given, unless
+--csv output format is selected.
+";
     usage();
     exit(1);
 }
-$timemem_cmd         = (defined($opts->{t}) ? $opts->{t}
-			: time_cmd_location($os, $install_dir));
+$timemem_cmd = (defined($time_cmd_from_cmd_line) ? $time_cmd_from_cmd_line
+		: time_cmd_location($os, $install_dir));
 if ($timemem_cmd =~ /^(\S+)/) {
     my $cmd = $1;
     if (! -x $cmd) {
 	die sprintf "There is no command '$cmd' to measure performance for your command\n";
     }
 }
-my $log_file         = defined($opts->{a}) ? $opts->{a} : undef;
-my $input_file       = defined($opts->{i}) ? $opts->{i} : undef;
-my $output_file      = defined($opts->{o}) ? $opts->{o} : undef;
-my $language_implementation_desc_str = defined($opts->{l}) ? $opts->{l} : '';
-my $benchmark_name   = defined($opts->{b}) ? $opts->{b} : '';
-my $source_file_name = defined($opts->{f}) ? $opts->{f} : '';
-my $check_good_cmd   = defined($opts->{g}) ? $opts->{g} : undef;
 if ($#ARGV < 0) {
     printf STDERR "No command given.\n";
     usage();
@@ -229,7 +270,6 @@ my $cmd_to_run;
 if ($os eq 'Cygwin') {
     # On Cygwin, put the command into a BAT file for execution.
     my $tempdir = tempdir( CLEANUP => 1 );
-    #my $tempdir = tempdir( CLEANUP => 0 );
     my ($fh, $batchfile) = tempfile( DIR => $tempdir, SUFFIX => '.bat' );
     if ($verbose) {
 	printf STDERR "\$tempdir='%s'\n", $tempdir;
@@ -368,20 +408,14 @@ if ($os eq 'Cygwin') {
 	    } elsif (/^\s*Maximum resident set size \(kbytes\):\s*(\d+)\s*$/) {
                 # There is a bug in GNU time version 1.7 that causes
                 # the maximum resident set size reported to be 4 times
-                # too large.  See:
-
+                # too large, at least when running on Linux.  See:
+		#
                 # http://www.mail-archive.com/help-gnu-utils@gnu.org/msg01371.html
 		#
 		# You can find out which version of GNU time you have
-		# in Cygwin using this command:
+		# using this command:
 		#
                 #     /usr/bin/time -V
-		#
-		# If that gives an error message like 'No such file or
-		# directory', then you must use the Cygwin Setup
-		# program to add the 'time' package.  You can search
-		# for it by name, or look for it in the 'Utils'
-		# category.
 
 		# Use BigInt arithmetic, in case the integer is very
 		# large.
@@ -455,32 +489,32 @@ $timemem_cmd, and requires a corresponding change to $progname";
 
 ######################################################################
 # Run the command to check if the output file's contents are good, if
-# specified.
+# such a command was given.
 ######################################################################
 
-my $check_good_cmd_exit_status;
-if (defined($output_file) && defined($check_good_cmd)) {
-    $check_good_cmd =~ s/%o/$output_file/g;
-    system($check_good_cmd);
-    $check_good_cmd_exit_status = $?;
-    if ($check_good_cmd_exit_status == -1) {
-	printf STDERR "failed to execute cmd '%s': %s\n", $check_good_cmd, $!;
+my $check_output_cmd_exit_status;
+if (defined($output_file) && defined($check_output_cmd)) {
+    $check_output_cmd =~ s/%o/$output_file/g;
+    system($check_output_cmd);
+    $check_output_cmd_exit_status = $?;
+    if ($check_output_cmd_exit_status == -1) {
+	printf STDERR "failed to execute cmd '%s': %s\n", $check_output_cmd, $!;
 	exit 1;
-    } elsif (($check_good_cmd_exit_status & 127) != 0) {
+    } elsif (($check_output_cmd_exit_status & 127) != 0) {
 	printf STDERR "check good cmd '%s' died with signal %d, %s coredump\n",
-	    $check_good_cmd,
-	    ($check_good_cmd_exit_status & 127),
-	    ($check_good_cmd_exit_status & 128) ? 'with' : 'without';
+	    $check_output_cmd,
+	    ($check_output_cmd_exit_status & 127),
+	    ($check_output_cmd_exit_status & 128) ? 'with' : 'without';
     } else {
-	my $child_exit_status = $check_good_cmd_exit_status >> 8;
+	my $child_exit_status = $check_output_cmd_exit_status >> 8;
 	if ($child_exit_status != 0) {
 	    printf STDERR "check good cmd '%s' exited with error status %d\n",
-	        $check_good_cmd, $child_exit_status;
+	        $check_output_cmd, $child_exit_status;
 	}
     }
 }
 
-# Note: If $check_good_cmd_exit_status is 0, then everything is fine.
+# Note: If $check_output_cmd_exit_status is 0, then everything is fine.
 
 # If it is not 0, then either it exited with a non-0 exit status, or
 # it was stopped without exiting normally, e.g. via a signal.  No
@@ -492,12 +526,55 @@ if (defined($output_file) && defined($check_good_cmd)) {
 # Print the performance stats in the desired format.
 ######################################################################
 
-if ($opts->{c}) {
-    if ($opts->{n}) {
+# TBD: percent of cpu this job got while it ran
+
+# TBD: Is there a way to find out how much total CPU time *all other
+# processes* got while this process was running?  It would be nice to
+# have some kind of automated verification that the overall system
+# load due to other processes was very low while running benchmark
+# programs.
+
+# TBD:
+#    description string for result summary:
+#        normal completion, output correct
+#        normal completion, output incorrect
+#	completed with exception <name>
+#        unknown type of completion, output incorrect
+#        killed after taking too long
+
+# TBD: some measure of the maximum memory ever used by all
+# simultaneously live Java objects, in kbytes (tbd: check out
+# -verbose:gc output, and learn how to interpret the values to see if
+# they can provide this measurement)
+
+# TBD: For JVM-based programs, it would be nice to extract and report
+# separately a measure of CPU time used by GCs.  Can probably be done
+# by parsing the extra output lines produced when -verbose:gc is given
+# to JVM.
+
+# TBD: Description of hardware, e.g. # of CPU cores, type, and clock
+# speed of each.
+
+# For Ubuntu Linux, some info is available in /proc/cpuinfo
+
+# Mac OS X command to get CPU details:
+# /usr/sbin/system_profiler -detailLevel full SPHardwareDataType
+
+# Command to get OS details in a format more like in "About This Mac"
+# menu item: sw_vers
+
+# Other similar commands mentioned at:
+# http://serverfault.com/questions/14981/getting-cpu-information-from-command-line-in-mac-os-x-server
+
+if ($output_format_csv) {
+    if ($print_csv_name_row) {
 	my $field_names = [ "Benchmark name",
 			    "Language implementation",
 			    "Source file name",
 			    "Command measured",
+			    "Input file",
+			    "Output file",
+			    "Current working directory",
 			    "Elapsed sec",
 			    "User sec",
 			    "System sec",
@@ -526,6 +603,9 @@ if ($opts->{c}) {
     printf $log ",%s", csv_str($language_implementation_desc_str);
     printf $log ",%s", csv_str($source_file_name);
     printf $log ",%s", csv_str($cmd_to_time);
+    printf $log ",%s", cvs_str(defined($input_file) ? $input_file : '');
+    printf $log ",%s", cvs_str(defined($output_file) ? $output_file : '');
+    printf $log ",%s", csv_str($cwd);
     printf $log ",%s", $elapsed_sec;
     printf $log ",%s", $user_sec;
     printf $log ",%s", $sys_sec;
@@ -534,38 +614,16 @@ if ($opts->{c}) {
     printf $log ",%s", csv_str($end_time);
     printf $log ",%s", $num_cpus;
     printf $log ",%s", csv_str($usage_per_cpu);
-    # TBD: percent of cpu this job got while it ran
     printf $log ",%s", $cmd_exit_status;
-    printf $log ",%s", csv_str(defined($check_good_cmd) ? $check_good_cmd : '');
-    printf $log ",%s", (defined($check_good_cmd_exit_status)
-			? $check_good_cmd_exit_status : '');
-    # TBD:
-    #    description string for result summary:
-    #        normal completion, output correct
-    #        normal completion, output incorrect
-    #	completed with exception <name>
-    #        unknown type of completion, output incorrect
-    #        killed after taking too long
-    #    tbd: some measure of the maximum memory ever used by all
-    #        simultaneously live Java objects, in kbytes (tbd: check out
-    #        -verbose:gc output, and learn how to interpret the values to
-    #        see if they can provide this measurement)
-    # TBD: Description of hardware, e.g. # of CPU cores, type, and
-    #     clock speed of each.
-
-    # Mac OS X command to get CPU details:
-    # /usr/sbin/system_profiler -detailLevel full SPHardwareDataType
-
-    # Command to get OS details in a format more like in "About This
-    # Mac" menu item:
-    # sw_vers
-
-    # Other similar commands mentioned at:
-    # http://serverfault.com/questions/14981/getting-cpu-information-from-command-line-in-mac-os-x-server
-
+    printf $log ",%s", csv_str(defined($check_output_cmd) ? $check_output_cmd
+			       : '');
+    printf $log ",%s", (defined($check_output_cmd_exit_status)
+			? $check_output_cmd_exit_status : '');
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
-} elsif ($opts->{x}) {
+
+} elsif ($output_format_xml) {
+
     # Create a new document
     my $xmldoc = XML::LibXML::Document->new();
 
@@ -590,27 +648,35 @@ if ($opts->{c}) {
 	push @{$tag_text_pairs}, 'source_file_name', $source_file_name;
     }
     push @{$tag_text_pairs}, 'command_measured', $cmd_to_time;
+    push @{$tag_text_pairs}, 'input_file',
+        defined($input_file) ? $input_file : '';
+    push @{$tag_text_pairs}, 'output_file',
+        defined($output_file) ? $output_file : '';
+    push @{$tag_text_pairs}, 'current_working_directory', $cwd;
     push @{$tag_text_pairs}, 'elapsed_time_sec', $elapsed_sec;
     push @{$tag_text_pairs}, 'user_cpu_time_sec', $user_sec;
     push @{$tag_text_pairs}, 'system_cpu_time_sec', $sys_sec;
-    push @{$tag_text_pairs},
-        'maximum_resident_set_size_kibibytes', $max_rss_kbytes;
+    push @{$tag_text_pairs}, 'maximum_resident_set_size_kibibytes',
+        $max_rss_kbytes;
     push @{$tag_text_pairs}, 'start_time', $start_time;
     push @{$tag_text_pairs}, 'end_time', $end_time;
     push @{$tag_text_pairs}, 'number_of_cpu_cores', $num_cpus;
     push @{$tag_text_pairs}, 'cpu_usage_per_core', $usage_per_cpu;
     push @{$tag_text_pairs}, 'exit_status', $cmd_exit_status;
-    if (defined($output_file) && defined($check_good_cmd)) {
-	push @{$tag_text_pairs}, 'command_to_check_output', $check_good_cmd;
-	push @{$tag_text_pairs}, 'exit_status_of_check_cmd', $check_good_cmd_exit_status;
+    if (defined($output_file) && defined($check_output_cmd)) {
+	push @{$tag_text_pairs}, 'command_to_check_output', $check_output_cmd;
+	push @{$tag_text_pairs}, 'exit_status_of_check_cmd',
+	    $check_output_cmd_exit_status;
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
 
-    add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
+    libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
 
     # and finally print out the XML file.
     print $xmldoc->toString(1);
+
 } else {
+
     if ($benchmark_name ne '') {
 	printf $log "    Benchmark name            : %s\n", $benchmark_name;
     }
@@ -621,17 +687,24 @@ if ($opts->{c}) {
 	printf $log "    Source file name          : %s\n", $source_file_name;
     }
     printf $log "    Command measured          : %s\n", $cmd_to_time;
+    if (defined($input_file)) {
+	printf $log "    Input file                : %s\n", $input_file;
+    }
+    if (defined($output_file)) {
+	printf $log "    Output file               : %s\n", $output_file;
+    }
+    printf $log "    Current working directory : %s\n", $cwd;
     printf $log "    Elapsed time (sec)        : %s\n", $elapsed_sec;
     printf $log "    User CPU time (sec)       : %s\n", $user_sec;
     printf $log "    System CPU time (sec)     : %s\n", $sys_sec;
-    printf $log "    Max resident set size (kb): %s\n", $max_rss_kbytes;
+    printf $log "    Max resident set size (KB): %s\n", $max_rss_kbytes;
     printf $log "    Start time                : %s\n", $start_time;
     printf $log "    End time                  : %s\n", $end_time;
     printf $log "    Per core CPU usage (%d cores): %s\n", $num_cpus, $usage_per_cpu;
     printf $log "    Exit status               : %s\n", $cmd_exit_status;
-    if (defined($output_file) && defined($check_good_cmd)) {
-	printf $log "    Command to check output   : %s\n", $check_good_cmd;
-	printf $log "    Exit status of check cmd  : %s\n", $check_good_cmd_exit_status;
+    if (defined($output_file) && defined($check_output_cmd)) {
+	printf $log "    Command to check output   : %s\n", $check_output_cmd;
+	printf $log "    Exit status of check cmd  : %s\n", $check_output_cmd_exit_status;
     }
     printf $log "    OS description            : %s\n", $os_full;
 }
@@ -885,7 +958,7 @@ sub time_cmd_location {
 }
 
 
-sub add_children_to_elem {
+sub libxml_add_children_to_elem {
     my $xmldoc = shift;
     my $elem = shift;
     my $tag_text_pairs = shift;
