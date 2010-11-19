@@ -32,11 +32,11 @@ either not there, or not executable:
     exit 1;
 }
 
-my $min_mb_ever_to_use = 16;
+my $min_mb_ever_to_use = 4;
 # 2048 is too large for 32-bit JRockit on Windows
-my $max_mb_ever_to_use = 2048 - 16;
+my $max_mb_ever_to_use = 2048 - 4;
 my $starting_mb = 128;
-my $precision_mb = 16;
+my $precision_mb = 4;
 my $repeat_count = 3;
 my $min_unique_mb_values = 3;
 my $max_unique_mb_values = 5;
@@ -221,19 +221,18 @@ my $smallest_success_mb = undef;
 my $mb = $starting_mb;
 
 printf "Looking for smallest memory size that succeeds.\n" if ($verbose >= 1);
-my $success = cmd_succeeds($mb);
-printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+print_status($mb, $success, $measurement_xml_info);
 if ($success) {
     # Then look for smaller memory limit that fails.
     $smallest_success_mb = $mb;
     while ($mb > $min_mb_ever_to_use) {
-	if ($mb / 2 >= $min_mb_ever_to_use) {
-	    $mb = $mb / 2;
-	} else {
+	$mb = $mb / 2;
+	if ($mb < $min_mb_ever_to_use) {
 	    $mb = $min_mb_ever_to_use;
 	}
-	my $success = cmd_succeeds($mb);
-	printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	print_status($mb, $success, $measurement_xml_info);
 	if ($success) {
 	    $smallest_success_mb = $mb;
 	    # Keep going
@@ -251,10 +250,13 @@ if ($success) {
 } else {
     # Then look for larger memory limit that succeeds.
     $largest_fail_mb = $mb;
-    while ($mb * 2 <= $max_mb_ever_to_use) {
+    while ($mb < $max_mb_ever_to_use) {
 	$mb = $mb * 2;
-	my $success = cmd_succeeds($mb);
-	printf "mb=%d %s\n", $mb, success_str($success) if ($verbose >= 1);
+	if ($mb > $max_mb_ever_to_use) {
+	    $mb = $max_mb_ever_to_use;
+	}
+	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	print_status($mb, $success, $measurement_xml_info);
 	if ($success) {
 	    # Found it.
 	    $smallest_success_mb = $mb;
@@ -272,18 +274,19 @@ if ($success) {
 }
 
 printf "Now perform binary search on range [%d,%d]\n",
-    $largest_fail_mb, $smallest_success_mb if ($verbose >= 1);
+    $largest_fail_mb, $smallest_success_mb
+        if ($verbose >= 1);
 while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
     $mb = ($largest_fail_mb + $smallest_success_mb) / 2;
-    my $success = cmd_succeeds($mb);
+    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
     if ($success) {
 	$smallest_success_mb = $mb;
     } else {
 	$largest_fail_mb = $mb;
     }
-    printf "mb=%d %s   new range [%d,%d]\n",
-        $mb, success_str($success), $largest_fail_mb, $smallest_success_mb
-	    if ($verbose >= 1);
+    my $extra_info =
+	sprintf "new range [%d,%d]", $largest_fail_mb, $smallest_success_mb;
+    print_status($mb, $success, $measurement_xml_info, $extra_info);
 }
 printf "Succeeded at %d MB, failed at %d MB\n",
     $smallest_success_mb, $largest_fail_mb
@@ -445,5 +448,36 @@ sub cmd_succeeds {
 	print $fh $tree->toString(1);
 	close $fh;
     }
-    return $success;
+    return ($success, $measurement_xml_info);
+}
+
+
+sub print_status {
+    my $mb = shift;
+    my $success = shift;
+    my $measurement_xml_info = shift;
+    my $extra_stuff = shift;
+
+    if ($verbose >= 1) {
+	my $cpu_sec =
+	    $measurement_xml_info->findvalue('user_cpu_time_sec') +
+	    $measurement_xml_info->findvalue('system_cpu_time_sec');
+	my $max_rss_kb = 
+	    $measurement_xml_info->findvalue('maximum_resident_set_size_kibibytes');
+	my $max_rss_mb = max_rss_mb($max_rss_kb);
+	printf "Max heap=%d MB %s  cpu=%s sec  Max RSS=%.1f MB  RSS-heap=%.1f MB",
+	    $mb, success_str($success), $cpu_sec,
+	    $max_rss_mb, $max_rss_mb - $mb;
+	if (defined($extra_stuff)) {
+	    printf "  %s", $extra_stuff;
+	}
+	printf "\n";
+    }
+}
+
+
+sub max_rss_mb {
+    my $max_rss_kb = shift;
+
+    return ($max_rss_kb / 1024.0);
 }
