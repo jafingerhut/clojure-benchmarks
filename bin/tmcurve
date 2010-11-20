@@ -15,6 +15,7 @@ use File::Temp qw/ tempfile tempdir /;
 # find them, without needing hand-editing.
 use FindBin;
 use XML::LibXML;
+use POSIX qw(ceil);
 
 
 my $verbose = 0;
@@ -40,16 +41,13 @@ either not there, or not executable:
     exit 1;
 }
 
+my $starting_mb = 128;
 my $min_mb_ever_to_use = 4;
 # 2048 is too large for 32-bit JRockit on Windows
 my $max_mb_ever_to_use = 2048 - 4;
-my $starting_mb = 128;
 my $precision_mb = 4;
-my $repeat_count = 3;
-my $min_unique_mb_values = 3;
-my $max_unique_mb_values = 5;
-my $run_time_decrease_percentage = 8;
-my $delta_mb = 8;
+my $repeat_count = 4;
+my $num_mb_values = 5;
 my $check_output_cmd = undef;
 
 
@@ -58,18 +56,16 @@ sub usage {
 "usage: $progname [ --help ] [ --verbose ]
                [ --sorted-summary ]
                [ --results-file <results_file> ]
+               [ --binary-search-only ]
+               [ --sweep-only ]
+               [ --start <starting_mb> ]  (default $starting_mb)
                [ --min <min_mb> ]  (default $min_mb_ever_to_use)
                [ --max <max_mb> ]  (default $max_mb_ever_to_use)
-               [ --start <starting_mb> ]  (default $starting_mb)
                [ --precision <precision_mb> ]  (default $precision_mb)
-               [ --repeat-count <repeat_count> ]  (default $repeat_count)
-               [ --min-unique-mb-values <min_mb_values> ]
-                                          (default $min_unique_mb_values)
-               [ --max-unique-mb-values <max_mb_values> ]
-                                          (default $max_unique_mb_values)
-               [ --run-time-decrease <run_time_decrease> ]
-                                          (default $run_time_decrease_percentage)
-               [ --delta <delta_mb> ]  (default $delta_mb)
+               [ --repeat-count <repeat_count> ]   (default $repeat_count)
+               [ --num-mb-values <num_mb_values> ] (default $num_mb_values)
+               [ --delta <delta_mb> ]  (no default)
+               [ --alpha <alpha> ]     (no default)
 
                  These options are passed on to measureproc
                  unmodified, and have the same meaning as documented
@@ -87,19 +83,19 @@ sub usage {
 
 The purpose of $progname is to:
 
-    (1) Determine the smallest memory required for <measured_cmd> to
-        run, within a configurable precision.  It uses binary search
-        to find this value.
+    (1) Binary search phase: Determine the smallest memory required
+        for <measured_cmd> to run, within a configurable precision.
+        It uses binary search to find this value.
 
-    (2) Once this minimum required memory is determined, run the
-        command repeatedly with that memory limit, and then for larger
-        memory limits, to see if the program gets significantly faster
-        when permitted more memory.  For example, a larger memory
-        limit might make the program execute faster if it leads to
-        fewer and faster garbage collections.  (Note that this is not
-        _automatically_ true in all cases -- it depends upon the
-        details of the garbage collection method in use and the
-        pattern of memory allocation in the application.)
+    (2) Sweep phase: Once this minimum required memory is determined,
+        run the command repeatedly with that memory limit.  Then run
+        it with larger memory limits, to see if the program gets
+        significantly faster when permitted more memory.  For example,
+        a larger memory limit might make the program execute faster if
+        it leads to fewer and faster garbage collections.  (Note that
+        this is not _automatically_ true in all cases -- it depends
+        upon the details of the garbage collection method in use and
+        the pattern of memory allocation in the application.)
 
 The <measured_cmd> [ args ... ] is a command that will be executed
 with the arguments that you specify, except that somewhere in those
@@ -123,14 +119,64 @@ command should read the output file specified by --output-file, and
 have an exit status of 0 if that file is good, otherwise it should
 have a non-0 exit status.
 
+    --binary-search-only
+        Do only the binary search phase (1), leaving out (2).
+        Relevant parameters that control this phase are:
+
+          --start <starting_mb>  (default $starting_mb)
+          --min <min_mb>  (default $min_mb_ever_to_use)
+          --max <max_mb>  (default $max_mb_ever_to_use)
+          --precision <precision_mb> (default $precision_mb)
+
+    --sweep-only
+        Do only the 'sweep' phase (2), leaving out the binary search
+        (1).  Relevant parameters that control this phase are:
+
+          --start <starting_mb>  (default $starting_mb)
+          --repeat-count <repeat_count>   (default $repeat_count)
+          --num-mb-values <num_mb_values> (default $num_mb_values)
+
+          Exactly one of --delta and --alpha must be specified if the
+          sweep phase is performed.  If --delta <delta_mb> is given,
+          then the program will be run with MB values of S, S+D,
+          S+2*D, etc. where S is <starting_mb> and D is <delta_mb>.
+
+          If instead --alpha <alpha> is given, then the program will
+          be run with MB values of S, S*A, S*A^2, S*A^3, etc. where A
+          is <alpha>.  Each value will be made at least 1 MB larger
+          than the one before, if it is not already, so the program is
+          guaranteed to be run with different MB values.
+
+          Whether --delta or --alpha is used, the program will be run
+          with <num_mb_values> different values of MB, unless the
+          increasing values would go over <max_mb>, in which case
+          fewer than <num_mb_values> different MB values will be used.
+          The program will be run <repeat_count> times for each MB
+          value used, to learn whether there is much variation in the
+          time or memory used from one run to the next.
+
+If neither --binary-search-only nor --sweep-only options are
+specified, $progname will do both the binary search and sweep phases,
+each controlled by the relevant parameters.  The only exception is
+that the first MB value used for the sweep phase will not be
+<starting_mb>, but the smallest MB value found in the binary search
+phase for which the program produced correct output.
+
 TBD: Document all arguments that are not also arguments to
 measureproc.
+
+    --sorted-summary
+    --results-file <results_file>
 ";
 }
 
 my $help = 0;
 my $sorted_summary = 0;
 my $results_file;
+my $binary_search_only;
+my $sweep_only;
+my $delta_mb;
+my $alpha;
 my $input_file;
 my $output_file;
 my $check_output_cmd;
@@ -139,19 +185,22 @@ my $time_cmd_from_cmd_line;
 my $language_implementation_desc_str;
 my $benchmark_name;
 my $source_file_name;
+my $stop_after_arg_processing;
 Getopt::Long::Configure('require_order');
 if (!GetOptions('help' => \$help,
 		'verbose+' => \$verbose,
                 'sorted-summary' => \$sorted_summary,
                 'results-file=s' => \$results_file,
+                'binary-search-only' => \$binary_search_only,
+                'sweep-only' => \$sweep_only,
+                'start=i' => \$starting_mb,
                 'min=i' => \$min_mb_ever_to_use,
                 'max=i' => \$max_mb_ever_to_use,
-                'start=i' => \$starting_mb,
                 'precision=i' => \$precision_mb,
                 'repeat-count=i' => \$repeat_count,
-                'min-unique-mb-values=i' => \$min_unique_mb_values,
-                'run-time-decrease=f' => \$run_time_decrease_percentage,
+                'num-mb-values=i' => \$num_mb_values,
                 'delta=i' => \$delta_mb,
+                'alpha=f' => \$alpha,
 
 		# These are the options passed on to measureproc
 		'input-file=s' => \$input_file,
@@ -161,7 +210,11 @@ if (!GetOptions('help' => \$help,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
-		'source-file-name=s' => \$source_file_name
+		'source-file-name=s' => \$source_file_name,
+
+		# Undocumented option strictly for developer testing
+		# of the argument processing itself.
+		'stop-after-arg-processing' => \$stop_after_arg_processing
                ))
 {
     usage();
@@ -170,55 +223,87 @@ if (!GetOptions('help' => \$help,
 
 if ($help) {
     usage();
-    exit(0);
+    exit 0;
 }
-if ((1 <= $min_mb_ever_to_use) &&
-    ($min_mb_ever_to_use <= $starting_mb) &&
-    ($starting_mb <= $max_mb_ever_to_use) &&
-    ($precision_mb >= 1) &&
-    ($repeat_count >= 1) &&
-    (1 <= $min_unique_mb_values) &&
-    ($min_unique_mb_values <= $max_mb_ever_to_use) &&
-    ($run_time_decrease_percentage >= 1) &&
-    ($delta_mb >= 1))
+
+if ($binary_search_only && $sweep_only) {
+    printf STDERR
+"$progname: You must not specify both of --binary-search-only and
+--sweep-only.  At most one of those two may be used.
+";
+    exit 1;
+}
+
+my $do_binary_search_phase = 1;
+my $do_sweep_phase = 1;
+if ($binary_search_only) {
+    $do_sweep_phase = 0;
+}
+if ($sweep_only) {
+    $do_binary_search_phase = 0;
+}
+
+if (defined($binary_search_only) || exactly_one_defined([ $delta_mb, $alpha ]))
 {
     # Good
 } else {
     printf STDERR
-"The arguments must satisfy these conditions:
+"$progname: If you do not specify --binary-search-only, then exactly
+one of <delta_mb> and <alpha> must specified.
+";
+    exit 1;
+}
+if ( (1 <= $min_mb_ever_to_use) &&
+     ($min_mb_ever_to_use <= $starting_mb) &&
+     ($starting_mb <= $max_mb_ever_to_use) &&
+     ($precision_mb >= 1) &&
+     ($repeat_count >= 1) &&
+     ($num_mb_values >= 1) &&
+     (!defined($delta_mb) || ($delta_mb >= 1)) &&
+     (!defined($alpha) || ($alpha > 1.0))
+    )
+{
+    # Good
+} else {
+    printf STDERR
+"$progname: The arguments must satisfy these conditions:
     1  <=  <min_mb>  <=  <starting_mb>  <=  <max_mb>
     <precision_mb>  >=  1
     <repeat_count>  >=  1
-    1  <=  <min_mb_values>  <=  <max_mb_values>
-    <run_time_decrease>  >=  1
-    <delta_mb>  >=  1
+    <num_mb_values>  >=  1
+    <delta_mb>  >=  1   (if --delta_mb specified)
+    <alpha>  >  1.0     (if --alpha specified)
 
 You have violated one or more of these conditions.
 ";
-    usage();
     exit 1;
 }
 
-if (defined($check_output_cmd) &&
-    defined($output_file))
-{
-    # Good
-} else {
-    printf STDERR
-"You must specify an output file and a command to check it, or else
-the binary search will have no way to verify whether the command is
-successful.
+if ($do_binary_search_phase) {
+    # We will be doing binary search, so we need to have an
+    # <output_file> and a <check_output_cmd> to verify whether the
+    # command is working.
+    if (defined($check_output_cmd) && defined($output_file)) {
+	# Good
+    } else {
+	printf STDERR
+"$progname: You must specify an output file and a command to check it,
+or else the binary search will have no way to verify whether the
+command is successful.
 ";
-    usage();
-    exit 1;
+	exit 1;
+    }
+} else {
+    # Then those arguments need not be specified if the user does not
+    # want to.  tmcurve won't be checking the output.
 }
 
 if (defined($input_file)) {
     if ($os eq 'Cygwin' && -l $input_file) {
 	printf STDERR
-"On Cygwin, $progname uses a DOS/Windows batch file to run the command
-and collect cpu and memory usage.  When redirecting input from a file,
-this fails if the input file is a Cygwin symbolic link.
+"$progname: On Cygwin, $progname uses a DOS/Windows batch file to run
+the command and collect cpu and memory usage.  When redirecting input
+from a file, this fails if the input file is a Cygwin symbolic link.
 
 $input_file is a Cygwin symbolic link.  Try copying the file to where
 the symbolic link is, or use the file name of the original file.
@@ -231,7 +316,7 @@ the symbolic link is, or use the file name of the original file.
 	    $msg = 'no such file exists';
 	}
 	printf STDERR
-"You specified an input file '%s', but %s
+"$progname: You specified an input file '%s', but %s
 ",
             $input_file, $msg;
 	exit 1;
@@ -241,94 +326,131 @@ the symbolic link is, or use the file name of the original file.
 my $nargs = 1 + $#ARGV;
 if ($nargs < 1) {
     printf STDERR
-"You must specify a command to be run.
+"$progname: You must specify a command to be run.
 ";
-    usage();
     exit 1;
 }
 
+if ($stop_after_arg_processing) {
+    if ($do_sweep_phase) {
+	my $mb = $starting_mb;
+	my $mb_vals = sweep_phase_mb_values($mb, $delta_mb, $alpha,
+					    $num_mb_values,
+					    $max_mb_ever_to_use);
+	printf "sweep phase MB values to use: %s\n", join(' ', @{$mb_vals});
+    }
+    printf "\$do_binary_search_phase=%s \$do_sweep_phase=%s\n",
+        $do_binary_search_phase, $do_sweep_phase;
+    printf STDERR "andy-debug: Stopping early after argument processing.\n";
+    exit 2;
+}
+
+# TBD: Change this back to cleanup 1
 #my $tempdir = tempdir( CLEANUP => 1 );
 my $tempdir = tempdir( CLEANUP => 0 );
 
-my $largest_fail_mb = undef;
-my $smallest_success_mb = undef;
 
-my $mb = $starting_mb;
 my $summaries_to_sort = {};
+my $mb = $starting_mb;
 
-printf "Looking for smallest memory size that succeeds.\n" if ($verbose >= 1);
-my ($success, $measurement_xml_info) = cmd_succeeds($mb);
-print_status($mb, $success, $measurement_xml_info);
-my $do_binary_search = 1;
-if ($success) {
-    # Then look for smaller memory limit that fails.
-    $smallest_success_mb = $mb;
-    while ($mb > $min_mb_ever_to_use) {
-	$mb = $mb / 2;
-	if ($mb < $min_mb_ever_to_use) {
-	    $mb = $min_mb_ever_to_use;
+if ($do_binary_search_phase) {
+    my $largest_fail_mb;
+    my $smallest_success_mb;
+
+    printf "Looking for smallest memory size that succeeds.\n" if ($verbose >= 1);
+    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+    print_status($mb, $success, $measurement_xml_info);
+    my $do_range_narrowing = 1;
+    if ($success) {
+	# Then look for smaller memory limit that fails.
+	$smallest_success_mb = $mb;
+	while ($mb > $min_mb_ever_to_use) {
+	    $mb = $mb / 2;
+	    if ($mb < $min_mb_ever_to_use) {
+		$mb = $min_mb_ever_to_use;
+	    }
+	    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	    print_status($mb, $success, $measurement_xml_info);
+	    if ($success) {
+		$smallest_success_mb = $mb;
+		# Keep going
+	    } else {
+		# Found it.
+		$largest_fail_mb = $mb;
+		last;
+	    }
 	}
-	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
-	print_status($mb, $success, $measurement_xml_info);
-	if ($success) {
-	    $smallest_success_mb = $mb;
-	    # Keep going
-	} else {
-	    # Found it.
-	    $largest_fail_mb = $mb;
-	    last;
+	if (!defined($largest_fail_mb)) {
+	    printf "Tried down to %d MB and all tests succeeded.\n",
+	        $smallest_success_mb
+		    if ($verbose >= 1);
+	    $do_range_narrowing = 0;
+	}
+    } else {
+	# Then look for larger memory limit that succeeds.
+	$largest_fail_mb = $mb;
+	while ($mb < $max_mb_ever_to_use) {
+	    $mb = $mb * 2;
+	    if ($mb > $max_mb_ever_to_use) {
+		$mb = $max_mb_ever_to_use;
+	    }
+	    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	    print_status($mb, $success, $measurement_xml_info);
+	    if ($success) {
+		# Found it.
+		$smallest_success_mb = $mb;
+		last;
+	    } else {
+		$largest_fail_mb = $mb;
+		# Keep going
+	    }
+	}
+	if (!defined($smallest_success_mb)) {
+	    printf "Tried up to %d MB but all tests failed.\n", $largest_fail_mb
+		if ($verbose >= 1);
+	    $do_range_narrowing = 0;
 	}
     }
-    if (!defined($largest_fail_mb)) {
-	printf "Tried down to %d MB and all tests succeeded.\n",
-	    $smallest_success_mb if ($verbose >= 1);
-	$do_binary_search = 0;
-    }
-} else {
-    # Then look for larger memory limit that succeeds.
-    $largest_fail_mb = $mb;
-    while ($mb < $max_mb_ever_to_use) {
-	$mb = $mb * 2;
-	if ($mb > $max_mb_ever_to_use) {
-	    $mb = $max_mb_ever_to_use;
+    
+    if ($do_range_narrowing) {
+	printf "Now perform binary search on range [%d,%d]\n",
+            $largest_fail_mb, $smallest_success_mb
+		if ($verbose >= 1);
+	while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
+	    $mb = ($largest_fail_mb + $smallest_success_mb) / 2;
+	    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	    if ($success) {
+		$smallest_success_mb = $mb;
+	    } else {
+		$largest_fail_mb = $mb;
+	    }
+	    my $extra_info =
+		sprintf "new range [%d,%d]", $largest_fail_mb, $smallest_success_mb;
+	    print_status($mb, $success, $measurement_xml_info, $extra_info);
 	}
-	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
-	print_status($mb, $success, $measurement_xml_info);
-	if ($success) {
-	    # Found it.
-	    $smallest_success_mb = $mb;
-	    last;
-	} else {
-	    $largest_fail_mb = $mb;
-	    # Keep going
-	}
-    }
-    if (!defined($smallest_success_mb)) {
-	printf "Tried up to %d MB but all tests failed.\n", $largest_fail_mb
-	    if ($verbose >= 1);
-	$do_binary_search = 0;
+	printf "Succeeded at %d MB, failed at %d MB\n",
+            $smallest_success_mb, $largest_fail_mb
+		if ($verbose >= 1);
+	$mb = $smallest_success_mb;
     }
 }
 
-if ($do_binary_search) {
-    printf "Now perform binary search on range [%d,%d]\n",
-        $largest_fail_mb, $smallest_success_mb
-	    if ($verbose >= 1);
-    while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
-	$mb = ($largest_fail_mb + $smallest_success_mb) / 2;
-	my ($success, $measurement_xml_info) = cmd_succeeds($mb);
-	if ($success) {
-	    $smallest_success_mb = $mb;
-	} else {
-	    $largest_fail_mb = $mb;
+if ($do_sweep_phase) {
+    # Then do the sweep phase.  Create the list of MB values to use.
+    my $mb_vals = sweep_phase_mb_values($mb, $delta_mb, $alpha, $num_mb_values,
+					$max_mb_ever_to_use);
+    printf "Sweep phase MB values to use: %s\n", join(' ', @{$mb_vals})
+	if ($verbose >= 1);
+    foreach $mb (@{$mb_vals}) {
+	my $i;
+	for ($i = 0; $i < $repeat_count; $i++) {
+	    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
+	    # We don't care about whether we succeed or not here.
+	    # Just run them regardless of the outcome, and save the
+	    # results.
+	    print_status($mb, $success, $measurement_xml_info);
 	}
-	my $extra_info =
-	    sprintf "new range [%d,%d]", $largest_fail_mb, $smallest_success_mb;
-	print_status($mb, $success, $measurement_xml_info, $extra_info);
     }
-    printf "Succeeded at %d MB, failed at %d MB\n",
-        $smallest_success_mb, $largest_fail_mb
-	    if ($verbose >= 1);
 }
 
 if ($sorted_summary) {
@@ -434,23 +556,29 @@ sub run_measure_cmd {
 	# There should only be one element in that list.
 	my $measurement_xml_info = $all_measurements->[0];
 
-	my $success = 0;
+	my $overall_success;
+	my $measured_cmd_success;
 	my $measured_cmd_exit_status =
 	    $measurement_xml_info->findvalue('exit_status');
-	my $exit_status_of_check_cmd =
-	    $measurement_xml_info->findvalue('exit_status_of_check_cmd');
-	printf "    exit_status=%s exit_status_of_check_cmd=%s",
-	    $measured_cmd_exit_status, $exit_status_of_check_cmd
+	printf "    exit_status=%s", $measured_cmd_exit_status
+	    if ($verbose >= 2);
+	$measured_cmd_success = (defined($measured_cmd_exit_status) &&
+				 ($measured_cmd_exit_status == 0)) ? 1 : 0;
+	if (defined($check_output_cmd)) {
+	    my $check_output_cmd_success;
+	    my $exit_status_of_check_cmd =
+		$measurement_xml_info->findvalue('exit_status_of_check_cmd');
+	    printf " exit_status_of_check_cmd=%s", $exit_status_of_check_cmd
 		if ($verbose >= 2);
-	if (defined($measured_cmd_exit_status) &&
-	    ($measured_cmd_exit_status == 0) &&
-	    defined($exit_status_of_check_cmd) &&
-	    ($exit_status_of_check_cmd == 0))
-	{
-	    $success = 1;
+	    $check_output_cmd_success = (defined($exit_status_of_check_cmd) &&
+					 ($exit_status_of_check_cmd == 0)) ? 1 : 0;
+	    $overall_success =
+		($measured_cmd_success && $check_output_cmd_success) ? 1 : 0;
+	} else {
+	    $overall_success = $measured_cmd_success;
 	}
-	printf " success=%d\n", $success if ($verbose >= 2);
-	return ($success, $measurement_xml_info);
+	printf " overall_success=%d\n", $overall_success if ($verbose >= 2);
+	return ($overall_success, $measurement_xml_info);
     } else {
 	printf "Temporary log file '%s' created for measureproc was not created.  Assume failure." if ($verbose >= 1);
 	return (0, undef);
@@ -530,4 +658,70 @@ sub max_rss_mb {
     my $max_rss_kb = shift;
 
     return ($max_rss_kb / 1024.0);
+}
+
+
+sub exactly_one_defined {
+    my $val_list = shift;
+
+    my $at_least_one_defined = 0;
+    foreach my $val (@{$val_list}) {
+	if (defined($val)) {
+	    if ($at_least_one_defined) {
+		# More than one defined
+		return 0;
+	    } else {
+		$at_least_one_defined = 1;
+	    }
+	}
+    }
+    return $at_least_one_defined;
+}
+
+
+sub sweep_phase_mb_values {
+    my $mb = shift;
+    my $delta = shift;
+    my $alpha = shift;
+    my $num_mb_values = shift;
+    my $max_mb_ever_to_use = shift;
+
+    my $i;
+    my $mb_vals = [ ];
+    if (defined($delta)) {
+	my $x = $mb;
+	for ($i = 0; $i < $num_mb_values; $i++) {
+	    push @{$mb_vals}, $x;
+	    if ($x < $max_mb_ever_to_use) {
+		$x += $delta;
+		if ($x > $max_mb_ever_to_use) {
+		    $x = $max_mb_ever_to_use;
+		}
+	    } else {
+		last;
+	    }
+	}
+    } else {
+	my $temp_list = [];
+	my $x = $mb;
+	# First, just generate the 'exact' floating point values, each
+	# rounded up to the next whole number.
+	for ($i = 0; $i < $num_mb_values; $i++) {
+	    push @{$temp_list}, POSIX::ceil($x);
+	    $x = $x * $alpha;
+	}
+	# Then "clean it up by making sure that they are all unique,
+	# increase values to be one more than the value before if
+	# needed to ensure that condition.
+	$x = shift @{$temp_list};
+	push @{$mb_vals}, $x;
+	foreach my $next_x (@{$temp_list}) {
+	    if ($next_x < ($x + 1)) {
+		$next_x = $x + 1;
+	    }
+	    push @{$mb_vals}, $next_x;
+	    $x = $next_x;
+	}
+    }
+    return $mb_vals;
 }
