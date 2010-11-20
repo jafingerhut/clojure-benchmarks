@@ -536,7 +536,10 @@ if (defined($output_file) && defined($check_output_cmd)) {
 # processes* got while this process was running?  It would be nice to
 # have some kind of automated verification that the overall system
 # load due to other processes was very low while running benchmark
-# programs.
+# programs.  For an OS running in a virtual machine like VMware
+# Fusion, I don't think the "guest OS" can determine how busy the CPU
+# is in the "host OS", but it should at least be able to find out
+# whether other processes in the "guest OS" are using much CPU time.
 
 # TBD:
 #    description string for result summary:
@@ -555,6 +558,18 @@ if (defined($output_file) && defined($check_output_cmd)) {
 # separately a measure of CPU time used by GCs.  Can probably be done
 # by parsing the extra output lines produced when -verbose:gc is given
 # to JVM.
+
+# TBD: Details about the JVM used, if one is being used.  See
+# misc/jvm-ptr-size.clj for some leads on how to determine whether the
+# JVM is 32-bit or 64-bit, which is a significant factor for run time
+# performance and memory use that should be recorded.
+
+# TBD: Details about the virtual machine being used, e.g. VMware
+# Fusion or Parallels Desktop on a Mac, or other similar things.  This
+# can make a significant difference for performance, and should be
+# recorded.  This will probably require an explicit command line
+# argument from the user to specify it, unless there is some kind of
+# relatively simple method I can use to get the info automatically.
 
 # TBD: Description of hardware, e.g. # of CPU cores, type, and clock
 # speed of each.
