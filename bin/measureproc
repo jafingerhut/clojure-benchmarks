@@ -55,6 +55,12 @@ sub usage {
                [ --language <language_implementation_description_string> ]
                [ --benchmark <benchmark_problem_name> ]
                [ --source-file-name <source_file_name> ]
+
+               The following group of options are only useful if the
+               <measured_cmd> below is an invocation of a Java virtual
+               machine:
+               [ --jvm-gc-stats ]
+
                <measured_cmd> [ arg1 ... ]
 
     --help        Show this help.
@@ -109,6 +115,22 @@ sub usage {
                   time and memory usage of the process.  This is only
                   needed if you wish to override the default command,
                   which for platform '$os' is: $timemem_cmd
+
+    --jvm-gc-stats
+                  When this option is used, $progname will assume that
+                  <measured_cmd> is an invocation of a Java virtual
+                  machine that takes the following command line option
+                  in order to report information about garbage
+                  collection (GC) invocation.
+
+                    -Xloggc:<gc_log_file>
+
+                  $progname will modify the command line given to add
+                  an option like the one above, with the name of an
+                  auto-generated temporary file name, and then parse
+                  the contents of this file when <measured_cmd> exits.
+                  Some summary statistics about the contents will be
+                  reported.
 
     The options below do not affect how the command is run or its
     performance measured.  They are simply printed to the output for
@@ -170,6 +192,7 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
+my $jvm_gc_stats;
 my $language_implementation_desc_str = '';
 my $benchmark_name = '';
 my $source_file_name = '';
@@ -185,6 +208,7 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
+                'jvm-gc-stats' => \$jvm_gc_stats,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name
@@ -232,9 +256,12 @@ if ($#ARGV < 0) {
     usage();
     exit 1;
 }
-my $cmd_to_time = join(' ', @ARGV);
-if ($verbose) {
-    printf STDERR "\$cmd_to_time='%s'\n", $cmd_to_time;
+
+my $tempdir;
+if (($os eq 'Cygwin') || $jvm_gc_stats) {
+    # We will later use a temporary directory for creating one or more
+    # temporary files.
+    $tempdir = tempdir( CLEANUP => 1 );
 }
 
 my $log;
@@ -249,6 +276,20 @@ if (defined($log_file)) {
 ######################################################################
 # Construct command to run (and measure its performance)
 ######################################################################
+
+my $gc_log_filename;
+my $cmd_to_time = shift @ARGV;
+if ($jvm_gc_stats) {
+    my $tempfh;
+    ($tempfh, $gc_log_filename) = tempfile( DIR => $tempdir,
+					    SUFFIX => '.txt' );
+    $cmd_to_time .= (' -Xloggc:' . $gc_log_filename);
+}
+$cmd_to_time .= (' ' . join(' ', @ARGV));
+
+if ($verbose) {
+    printf STDERR "\$cmd_to_time='%s'\n", $cmd_to_time;
+}
 
 my $cmd_str = '';
 my $cmd_begin = '';
@@ -271,7 +312,6 @@ if ($verbose) {
 my $cmd_to_run;
 if ($os eq 'Cygwin') {
     # On Cygwin, put the command into a BAT file for execution.
-    my $tempdir = tempdir( CLEANUP => 1 );
     my ($fh, $batchfile) = tempfile( DIR => $tempdir, SUFFIX => '.bat' );
     if ($verbose) {
 	printf STDERR "\$tempdir='%s'\n", $tempdir;
@@ -490,8 +530,8 @@ $timemem_cmd, and requires a corresponding change to $progname";
 }
 
 ######################################################################
-# Run the command to check if the output file's contents are good, if
-# such a command was given.
+# If a check output command was given, run it to see if the output
+# file's contents are good.
 ######################################################################
 
 my $check_output_cmd_exit_status;
@@ -527,6 +567,59 @@ if (defined($output_file) && defined($check_output_cmd)) {
 
 
 ######################################################################
+# If --jvm-gc-stats option was given, read the GC log file and
+# calculate summary GC performance stats.
+######################################################################
+
+my $num_gcs = 0;
+my $total_mem_collected = 0;
+my $total_gc_time = 0;
+my $max_total_avail_mem = 0;
+my $max_total_live_mem = 0;
+if ($jvm_gc_stats) {
+    my $fh;
+    open(FH, '<', $gc_log_filename)
+	or die sprintf "Could not open file %s for reading", $gc_log_filename;
+    # TBD: Handle error in attempting to open file
+    while (my $line = <FH>) {
+	while ($line =~
+	       /^.*\[(GC|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\](.*)$/)
+	{
+	    my ($gc_type, $live_before_this_gc, $live_after_this_gc,
+		$total_avail_space, $gc_time, $rest) = ($1, $2, $3, $4, $5, $6);
+	    $line = $rest;
+	    # Notes from this source:
+	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
+	    
+	    # $live_before_this_gc space consists of objects that are
+	    # actually live, or they are dead but still referenced
+	    # from a tenured generation object after a previous minor
+	    # GC.
+	    
+	    # Similarly for $live_after_this_gc
+	    
+	    # $total_avail_space is the total available space, not
+	    # counting the space in the permanent generation, which is
+	    # the total heap minus one of the survivor spaces.
+	    
+	    ++$num_gcs;
+	    my $mem_collected_this_gc = ($live_before_this_gc -
+					 $live_after_this_gc);
+	    $total_mem_collected += $mem_collected_this_gc;
+	    $total_gc_time += $gc_time;
+	    if ($total_avail_space > $max_total_avail_mem) {
+		$max_total_avail_mem = $total_avail_space;
+	    }
+	    if ($live_before_this_gc > $max_total_live_mem) {
+		$max_total_live_mem = $live_before_this_gc;
+	    }
+	}
+    }
+    close(FH);
+}
+
+
+######################################################################
 # Print the performance stats in the desired format.
 ######################################################################
 
@@ -548,16 +641,6 @@ if (defined($output_file) && defined($check_output_cmd)) {
 #	completed with exception <name>
 #        unknown type of completion, output incorrect
 #        killed after taking too long
-
-# TBD: some measure of the maximum memory ever used by all
-# simultaneously live Java objects, in kbytes (tbd: check out
-# -verbose:gc output, and learn how to interpret the values to see if
-# they can provide this measurement)
-
-# TBD: For JVM-based programs, it would be nice to extract and report
-# separately a measure of CPU time used by GCs.  Can probably be done
-# by parsing the extra output lines produced when -verbose:gc is given
-# to JVM.
 
 # TBD: Details about the JVM used, if one is being used.  See
 # misc/jvm-ptr-size.clj for some leads on how to determine whether the
@@ -605,6 +688,11 @@ if ($output_format_csv) {
 			    "Exit status",
 			    "Command used to check output",
 			    "Exit status of command used to check output",
+			    "Number of GCs",
+			    "Total memory GCed (KB)",
+			    "Total GC time (sec)",
+			    "Maximum total available memory (KB)",
+			    "Maximum total live memory (KB)",
 			    "OS description" ];
 	my $field_name;
 	my $first = 1;
@@ -638,6 +726,11 @@ if ($output_format_csv) {
 			       : '');
     printf $log ",%s", (defined($check_output_cmd_exit_status)
 			? $check_output_cmd_exit_status : '');
+    printf $log ",%s", $jvm_gc_stats ? $num_gcs : '';
+    printf $log ",%s", $jvm_gc_stats ? $total_mem_collected : '';
+    printf $log ",%s", $jvm_gc_stats ? $total_gc_time : '';
+    printf $log ",%s", $jvm_gc_stats ? $max_total_avail_mem : '';
+    printf $log ",%s", $jvm_gc_stats ? $max_total_live_mem : '';
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 
@@ -687,6 +780,15 @@ if ($output_format_csv) {
 	push @{$tag_text_pairs}, 'exit_status_of_check_cmd',
 	    $check_output_cmd_exit_status;
     }
+    if ($jvm_gc_stats) {
+	push @{$tag_text_pairs}, 'number_of_gcs', $num_gcs;
+	push @{$tag_text_pairs}, 'total_memory_gced_kb', $total_mem_collected;
+	push @{$tag_text_pairs}, 'total_gc_time_sec', $total_gc_time;
+	push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
+	    $max_total_avail_mem;
+	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
+	    $max_total_live_mem;
+    }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
 
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
@@ -724,6 +826,16 @@ if ($output_format_csv) {
     if (defined($output_file) && defined($check_output_cmd)) {
 	printf $log "    Command to check output   : %s\n", $check_output_cmd;
 	printf $log "    Exit status of check cmd  : %s\n", $check_output_cmd_exit_status;
+    }
+    if ($jvm_gc_stats) {
+	printf $log "    Number of GCs             : %s\n", $num_gcs;
+	printf $log "    Total memory GCed (KB)    : %s\n",
+	    $total_mem_collected;
+	printf $log "    Total GC time (sec)       : %s\n", $total_gc_time;
+	printf $log "    Maximum total available memory (KB): %s\n",
+	    $max_total_avail_mem;
+	printf $log "    Maximum total live memory (KB)     : %s\n",
+	    $max_total_live_mem;
     }
     printf $log "    OS description            : %s\n", $os_full;
 }
