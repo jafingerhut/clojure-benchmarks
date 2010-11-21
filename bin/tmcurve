@@ -75,6 +75,7 @@ sub usage {
                  [ --check-output-cmd <check_output_cmd> ]
                  [ --os <os_name> ]
                  [ --time-cmd <time_cmd> ]
+                 [ --jvm-gc-stats ]
                  [ --language <language_implementation_description_string> ]
                  [ --benchmark <benchmark_problem_name> ]
                  [ --source-file-name <source_file_name> ]
@@ -182,6 +183,7 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
+my $jvm_gc_stats;
 my $language_implementation_desc_str;
 my $benchmark_name;
 my $source_file_name;
@@ -208,6 +210,7 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
+                'jvm-gc-stats' => \$jvm_gc_stats,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name,
@@ -218,9 +221,8 @@ if (!GetOptions('help' => \$help,
                ))
 {
     usage();
-    exit(1);
+    exit 1;
 }
-
 if ($help) {
     usage();
     exit 0;
@@ -523,6 +525,9 @@ sub run_measure_cmd {
     if ($time_cmd_from_cmd_line) {
 	push @{$args}, '--time-cmd', $time_cmd_from_cmd_line;
     }
+    if ($jvm_gc_stats) {
+	push @{$args}, '--jvm-gc-stats';
+    }
     if ($language_implementation_desc_str) {
 	push @{$args}, '--language', $language_implementation_desc_str;
     }
@@ -632,14 +637,42 @@ sub print_status {
     my $measurement_xml_info = shift;
     my $extra_stuff = shift;
 
+    my $show_units = 1;
+    my $mb_str = '';
+    my $sec_str = '';
+    if ($show_units) {
+	$mb_str = ' MB';
+	$sec_str = ' sec';
+    }
+
     my $cpu_sec =
 	$measurement_xml_info->findvalue('user_cpu_time_sec') +
 	$measurement_xml_info->findvalue('system_cpu_time_sec');
     my $max_rss_kb = 
 	$measurement_xml_info->findvalue('maximum_resident_set_size_kibibytes');
     my $max_rss_mb = max_rss_mb($max_rss_kb);
-    my $line = sprintf "Max heap=%d MB %s  cpu=%s sec  Max RSS=%.1f MB  RSS-heap=%.1f MB",
-        $mb, success_str($success), $cpu_sec, $max_rss_mb, $max_rss_mb - $mb;
+
+    my $num_gcs =
+	$measurement_xml_info->findvalue('number_of_gcs');
+    my $total_mem_collected =
+	$measurement_xml_info->findvalue('total_memory_gced_kb');
+    my $total_gc_time =
+	$measurement_xml_info->findvalue('total_gc_time_sec');
+    my $max_total_avail_mem =
+	$measurement_xml_info->findvalue('maximum_total_available_memory_kb');
+    my $max_total_live_mem =
+	$measurement_xml_info->findvalue('maximum_total_live_memory_kb');
+
+    my $line = sprintf "Max heap=%d%s", $mb, $mb_str;
+    $line .= sprintf " %s", success_str($success);
+    $line .= sprintf "  cpu=%s%s", $cpu_sec, $sec_str;
+    $line .= sprintf "  Max RSS=%.1f%s", $max_rss_mb, $mb_str;
+    $line .= sprintf "  RSS-heap=%.1f%s", $max_rss_mb - $mb, $mb_str;
+    if ($jvm_gc_stats) {
+	$line .= sprintf "  GC tot space=%.1f%s", $total_mem_collected / 1024.0, $mb_str;
+	$line .= sprintf " time=%.1f%s", $total_gc_time, $sec_str;
+	$line .= sprintf " max live=%.1f%s", $max_total_live_mem / 1024.0, $mb_str;
+    }
     if (defined($extra_stuff)) {
 	$line .= sprintf "  %s", $extra_stuff;
     }
