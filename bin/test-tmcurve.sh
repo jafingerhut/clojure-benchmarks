@@ -24,8 +24,8 @@ fi
 
 set -ex
 
-COMMON_ARGS="--verbose --alpha 1.05 --sorted-summary --results-file results.xml"
-#COMMON_ARGS="--verbose --alpha 1.05 --sorted-summary --results-file results.xml --sweep-only --num-mb-values 2"
+COMMON_ARGS="--verbose --jvm-gc-stats --alpha 1.05 --sorted-summary --results-file results.xml"
+#COMMON_ARGS="--verbose --jvm-gc-stats --alpha 1.05 --sorted-summary --results-file results.xml --sweep-only --num-mb-values 2"
 
 if [ "$OS" == "Cygwin" ]
 then
