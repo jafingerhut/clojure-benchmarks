@@ -213,8 +213,7 @@ void _tmain (int argc, TCHAR *argv[])
         return;
     }
 
-    // See if we can get stats on the process even after it exits.  I
-    // don't know whether this will work or not.
+    // Get stats on the process after it exits.
     PrintMemoryAndTimeInfo(pi.dwProcessId);
 
     // Close process and thread handles. 
