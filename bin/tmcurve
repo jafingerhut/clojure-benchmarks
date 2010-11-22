@@ -347,9 +347,7 @@ if ($stop_after_arg_processing) {
     exit 2;
 }
 
-# TBD: Change this back to cleanup 1
-#my $tempdir = tempdir( CLEANUP => 1 );
-my $tempdir = tempdir( CLEANUP => 0 );
+my $tempdir = tempdir( CLEANUP => 1 );
 
 
 my $summaries_to_sort = {};
