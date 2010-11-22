@@ -8,6 +8,7 @@ use Getopt::Long;
 use File::Basename;
 # File::Temp is a library for creating temporary files.
 use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
 # FindBin is a library to find the directory in which the script is
 # installed.  This can be useful for making it easy to install other
 # auxiliary files needed by the script all in one place, and no matter
@@ -25,6 +26,7 @@ use Cwd;
 my $verbose = 0;
 my $full_progname = $0;
 my $progname = fileparse($full_progname);
+my $save_dir_name;
 
 my $os = `uname -o 2>/dev/null`;
 if ($? != 0) {
@@ -283,7 +285,13 @@ if ($jvm_gc_stats) {
     my $tempfh;
     ($tempfh, $gc_log_filename) = tempfile( DIR => $tempdir,
 					    SUFFIX => '.txt' );
-    $cmd_to_time .= (' -Xloggc:' . $gc_log_filename);
+    if ($os eq 'Cygwin') {
+	my $win_filename = `cygpath -w $gc_log_filename`;
+	chomp $win_filename;
+	$cmd_to_time .= (' -Xloggc:' . $win_filename);
+    } else {
+	$cmd_to_time .= (' -Xloggc:' . $gc_log_filename);
+    }
 }
 $cmd_to_time .= (' ' . join(' ', @ARGV));
 
@@ -535,6 +543,7 @@ $timemem_cmd, and requires a corresponding change to $progname";
 ######################################################################
 
 my $check_output_cmd_exit_status;
+my $check_output_cmd_fail_info = '';
 if (defined($output_file) && defined($check_output_cmd)) {
     $check_output_cmd =~ s/%o/$output_file/g;
     # TBD: Don't let anything sent to stdout of $check_output_cmd get
@@ -545,17 +554,26 @@ if (defined($output_file) && defined($check_output_cmd)) {
 	printf STDERR "failed to execute cmd '%s': %s\n", $check_output_cmd, $!;
 	exit 1;
     } elsif (($check_output_cmd_exit_status & 127) != 0) {
-	printf STDERR "check good cmd '%s' died with signal %d, %s coredump\n",
-	    $check_output_cmd,
-	    ($check_output_cmd_exit_status & 127),
-	    ($check_output_cmd_exit_status & 128) ? 'with' : 'without';
+	$check_output_cmd_fail_info =
+	    sprintf "check output cmd '%s' died with signal %d, %s coredump",
+	        $check_output_cmd,
+	        ($check_output_cmd_exit_status & 127),
+	        ($check_output_cmd_exit_status & 128) ? 'with' : 'without';
     } else {
 	my $child_exit_status = $check_output_cmd_exit_status >> 8;
 	if ($child_exit_status != 0) {
-	    printf STDERR "check good cmd '%s' exited with error status %d\n",
-	        $check_output_cmd, $child_exit_status;
+	    $check_output_cmd_fail_info =
+		sprintf "check output cmd '%s' exited with error status %d",
+	            $check_output_cmd, $child_exit_status;
 	}
     }
+}
+if ($check_output_cmd_fail_info ne '') {
+    my ($copy_succeeded, $copy_info);
+    ($save_dir_name, $copy_succeeded, $copy_info) =
+	save_copy_of_file($save_dir_name, $output_file, 'output');
+    $check_output_cmd_fail_info .= ("\n" . $copy_info);
+    printf STDERR "%s\n", $check_output_cmd_fail_info;
 }
 
 # Note: If $check_output_cmd_exit_status is 0, then everything is fine.
@@ -571,57 +589,34 @@ if (defined($output_file) && defined($check_output_cmd)) {
 # calculate summary GC performance stats.
 ######################################################################
 
-my $num_gcs = 0;
-my $total_mem_collected = 0;
-my $total_gc_time = 0;
-my $max_total_avail_mem = 0;
-my $max_total_live_mem = 0;
+my $gc_stats;
 if ($jvm_gc_stats) {
-    my $fh;
-    open(FH, '<', $gc_log_filename)
-	or die sprintf "Could not open file %s for reading", $gc_log_filename;
-    # TBD: Handle error in attempting to open file
-    while (my $line = <FH>) {
-	while ($line =~
-	       /^.*\[(GC|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\](.*)$/)
-	{
-	    my ($gc_type, $live_before_this_gc, $live_after_this_gc,
-		$total_avail_space, $gc_time, $rest) = ($1, $2, $3, $4, $5, $6);
-	    $line = $rest;
-	    # Notes from this source:
-	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
-	    
-	    # $live_before_this_gc space consists of objects that are
-	    # actually live, or they are dead but still referenced
-	    # from a tenured generation object after a previous minor
-	    # GC.
-	    
-	    # Similarly for $live_after_this_gc
-	    
-	    # $total_avail_space is the total available space, not
-	    # counting the space in the permanent generation, which is
-	    # the total heap minus one of the survivor spaces.
-	    
-	    ++$num_gcs;
-	    my $mem_collected_this_gc = ($live_before_this_gc -
-					 $live_after_this_gc);
-	    $total_mem_collected += $mem_collected_this_gc;
-	    $total_gc_time += $gc_time;
-	    if ($total_avail_space > $max_total_avail_mem) {
-		$max_total_avail_mem = $total_avail_space;
-	    }
-	    if ($live_before_this_gc > $max_total_live_mem) {
-		$max_total_live_mem = $live_before_this_gc;
-	    }
-	}
-    }
-    close(FH);
+    $gc_stats = parse_jvm_gc_log($gc_log_filename);
 }
 
 
 ######################################################################
 # Print the performance stats in the desired format.
 ######################################################################
+
+# TBD: Add support so that --jvm-gc-stats works for the JRockit JVM.
+# Currently only HotSpot works.  JRockit has different command line
+# arguments to cause it to print GC details, and a different format
+# for its GC messages that requires different parsing.
+
+# TBD: (First part DONE) Make changes so that if a run has bad output,
+# the bad output file is copied to a unique temporary file name that
+# is reported on stderr and in the CSV/XML/stdout, so that the user
+# can track down what the bad output was if they wish.  This temporary
+# file should be created in the current working directory, or in a new
+# temporary directory created that is *not* automatically erased when
+# measureproc is done.  (Not done yet) Make an option to disable this
+# copying action.
+
+# TBD: Similarly, if a GC log file cannot be parsed, copy it to a
+# temporary file that will not be erased when measureproc is done, and
+# report the name of the copy on stderr and in the CSV/XML/stdout
+# output.  Make an option that disables this copying action.
 
 # TBD: percent of cpu this job got while it ran
 
@@ -688,6 +683,7 @@ if ($output_format_csv) {
 			    "Exit status",
 			    "Command used to check output",
 			    "Exit status of command used to check output",
+			    "Failure details of command used to check output",
 			    "Number of GCs",
 			    "Total memory GCed (KB)",
 			    "Total GC time (sec)",
@@ -726,11 +722,12 @@ if ($output_format_csv) {
 			       : '');
     printf $log ",%s", (defined($check_output_cmd_exit_status)
 			? $check_output_cmd_exit_status : '');
-    printf $log ",%s", $jvm_gc_stats ? $num_gcs : '';
-    printf $log ",%s", $jvm_gc_stats ? $total_mem_collected : '';
-    printf $log ",%s", $jvm_gc_stats ? $total_gc_time : '';
-    printf $log ",%s", $jvm_gc_stats ? $max_total_avail_mem : '';
-    printf $log ",%s", $jvm_gc_stats ? $max_total_live_mem : '';
+    printf $log ",%s", $check_output_cmd_fail_info;
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{num_gcs} : '';
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_mem_collected} : '';
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_gc_time} : '';
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_avail_mem} : '';
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_live_mem} : '';
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 
@@ -779,15 +776,19 @@ if ($output_format_csv) {
 	push @{$tag_text_pairs}, 'command_to_check_output', $check_output_cmd;
 	push @{$tag_text_pairs}, 'exit_status_of_check_cmd',
 	    $check_output_cmd_exit_status;
+	if ($check_output_cmd_fail_info ne '') {
+	    push @{$tag_text_pairs}, 'check_output_cmd_failure_details',
+	        $check_output_cmd_fail_info;
+	}
     }
     if ($jvm_gc_stats) {
-	push @{$tag_text_pairs}, 'number_of_gcs', $num_gcs;
-	push @{$tag_text_pairs}, 'total_memory_gced_kb', $total_mem_collected;
-	push @{$tag_text_pairs}, 'total_gc_time_sec', $total_gc_time;
+	push @{$tag_text_pairs}, 'number_of_gcs', $gc_stats->{num_gcs};
+	push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected};
+	push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time};
 	push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-	    $max_total_avail_mem;
+	    $gc_stats->{max_total_avail_mem};
 	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-	    $max_total_live_mem;
+	    $gc_stats->{max_total_live_mem};
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
 
@@ -826,16 +827,20 @@ if ($output_format_csv) {
     if (defined($output_file) && defined($check_output_cmd)) {
 	printf $log "    Command to check output   : %s\n", $check_output_cmd;
 	printf $log "    Exit status of check cmd  : %s\n", $check_output_cmd_exit_status;
+	if ($check_output_cmd_fail_info ne '') {
+	    printf $log "Failure details of command used to check output: %s\n",
+	        $check_output_cmd_fail_info;
+	}
     }
     if ($jvm_gc_stats) {
-	printf $log "    Number of GCs             : %s\n", $num_gcs;
+	printf $log "    Number of GCs             : %s\n", $gc_stats->{num_gcs};
 	printf $log "    Total memory GCed (KB)    : %s\n",
-	    $total_mem_collected;
-	printf $log "    Total GC time (sec)       : %s\n", $total_gc_time;
+	    $gc_stats->{total_mem_collected};
+	printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time};
 	printf $log "    Maximum total available memory (KB): %s\n",
-	    $max_total_avail_mem;
+	    $gc_stats->{max_total_avail_mem};
 	printf $log "    Maximum total live memory (KB)     : %s\n",
-	    $max_total_live_mem;
+	    $gc_stats->{max_total_live_mem};
     }
     printf $log "    OS description            : %s\n", $os_full;
 }
@@ -1104,4 +1109,101 @@ sub libxml_add_children_to_elem {
 	$child->appendChild($text);
 	$elem->appendChild($child);
     }
+}
+
+
+sub parse_jvm_gc_log {
+    my $gc_log_filename = shift;
+
+    my $num_gcs = 0;
+    my $total_mem_collected = 0;
+    my $total_gc_time = 0;
+    my $max_total_avail_mem = 0;
+    my $max_total_live_mem = 0;
+
+    open(FH, '<', $gc_log_filename)
+	or die sprintf "Could not open file %s for reading", $gc_log_filename;
+    # TBD: Handle error in attempting to open file or parse file more
+    # cleanly, i.e. by continuing and printing results without GC
+    # summary stats.
+    my $linenum = 0;
+    while (my $line = <FH>) {
+	++$linenum;
+	if ($line =~
+	    /^\s*\d+\.\d+:\s+\[(GC|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
+	{
+	    my ($gc_type, $live_before_this_gc, $live_after_this_gc,
+		$total_avail_space, $gc_time) = ($1, $2, $3, $4, $5);
+	    # Notes from this source:
+	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
+	    
+	    # $live_before_this_gc space consists of objects that are
+	    # actually live, or they are dead but still referenced
+	    # from a tenured generation object after a previous minor
+	    # GC.
+	    
+	    # Similarly for $live_after_this_gc
+	    
+	    # $total_avail_space is the total available space, not
+	    # counting the space in the permanent generation, which is
+	    # the total heap minus one of the survivor spaces.
+	    
+	    ++$num_gcs;
+	    my $mem_collected_this_gc = ($live_before_this_gc -
+					 $live_after_this_gc);
+	    $total_mem_collected += $mem_collected_this_gc;
+	    $total_gc_time += $gc_time;
+	    if ($total_avail_space > $max_total_avail_mem) {
+		$max_total_avail_mem = $total_avail_space;
+	    }
+	    if ($live_before_this_gc > $max_total_live_mem) {
+		$max_total_live_mem = $live_before_this_gc;
+	    }
+	} else {
+	    die sprintf "Could not parse line %d of file %s:\n%s",
+	        $linenum, $gc_log_filename, $line;
+	}
+    }
+    close(FH);
+
+    my $gc_stats = {
+	num_gcs => $num_gcs,
+	total_mem_collected => $total_mem_collected,
+	total_gc_time => $total_gc_time,
+	max_total_avail_mem => $max_total_avail_mem,
+	max_total_live_mem => $max_total_live_mem
+    };
+    return $gc_stats;
+}
+
+
+sub save_copy_of_file {
+    my $save_dir_name = shift;
+    my $filename_to_save = shift;
+    my $file_desc = shift;
+
+    if (!defined($save_dir_name)) {
+	$save_dir_name = tempdir( $progname . '-XXXXXX', DIR => '.',
+				  CLEANUP => 0 );
+	# TBD: Check whether tempdir() succeeded, and print an error
+	# message if it didn't.
+    }
+    my ($fh, $copy_filename) = tempfile( DIR => $save_dir_name );
+    close($fh);
+    my $copy_succeeded;
+    my $copy_info;
+    if (copy($filename_to_save, $copy_filename)) {
+	$copy_succeeded = 1;
+	$copy_info =
+	    sprintf "Copy of %s file '%s' (length %d bytes) saved as '%s'",
+	        $file_desc, $filename_to_save, -s $filename_to_save,
+	        $copy_filename;
+    } else {
+	$copy_succeeded = 0;
+	$copy_info =
+	    sprintf "Attempted to copy %s file '%s' (length %d bytes) as '%s', but failed: %s",
+	        $file_desc, $filename_to_save, -s $filename_to_save,
+	        $copy_filename, $!;
+    }
+    return ($save_dir_name, $copy_succeeded, $copy_info);
 }
