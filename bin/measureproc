@@ -1172,6 +1172,25 @@ sub parse_jvm_gc_log {
 	    if ($live_before_this_gc > $max_total_live_mem) {
 		$max_total_live_mem = $live_before_this_gc;
 	    }
+	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
+	    # I have seen the version of the JVM described below
+	    # produce a line in its GC log file very occasionally, as
+	    # in once in _several_ runs of a program that printed 6600
+	    # lines of output to its GC log file.  I am going to
+	    # assume that it means that the time taken for this
+	    # particular GC is the value given after the "GC,", but I
+	    # won't update any of the memory statistics when reading
+	    # such a line.
+
+	    # % uname -a
+	    # Linux ubuntu 2.6.32-25-generic #45-Ubuntu SMP Sat Oct 16 19:48:22 UTC 2010 i686 GNU/Linux
+	    # % java -server -version
+	    # java version "1.6.0_22"
+	    # Java(TM) SE Runtime Environment (build 1.6.0_22-b04)
+	    # Java HotSpot(TM) Server VM (build 17.1-b03, mixed mode)
+	    my $gc_time = $1;
+	    ++$num_gcs;
+	    $total_gc_time += $gc_time;
 	} else {
 	    $parse_gc_log_fail_info =
 		sprintf "Could not parse line %d of GC log file %s: '%s'",
