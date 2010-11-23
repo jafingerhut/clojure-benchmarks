@@ -684,6 +684,7 @@ if ($output_format_csv) {
 			    "Command used to check output",
 			    "Exit status of command used to check output",
 			    "Failure details of command used to check output",
+			    "Failure details of parsing GC log",
 			    "Number of GCs",
 			    "Total memory GCed (KB)",
 			    "Total GC time (sec)",
@@ -723,6 +724,9 @@ if ($output_format_csv) {
     printf $log ",%s", (defined($check_output_cmd_exit_status)
 			? $check_output_cmd_exit_status : '');
     printf $log ",%s", $check_output_cmd_fail_info;
+    printf $log ",%s", (($jvm_gc_stats &&
+			 defined($gc_stats->{parse_gc_log_fail_info}))
+			? $gc_stats->{parse_gc_log_fail_info} : '');
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{num_gcs} : '';
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_mem_collected} : '';
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_gc_time} : '';
@@ -782,13 +786,17 @@ if ($output_format_csv) {
 	}
     }
     if ($jvm_gc_stats) {
-	push @{$tag_text_pairs}, 'number_of_gcs', $gc_stats->{num_gcs};
-	push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected};
-	push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time};
-	push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-	    $gc_stats->{max_total_avail_mem};
-	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-	    $gc_stats->{max_total_live_mem};
+	if (defined($gc_stats->{parse_gc_log_fail_info})) {
+	    push @{$tag_text_pairs}, 'parse_gc_log_failure_details', $gc_stats->{parse_gc_log_failure_details};
+	} else {
+	    push @{$tag_text_pairs}, 'number_of_gcs', $gc_stats->{num_gcs};
+	    push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected};
+	    push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time};
+	    push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
+	        $gc_stats->{max_total_avail_mem};
+	    push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
+	        $gc_stats->{max_total_live_mem};
+	}
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
 
@@ -833,14 +841,18 @@ if ($output_format_csv) {
 	}
     }
     if ($jvm_gc_stats) {
-	printf $log "    Number of GCs             : %s\n", $gc_stats->{num_gcs};
-	printf $log "    Total memory GCed (KB)    : %s\n",
-	    $gc_stats->{total_mem_collected};
-	printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time};
-	printf $log "    Maximum total available memory (KB): %s\n",
-	    $gc_stats->{max_total_avail_mem};
-	printf $log "    Maximum total live memory (KB)     : %s\n",
-	    $gc_stats->{max_total_live_mem};
+	if (defined($gc_stats->{parse_gc_log_failure_details})) {
+	    printf $log "    Failure details of parsing GC log: %s\n", $gc_stats->{parse_gc_log_failure_details};
+	} else {
+	    printf $log "    Number of GCs             : %s\n", $gc_stats->{num_gcs};
+	    printf $log "    Total memory GCed (KB)    : %s\n",
+	        $gc_stats->{total_mem_collected};
+	    printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time};
+	    printf $log "    Maximum total available memory (KB): %s\n",
+	        $gc_stats->{max_total_avail_mem};
+	    printf $log "    Maximum total live memory (KB)     : %s\n",
+	        $gc_stats->{max_total_live_mem};
+	}
     }
     printf $log "    OS description            : %s\n", $os_full;
 }
@@ -1120,6 +1132,7 @@ sub parse_jvm_gc_log {
     my $total_gc_time = 0;
     my $max_total_avail_mem = 0;
     my $max_total_live_mem = 0;
+    my $parse_gc_log_fail_info;
 
     open(FH, '<', $gc_log_filename)
 	or die sprintf "Could not open file %s for reading", $gc_log_filename;
@@ -1160,8 +1173,14 @@ sub parse_jvm_gc_log {
 		$max_total_live_mem = $live_before_this_gc;
 	    }
 	} else {
-	    die sprintf "Could not parse line %d of file %s:\n%s",
-	        $linenum, $gc_log_filename, $line;
+	    $parse_gc_log_fail_info =
+		sprintf "Could not parse line %d of GC log file %s: '%s'",
+	            $linenum, $gc_log_filename, $line;
+	    my ($copy_succeeded, $copy_info);
+	    ($save_dir_name, $copy_succeeded, $copy_info) =
+		save_copy_of_file($save_dir_name, $gc_log_filename, 'GC log');
+	    $parse_gc_log_fail_info .= ("\n" . $copy_info);
+	    printf STDERR "%s\n", $parse_gc_log_fail_info;
 	}
     }
     close(FH);
@@ -1173,6 +1192,9 @@ sub parse_jvm_gc_log {
 	max_total_avail_mem => $max_total_avail_mem,
 	max_total_live_mem => $max_total_live_mem
     };
+    if (defined($parse_gc_log_fail_info)) {
+	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
+    }
     return $gc_stats;
 }
 
