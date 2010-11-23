@@ -613,10 +613,11 @@ if ($jvm_gc_stats) {
 # measureproc is done.  (Not done yet) Make an option to disable this
 # copying action.
 
-# TBD: Similarly, if a GC log file cannot be parsed, copy it to a
-# temporary file that will not be erased when measureproc is done, and
-# report the name of the copy on stderr and in the CSV/XML/stdout
-# output.  Make an option that disables this copying action.
+# TBD: (First part DONE) Similarly, if a GC log file cannot be parsed,
+# copy it to a temporary file that will not be erased when measureproc
+# is done, and report the name of the copy on stderr and in the
+# CSV/XML/stdout output.  (Not done yet) Make an option that disables
+# this copying action.
 
 # TBD: percent of cpu this job got while it ran
 
