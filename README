@@ -1,24 +1,36 @@
-This file last edited: September 27, 2010
-
 Quick start instructions (see below for a few more details of what
 these do if you are curious):
 
-    # Either: (1) Install Leiningen and run lein-init.sh, which
+    # (1) If you are on Windows, install Cygwin: http://www.cygwin.com
+    # Install a JDK of your choice, such as HotSpot or JRockit.  Edit
+    # env.sh so that JAVA_BIN points at the directory where your java
+    # and javac commands are installed.
+
+    # If you are on Ubuntu Linux, install the Sun/Oracle JDK, which
+    # I've tested with, or explore new territory by installing
+    # whatever JDK you wish and seeing what happens.
+
+    # Either: (2a) Install Leiningen and run lein-init.sh, which
     # creates directories 'lein' and '.m2' in your home directory
     # (takes about 1.5 mins on my system after Leiningen is
-    # installed), or (2) edit env.sh to specify the location of your
-    # Java VM and javac compiler, and Clojure JAR files.
+    # installed), or (2b) edit env.sh to specify the location of your
+    # Clojure JAR files.  Look for the CLOJURE_CLASSPATH variable
+    # settings.
 
-    # Leiningen installation: http://github.com/technomancy/leiningen
+    # (2a) Leiningen installation instructions:
+    # http://github.com/technomancy/leiningen
+    # The use Leiningen to install multiple Clojure JAR files in
+    # $HOME/lein directory.
+
     ./lein-init.sh
 
-    # Use init.sh to create largish input and expected output files
-    # (total about 850 Mbytes of storage), by running some Java
+    # (3) Use init.sh to create largish input and expected output
+    # files (total about 850 Mbytes of storage), by running some Java
     # programs.  Takes about 6 mins on my system.
 
     ./init.sh output
 
-    # Run Java, Clojure 1.2, Clojure 1.3 alpha1, and Clojure 1.3
+    # (4) Run Java, Clojure 1.2, Clojure 1.3 alpha1, and Clojure 1.3
     # alpha3 versions of all of the benchmark programs.  Takes
     # somewhere around 60 to 90 mins on my system.
 
