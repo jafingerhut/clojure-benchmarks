@@ -24,11 +24,11 @@ fi
 
 set -ex
 
-COMMON_ARGS="--verbose --jvm-gc-stats --alpha 1.05 --sorted-summary --results-file results.xml"
+COMMON_ARGS="--verbose --jvm-gc-stats --delta 8 --sorted-summary --results-file results.xml"
 #COMMON_ARGS="--verbose --jvm-gc-stats --alpha 1.05 --sorted-summary --results-file results.xml --sweep-only --num-mb-values 2"
 
 # Useful when testing hello.clj memory use
-#EXTRA_ARGS="--min 1 --precision 1"
+EXTRA_ARGS="--min 1 --precision 1"
 
 if [ "${INPUT_SIZE}" == "none" ]; then
     INFILE_ARGS=""
