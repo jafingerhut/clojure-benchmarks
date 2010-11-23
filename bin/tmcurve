@@ -750,7 +750,14 @@ sub sweep_phase_mb_values {
 	    if ($next_x < ($x + 1)) {
 		$next_x = $x + 1;
 	    }
-	    push @{$mb_vals}, $next_x;
+	    if ($next_x <= $max_mb_ever_to_use) {
+		push @{$mb_vals}, $next_x;
+	    } elsif ($max_mb_ever_to_use > $x) {
+		push @{$mb_vals}, $max_mb_ever_to_use;
+		last;
+	    } else {
+		last;
+	    }
 	    $x = $next_x;
 	}
     }
