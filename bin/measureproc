@@ -690,6 +690,7 @@ if ($output_format_csv) {
 			    "Total memory GCed (KB)",
 			    "Total GC time (sec)",
 			    "Maximum total available memory (KB)",
+			    "Maximum total allocated memory (KB)",
 			    "Maximum total live memory (KB)",
 			    "OS description" ];
 	my $field_name;
@@ -732,6 +733,7 @@ if ($output_format_csv) {
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_mem_collected} : '';
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_gc_time} : '';
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_avail_mem} : '';
+    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_allocated_mem} : '';
     printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_live_mem} : '';
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
@@ -795,6 +797,8 @@ if ($output_format_csv) {
 	    push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time};
 	    push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
 	        $gc_stats->{max_total_avail_mem};
+	    push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
+	        $gc_stats->{max_total_allocated_mem};
 	    push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
 	        $gc_stats->{max_total_live_mem};
 	}
@@ -851,6 +855,8 @@ if ($output_format_csv) {
 	    printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time};
 	    printf $log "    Maximum total available memory (KB): %s\n",
 	        $gc_stats->{max_total_avail_mem};
+	    printf $log "    Maximum total allocated memory (KB): %s\n",
+	        $gc_stats->{max_total_allocated_mem};
 	    printf $log "    Maximum total live memory (KB)     : %s\n",
 	        $gc_stats->{max_total_live_mem};
 	}
@@ -1132,6 +1138,7 @@ sub parse_jvm_gc_log {
     my $total_mem_collected = 0;
     my $total_gc_time = 0;
     my $max_total_avail_mem = 0;
+    my $max_total_allocated_mem = 0;
     my $max_total_live_mem = 0;
     my $parse_gc_log_fail_info;
 
@@ -1170,8 +1177,11 @@ sub parse_jvm_gc_log {
 	    if ($total_avail_space > $max_total_avail_mem) {
 		$max_total_avail_mem = $total_avail_space;
 	    }
-	    if ($live_before_this_gc > $max_total_live_mem) {
-		$max_total_live_mem = $live_before_this_gc;
+	    if ($live_before_this_gc > $max_total_allocated_mem) {
+		$max_total_allocated_mem = $live_before_this_gc;
+	    }
+	    if ($live_after_this_gc > $max_total_live_mem) {
+		$max_total_live_mem = $live_after_this_gc;
 	    }
 	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
 	    # I have seen the version of the JVM described below
@@ -1210,6 +1220,7 @@ sub parse_jvm_gc_log {
 	total_mem_collected => $total_mem_collected,
 	total_gc_time => $total_gc_time,
 	max_total_avail_mem => $max_total_avail_mem,
+	max_total_allocated_mem => $max_total_allocated_mem,
 	max_total_live_mem => $max_total_live_mem
     };
     if (defined($parse_gc_log_fail_info)) {
