@@ -75,7 +75,8 @@ sub usage {
                  [ --check-output-cmd <check_output_cmd> ]
                  [ --os <os_name> ]
                  [ --time-cmd <time_cmd> ]
-                 [ --jvm-gc-stats ]
+                 [ --jvm-gc-stats <jvm_type> ]
+                 [ --jruby-gc-stats <jvm_type> ]
                  [ --language <language_implementation_description_string> ]
                  [ --benchmark <benchmark_problem_name> ]
                  [ --source-file-name <source_file_name> ]
@@ -183,7 +184,8 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
-my $jvm_gc_stats;
+my $jvm_gc_stats_from_cmd_line;
+my $jruby_gc_stats_from_cmd_line;
 my $language_implementation_desc_str;
 my $benchmark_name;
 my $source_file_name;
@@ -210,7 +212,8 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
-                'jvm-gc-stats' => \$jvm_gc_stats,
+                'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
+                'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name,
@@ -523,8 +526,11 @@ sub run_measure_cmd {
     if ($time_cmd_from_cmd_line) {
 	push @{$args}, '--time-cmd', $time_cmd_from_cmd_line;
     }
-    if ($jvm_gc_stats) {
-	push @{$args}, '--jvm-gc-stats';
+    if ($jvm_gc_stats_from_cmd_line) {
+	push @{$args}, '--jvm-gc-stats', $jvm_gc_stats_from_cmd_line;
+    }
+    if ($jruby_gc_stats_from_cmd_line) {
+	push @{$args}, '--jruby-gc-stats', $jruby_gc_stats_from_cmd_line;
     }
     if ($language_implementation_desc_str) {
 	push @{$args}, '--language', $language_implementation_desc_str;
@@ -658,6 +664,8 @@ sub print_status {
 	$measurement_xml_info->findvalue('total_gc_time_sec');
     my $max_total_avail_mem =
 	$measurement_xml_info->findvalue('maximum_total_available_memory_kb');
+    my $max_total_allocated_mem =
+	$measurement_xml_info->findvalue('maximum_total_allocated_memory_kb');
     my $max_total_live_mem =
 	$measurement_xml_info->findvalue('maximum_total_live_memory_kb');
 
@@ -666,10 +674,18 @@ sub print_status {
     $line .= sprintf "  cpu=%s%s", $cpu_sec, $sec_str;
     $line .= sprintf "  Max RSS=%.1f%s", $max_rss_mb, $mb_str;
     $line .= sprintf "  RSS-heap=%.1f%s", $max_rss_mb - $mb, $mb_str;
-    if ($jvm_gc_stats) {
-	$line .= sprintf "  GC tot space=%.1f%s", $total_mem_collected / 1024.0, $mb_str;
-	$line .= sprintf " time=%.1f%s", $total_gc_time, $sec_str;
-	$line .= sprintf " max live=%.1f%s", $max_total_live_mem / 1024.0, $mb_str;
+    if (defined($jvm_gc_stats_from_cmd_line) ||
+        defined($jruby_gc_stats_from_cmd_line))
+    {
+        $line .= sprintf "  GC num GCs=%d", $num_gcs;
+        $line .= sprintf " GC tot space=%.1f%s", $total_mem_collected / 1024.0, $mb_str;
+        $line .= sprintf " time=%.1f%s", $total_gc_time, $sec_str;
+        if ($num_gcs == 0) {
+	    $line .= sprintf " other GC stats N/A";
+        } else {
+	    $line .= sprintf " max live=%.1f%s", $max_total_live_mem / 1024.0, $mb_str;
+	    $line .= sprintf " max alloc=%.1f%s", $max_total_allocated_mem / 1024.0, $mb_str;
+        }
     }
     if (defined($extra_stuff)) {
 	$line .= sprintf "  %s", $extra_stuff;
