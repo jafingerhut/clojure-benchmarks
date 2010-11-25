@@ -57,12 +57,8 @@ sub usage {
                [ --language <language_implementation_description_string> ]
                [ --benchmark <benchmark_problem_name> ]
                [ --source-file-name <source_file_name> ]
-
-               The following group of options are only useful if the
-               <measured_cmd> below is an invocation of a Java virtual
-               machine:
-               [ --jvm-gc-stats ]
-
+               [ --jvm-gc-stats <jvm_type> ]
+               [ --jruby-gc-stats <jvm_type> ]
                <measured_cmd> [ arg1 ... ]
 
     --help        Show this help.
@@ -118,21 +114,33 @@ sub usage {
                   needed if you wish to override the default command,
                   which for platform '$os' is: $timemem_cmd
 
-    --jvm-gc-stats
+    --jvm-gc-stats <jvm_type>
                   When this option is used, $progname will assume that
                   <measured_cmd> is an invocation of a Java virtual
-                  machine that takes the following command line option
+                  machine that takes an additional command line option
                   in order to report information about garbage
-                  collection (GC) invocation.
+                  collection (GC) invocation.  What the option is
+                  depends upon what kind of JVM is in use.  The
+                  following are supported by $progname:
 
-                    -Xloggc:<gc_log_file>
+                    --jvm-gc-stats hotspot
+                        -Xloggc:<gc_log_file>
+                    --jvm-gc-stats jrockit  (not yet implemented)
+                        -Xverbose:memory -Xverboselog:<gc_log_file>
 
                   $progname will modify the command line given to add
-                  an option like the one above, with the name of an
+                  options like the ones above, with the name of an
                   auto-generated temporary file name, and then parse
                   the contents of this file when <measured_cmd> exits.
                   Some summary statistics about the contents will be
                   reported.
+
+    --jruby-gc-stats <jvm_type>
+                  This is the same as --jvm-gc-stats, except that the
+                  command line option added to the command line will
+                  have a '-J' prepended to it, as required by the
+                  jruby command in order to pass the options through
+                  to the JVM invocation.
 
     The options below do not affect how the command is run or its
     performance measured.  They are simply printed to the output for
@@ -194,7 +202,8 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
-my $jvm_gc_stats;
+my $jvm_gc_stats_from_cmd_line;
+my $jruby_gc_stats_from_cmd_line;
 my $language_implementation_desc_str = '';
 my $benchmark_name = '';
 my $source_file_name = '';
@@ -210,7 +219,8 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
-                'jvm-gc-stats' => \$jvm_gc_stats,
+                'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
+                'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name
@@ -245,6 +255,40 @@ if ($print_csv_name_row and !$output_format_csv) {
     usage();
     exit(1);
 }
+my $gc_stats_type;
+my $gc_stats_jruby;
+if (defined($jvm_gc_stats_from_cmd_line) &&
+    defined($jruby_gc_stats_from_cmd_line))
+{
+    printf STDERR
+"At most one of --jvm-gc-stats and --jruby-gc-stats should be
+specified, depending on whether the measured command is a jruby
+invocation or a java invocation.
+";
+    exit 1;
+}
+if (defined($jruby_gc_stats_from_cmd_line)) {
+    $gc_stats_type = $jruby_gc_stats_from_cmd_line;
+    $gc_stats_jruby = 1;
+} elsif (defined($jvm_gc_stats_from_cmd_line)) {
+    $gc_stats_type = $jvm_gc_stats_from_cmd_line;
+    $gc_stats_jruby = 0;
+}
+if (defined($gc_stats_type)) {
+    if ($gc_stats_type eq 'hotspot') {
+        # OK
+    } elsif ($gc_stats_type eq 'jrockit') {
+        # OK
+    } else {
+        printf STDERR
+"Unrecognized value '%s' given after option %s
+The following are supported: hotspot jrockit
+",
+            $gc_stats_type,
+            ($gc_stats_jruby ? '--jruby-gc-stats' : '--jvm-gc-stats');
+        exit 1;
+    }
+}
 $timemem_cmd = (defined($time_cmd_from_cmd_line) ? $time_cmd_from_cmd_line
 		: time_cmd_location($os, $install_dir));
 if ($timemem_cmd =~ /^(\S+)/) {
@@ -260,7 +304,7 @@ if ($#ARGV < 0) {
 }
 
 my $tempdir;
-if (($os eq 'Cygwin') || $jvm_gc_stats) {
+if (($os eq 'Cygwin') || defined($gc_stats_type)) {
     # We will later use a temporary directory for creating one or more
     # temporary files.
     $tempdir = tempdir( CLEANUP => 1 );
@@ -281,16 +325,21 @@ if (defined($log_file)) {
 
 my $gc_log_filename;
 my $cmd_to_time = shift @ARGV;
-if ($jvm_gc_stats) {
+if (defined($gc_stats_type)) {
     my $tempfh;
     ($tempfh, $gc_log_filename) = tempfile( DIR => $tempdir,
 					    SUFFIX => '.txt' );
+    my $log_fname = $gc_log_filename;
     if ($os eq 'Cygwin') {
-	my $win_filename = `cygpath -w $gc_log_filename`;
-	chomp $win_filename;
-	$cmd_to_time .= (' -Xloggc:' . $win_filename);
-    } else {
-	$cmd_to_time .= (' -Xloggc:' . $gc_log_filename);
+	$log_fname = `cygpath -w $gc_log_filename`;
+	chomp $log_fname;
+    }
+    my $prefix = ($gc_stats_jruby ? '-J' : '');
+    if ($gc_stats_type eq 'hotspot') {
+        $cmd_to_time .= (sprintf ' %s-Xloggc:%s', $prefix, $log_fname);
+    } elsif ($gc_stats_type eq 'jrockit') {
+        $cmd_to_time .= (sprintf ' %s-Xverbose:memory %s-Xverboselog:%s',
+                             $prefix, $prefix, $log_fname);
     }
 }
 $cmd_to_time .= (' ' . join(' ', @ARGV));
@@ -446,10 +495,10 @@ if ($os eq 'Cygwin') {
 		$sys_sec = $1;
             } elsif (/^\s*Elapsed \(wall clock\) time \(h:mm:ss or m:ss\):\s*(.*)\s*$/) {
                 my $tmp = $1;
-                if ($tmp =~ /^(\d+):(\d+):(\d+(\.\d*))$/) {
+                if ($tmp =~ /^(\d+):(\d+):(\d+(\.\d+)?)$/) {
                     my ($h, $m, $s) = ($1, $2, $3);
                     $elapsed_sec = $h * 3600 + $m * 60 + $s;
-                } elsif ($tmp =~ /^(\d+):(\d+(\.\d*))$/) {
+                } elsif ($tmp =~ /^(\d+):(\d+(\.\d+)?)$/) {
                     my ($m, $s) = ($1, $2);
                     $elapsed_sec = $m * 60 + $s;
                 } else {
@@ -590,8 +639,8 @@ if ($check_output_cmd_fail_info ne '') {
 ######################################################################
 
 my $gc_stats;
-if ($jvm_gc_stats) {
-    $gc_stats = parse_jvm_gc_log($gc_log_filename);
+if (defined($gc_stats_type)) {
+    $gc_stats = parse_jvm_gc_log($gc_stats_type, $gc_log_filename);
 }
 
 
@@ -726,15 +775,15 @@ if ($output_format_csv) {
     printf $log ",%s", (defined($check_output_cmd_exit_status)
 			? $check_output_cmd_exit_status : '');
     printf $log ",%s", $check_output_cmd_fail_info;
-    printf $log ",%s", (($jvm_gc_stats &&
+    printf $log ",%s", ((defined($gc_stats_type) &&
 			 defined($gc_stats->{parse_gc_log_fail_info}))
 			? $gc_stats->{parse_gc_log_fail_info} : '');
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{num_gcs} : '';
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_mem_collected} : '';
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{total_gc_time} : '';
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_avail_mem} : '';
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_allocated_mem} : '';
-    printf $log ",%s", $jvm_gc_stats ? $gc_stats->{max_total_live_mem} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{num_gcs} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_mem_collected} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_gc_time} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_avail_mem} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_allocated_mem} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_live_mem} : '';
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 
@@ -788,7 +837,7 @@ if ($output_format_csv) {
 	        $check_output_cmd_fail_info;
 	}
     }
-    if ($jvm_gc_stats) {
+    if (defined($gc_stats_type)) {
 	if (defined($gc_stats->{parse_gc_log_fail_info})) {
 	    push @{$tag_text_pairs}, 'parse_gc_log_failure_details', $gc_stats->{parse_gc_log_failure_details};
 	} else {
@@ -845,7 +894,7 @@ if ($output_format_csv) {
 	        $check_output_cmd_fail_info;
 	}
     }
-    if ($jvm_gc_stats) {
+    if (defined($gc_stats_type)) {
 	if (defined($gc_stats->{parse_gc_log_failure_details})) {
 	    printf $log "    Failure details of parsing GC log: %s\n", $gc_stats->{parse_gc_log_failure_details};
 	} else {
@@ -1132,7 +1181,11 @@ sub libxml_add_children_to_elem {
 
 
 sub parse_jvm_gc_log {
+    my $gc_stats_type = shift;
     my $gc_log_filename = shift;
+
+    # This works for $gc_stats_type eq 'hotspot'.  Add support for
+    # 'jrockit'
 
     my $num_gcs = 0;
     my $total_mem_collected = 0;
