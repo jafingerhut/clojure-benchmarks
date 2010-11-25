@@ -160,6 +160,20 @@ then
     ######################################################################
     PERL="perl"
 
+    ######################################################################
+    # Linux/MacOS Scala
+    ######################################################################
+    SCALAC="$HOME/sw/scala-2.8.1.final/bin/scalac"
+    PS_SCALA_OBJ_DIR=".${SEP}obj${SEP}scala"
+    SCALA_JAR_DIR="$HOME/sw/scala-2.8.1.final/lib"
+    SCALA_CLASSPATH="${SCALA_JAR_DIR}/scala-library.jar"
+    PS_FULL_SCALA_CLASSPATH="${SCALA_CLASSPATH}${PSEP}${PS_SCALA_OBJ_DIR}"
+
+    ######################################################################
+    # Linux/MacOS Perl
+    ######################################################################
+    JRUBY="$HOME/sw/jruby-1.5.5/bin/jruby"
+
 else
     2>&1 echo "In script env.sh: Unknown output from 'uname -o' command:" $OS
     2>&1 echo "Aborting."
@@ -169,6 +183,7 @@ fi
 JAVA_OBJ_DIR="./obj/java"
 GHC_OBJ_DIR="./obj/ghc"
 SBCL_OBJ_DIR="./obj/sbcl"
+SCALA_OBJ_DIR="./obj/scala"
 
 # Choose your style of Java profiling, if any.
 #JAVA_PROFILING="-Xprof"
