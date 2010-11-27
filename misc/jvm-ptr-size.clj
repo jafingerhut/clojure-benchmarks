@@ -3,6 +3,7 @@
 ;; 32-bit or 64-bit.  In particular sun.arch.data.model seems to be
 ;; the one introduced by Sun for this purpose.
 
+(comment
 (let [props (. System getProperties)
       keys (. props keys)
       s (enumeration-seq keys)
@@ -12,16 +13,64 @@
   ;(printf "(class keys)=%s\n" (class keys))
   ;(printf "(class s)=%s\n" (class s))
   ;(printf "(count s)=%s\n" (count s))
-  (doseq [prop-name (sort s)]
-    (printf "%s=%s\n" prop-name (. System getProperty prop-name)))
-  (printf "\n")
-  (printf "number of properties=%d\n" (count s)))
+    (doseq [prop-name (sort s)]
+      (printf "%s=%s\n" prop-name (. System getProperty prop-name)))
+    (printf "\n")
+    (printf "number of properties=%d\n" (count s))
+    (printf "\n"))
+)
 
-(printf "\n")
 (printf "sun.arch.data.model='%s'\n"
         (. System getProperty "sun.arch.data.model"))
 (printf "os.arch='%s'\n"
         (. System getProperty "os.arch"))
+;; Source for documentation on Runtime object:
+;; http://download.oracle.com/javase/1.4.2/docs/api/java/lang/Runtime.html
+(let [rt (. Runtime getRuntime)
+      total (. rt totalMemory)
+      max (. rt maxMemory)
+      free (. rt freeMemory)]
+  (printf "Runtime.getRuntime(). ...\n")
+  (printf "   totalMemory() = %d = %.1f MB\n"
+          total (/ total (* 1024.0 1024.0)))
+  (printf "   maxMemory() = %d = %.1f MB\n"
+          max (/ max (* 1024.0 1024.0)))
+  (printf "   freeMemory() = %d bytes = %.1f MB\n"
+          free (/ free (* 1024.0 1024.0)))
+  (printf "   availableProcessors() = %d\n"
+          (. rt availableProcessors))
+(comment
+  (printf (str
+"        totalMemory()\n"
+"        Returns the total amount of memory in the Java virtual machine. The\n"
+"        value returned by this method may vary over time, depending on the host\n"
+"        environment.\n"
+"\n"
+"        Note that the amount of memory required to hold an object of any given\n"
+"        type may be implementation-dependent.\n"
+"\n"
+"        Returns: the total amount of memory currently available for current and\n"
+"        future objects, measured in bytes.\n"))
+  (printf (str
+"        maxMemory()\n"
+"        Returns the maximum amount of memory that the Java virtual machine will\n"
+"        attempt to use. If there is no inherent limit then the value\n"
+"        Long.MAX_VALUE (%d) will be returned.\n"
+"\n"
+"        Returns: the maximum amount of memory that the virtual machine will attempt\n"
+"        to use, measured in bytes\n")
+          (. Long MAX_VALUE))
+
+  (printf (str
+"        freeMemory()\n"
+"        The amount of free memory in the Java Virtual Machine.  Calling the\n"
+"        gc method may result in increasing the value returned by freeMemory.\n"
+"        Returns: an approximation to the total amount of memory currently\n"
+"        available for future allocated objects\n"))
+)
+  )
+
+
 (flush)
 
 ;; Source:
