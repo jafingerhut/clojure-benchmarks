@@ -17,6 +17,7 @@ uname -a
 if [ "$OS" == "GNU/Linux" ]
 then
     cat /proc/cpuinfo
+    cat /proc/meminfo
 elif [ "$OS" == "Darwin" ]
 then
     /usr/sbin/system_profiler -detailLevel full SPHardwareDataType
