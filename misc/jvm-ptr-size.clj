@@ -1,3 +1,6 @@
+(require '[clojure.contrib.jmx :as jmx])
+(require '[clojure.contrib.string :as str])
+
 (comment
 (loop [i 0
        a *command-line-args*]
@@ -53,10 +56,17 @@
       max (. rt maxMemory)
       free (. rt freeMemory)
       mb (* 1024.0 1024.0)]
-  (printf "total=%d= %.1f MB" total (/ total mb))
-  (printf "  max=%d= %.1f MB" max (/ max mb))
-  (printf "  free=%d= %.1f MB" free (/ free mb))
-  (printf "\n")
+  (printf "total=%.1f MB" (/ total mb))
+  (printf " max=%.1f MB" (/ max mb))
+  (printf " free=%.1f MB" (/ free mb)))
+
+(let [gc-info (map #(subs (str %) 37)
+                   (jmx/mbean-names "java.lang:type=GarbageCollector,*"))]
+  (printf " GC method: %s" (str/join ", " gc-info)))
+
+(printf "\n")
+
+
 (comment
   (printf (str
 "        totalMemory()\n"
@@ -86,7 +96,6 @@
 "        Returns: an approximation to the total amount of memory currently\n"
 "        available for future allocated objects\n"))
 )
-  )
 
 
 (flush)
