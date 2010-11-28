@@ -21,18 +21,20 @@ then
 	echo "Got here 1"
     fi
     CP1=`cygpath -w ${HOME}/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar`
-    CP2="."
+    CP2=`cygpath -w ${HOME}/lein/swank-clj-1.2.0/lib/clojure-contrib-1.2.0.jar`
+    CP3="."
     PSEP=";"
-    CLASSPATH="${CP1}${PSEP}${CP2}"
+    CLASSPATH="${CP1}${PSEP}${CP2}${PSEP}${CP3}"
 else
     if [ "$JAVA" == "none-given" ]
     then
 	JAVA="java"
     fi
     CP1="${HOME}/lein/swank-clj-1.2.0/lib/clojure-1.2.0.jar"
-    CP2="."
+    CP2="${HOME}/lein/swank-clj-1.2.0/lib/clojure-contrib-1.2.0.jar"
+    CP3="."
     PSEP=":"
-    CLASSPATH="${CP1}${PSEP}${CP2}"
+    CLASSPATH="${CP1}${PSEP}${CP2}${PSEP}${CP3}"
 fi
 
 which java
