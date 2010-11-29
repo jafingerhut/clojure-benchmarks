@@ -16,14 +16,10 @@
               "other"))
 
 (when (= *show* "allproperties")
+  ;; Show all JVM runtime properties.
   (let [props (. System getProperties)
         keys (. props keys)
         s (enumeration-seq keys)]
-    ;;(printf "(class props)=%s\n" (class props))
-    ;;(printf "(class *out*)=%s\n" (class *out*))
-    ;;(printf "(class keys)=%s\n" (class keys))
-    ;;(printf "(class s)=%s\n" (class s))
-    ;;(printf "(count s)=%s\n" (count s))
     (doseq [prop-name (sort s)]
       (printf "%s=%s\n" prop-name (. System getProperty prop-name)))
     (printf "\n")
@@ -32,15 +28,13 @@
   (. System exit 0))
   
 (when (= *show* "sysinfo")
-  ;; Show all JVM properties, but especially at the end the two that I
-  ;; believe have the most to do in determining whether the JVM is
-  ;; 32-bit or 64-bit.  In particular sun.arch.data.model seems to be
-  ;; the one introduced by Sun for this purpose.
-
+  ;; Show a few selected JVM runtime properties.
   (printf "os.name = %s\n" (. System getProperty "os.name"))
   (printf "os.version = %s\n" (. System getProperty "os.version"))
   (printf "java.runtime.version = %s\n"
           (. System getProperty "java.runtime.version"))
+  ;; sun.arch.data.model distinguishes between a 32-bit and 64-bit
+  ;; JVM.
   (printf "sun.arch.data.model = %s\n"
           (. System getProperty "sun.arch.data.model"))
   (printf "os.arch = %s\n" (. System getProperty "os.arch"))
