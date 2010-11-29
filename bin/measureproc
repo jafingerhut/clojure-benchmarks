@@ -582,7 +582,11 @@ One or more of the following values were not found in the output:
     number of CPU cores, or their utilization
     command exit status
 This is likely due to a change in the output format of the command
-$timemem_cmd, and requires a corresponding change to $progname";
+$timemem_cmd, and requires a corresponding change to $progname
+
+The command line used was:
+$cmd_to_run
+";
     exit 1;
 }
 
@@ -1187,6 +1191,8 @@ sub parse_jvm_gc_log {
     # This works for $gc_stats_type eq 'hotspot'.  Add support for
     # 'jrockit'
 
+    my $num_mem_increase_warnings = 0;
+
     my $num_gcs = 0;
     my $total_mem_collected = 0;
     my $total_gc_time = 0;
@@ -1204,7 +1210,7 @@ sub parse_jvm_gc_log {
     while (my $line = <FH>) {
 	++$linenum;
 	if ($line =~
-	    /^\s*\d+\.\d+:\s+\[(GC|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
+	    /^\s*\d+\.\d+:\s+\[(GC|GC--|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
 	{
 	    my ($gc_type, $live_before_this_gc, $live_after_this_gc,
 		$total_avail_space, $gc_time) = ($1, $2, $3, $4, $5);
@@ -1225,6 +1231,15 @@ sub parse_jvm_gc_log {
 	    ++$num_gcs;
 	    my $mem_collected_this_gc = ($live_before_this_gc -
 					 $live_after_this_gc);
+	    if ($mem_collected_this_gc < 0) {
+		$mem_collected_this_gc = 0;
+		if ($num_mem_increase_warnings < 3) {
+		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s",
+		        $live_before_this_gc, $live_after_this_gc, $linenum,
+		        $gc_log_filename, $line;
+		}
+		++$num_mem_increase_warnings;
+	    }
 	    $total_mem_collected += $mem_collected_this_gc;
 	    $total_gc_time += $gc_time;
 	    if ($total_avail_space > $max_total_avail_mem) {
@@ -1233,8 +1248,18 @@ sub parse_jvm_gc_log {
 	    if ($live_before_this_gc > $max_total_allocated_mem) {
 		$max_total_allocated_mem = $live_before_this_gc;
 	    }
-	    if ($live_after_this_gc > $max_total_live_mem) {
-		$max_total_live_mem = $live_after_this_gc;
+	    if ($gc_type eq 'GC--') {
+		# I've seen several of these where the
+		# $live_after_this_gc number is larger than the
+		# $live_before_this_gc number, and the after number is
+		# significantly larger than the after number of other
+		# GCs.  Until I find out what these mean, I'm going to
+		# leave such GC lines out of the calculation of the
+		# $max_total_live_mem.
+	    } else {
+		if ($live_after_this_gc > $max_total_live_mem) {
+		    $max_total_live_mem = $live_after_this_gc;
+		}
 	    }
 	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
 	    # I have seen the version of the JVM described below
@@ -1267,6 +1292,11 @@ sub parse_jvm_gc_log {
 	}
     }
     close(FH);
+
+    if ($num_mem_increase_warnings > 3) {
+	printf STDERR "%d additional warnings about memory use increasing during GC suppressed.\n",
+	    $num_mem_increase_warnings - 3;
+    }
 
     my $gc_stats = {
 	num_gcs => $num_gcs,
