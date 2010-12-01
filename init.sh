@@ -43,12 +43,19 @@ make_expected_output_files () {
     local B=$1
     shift
     local T
+    local LANG
 
     cd $B
-    ./batch.sh java $*
+    if [ "$B" == "pidigits" ]
+    then
+	LANG="gcc"
+    else
+	LANG="java"
+    fi
+    ./batch.sh ${LANG} $*
     for T in $*
     do
-	/bin/mv -f output/${T}-java-output.txt output/${T}-expected-output.txt
+	/bin/mv -f output/${T}-${LANG}-output.txt output/${T}-expected-output.txt
     done
     cd ..
 }
@@ -105,6 +112,8 @@ fi
 
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
+make_expected_output_files binarytrees quick medium long
+make_expected_output_files pidigits quick medium long
 make_expected_output_files mandelbrot quick medium long
 make_expected_output_files fannkuch quick medium long
 make_expected_output_files fannkuchredux quick medium long

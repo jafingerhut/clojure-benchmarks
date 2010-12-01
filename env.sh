@@ -184,6 +184,7 @@ JAVA_OBJ_DIR="./obj/java"
 GHC_OBJ_DIR="./obj/ghc"
 SBCL_OBJ_DIR="./obj/sbcl"
 SCALA_OBJ_DIR="./obj/scala"
+GCC_OBJ_DIR="./obj/gcc"
 
 # Choose your style of Java profiling, if any.
 #JAVA_PROFILING="-Xprof"

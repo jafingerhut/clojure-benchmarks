@@ -7,8 +7,8 @@ mkdir -p $OUTPUT_DIR
 
 BENCHMARK="pidigits"
 
-#ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
-ALL_LANGUAGES="java jruby"
+#ALL_LANGUAGES="sbcl perl ghc gcc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+ALL_LANGUAGES="gcc jruby"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -17,7 +17,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj*|jruby) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|gcc|java|clj*|jruby) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
@@ -68,6 +68,9 @@ do
 		( ./sbcl-compile.sh ) >& ${OUTPUT_DIR}/sbcl-compile-log.txt
 		;;
 	    perl) CMD="$PERL pidigits.perl"
+		;;
+	    gcc) CMD=./gcc-run.sh
+		( ./gcc-compile.sh ) >& ${OUTPUT_DIR}/gcc-compile-log.txt
 		;;
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
