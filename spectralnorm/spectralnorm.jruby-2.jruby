@@ -1,0 +1,146 @@
+# The Computer Language Benchmarks Game
+# http://shootout.alioth.debian.org/
+#
+# contributed by Rick Branson
+
+require "thread"
+
+def eval_a(i, j)
+  1.0/((i+j)*(i+j+1.0)/2.0+i+1.0)
+end
+
+class Barrier
+  def initialize(count)
+    @mutex = Mutex.new
+    @count = count
+    reset_generation
+  end
+
+  def reset_generation
+    @generation = { :waiting => 0 }
+  end
+
+  def wait
+    generation = nil
+
+    @mutex.synchronize do
+      generation = @generation
+    end
+
+    @mutex.synchronize do
+      generation[:waiting] += 1
+
+      if generation[:waiting] == @count
+        reset_generation
+      end
+    end
+
+    loop do
+      @mutex.synchronize do
+        if generation[:waiting] == @count
+          return
+        end
+      end
+
+      Thread.pass
+    end
+  end
+end
+
+class SpectralNorm
+  class Worker
+    def initialize(sn, range)
+      @u, @v, @mtx, @tmp, @range = sn.u, sn.v, sn.mtx, sn.tmp, range
+
+      for i in (1..10)
+        multiply_at_av(@u, @tmp, @v)
+        multiply_at_av(@v, @tmp, @u)
+      end
+
+      @vBv = 0
+      @vv  = 0
+
+      for i in @range
+        @vBv += @u[i] * @v[i]
+        @vv  += @v[i] * @v[i]
+      end
+    end
+
+    def values
+      [ @vBv, @vv ]
+    end
+
+    private
+
+    def multiply_atv(v, atv)
+      for i in @range
+        sum = 0.0
+
+        for j in (0 .. (v.size - 1))
+          sum += eval_a(j, i) * v[j]
+        end
+
+        atv[i] = sum
+      end
+    end
+
+    def multiply_av(v, av)
+      for i in @range
+        sum = 0.0
+
+        for j in (0 .. (v.size - 1))
+          sum += eval_a(i, j) * v[j]
+        end
+
+        av[i] = sum
+      end
+    end
+
+    def multiply_at_av(v, tmp, at_av)
+      multiply_av(v, tmp)
+      @mtx.wait
+      multiply_atv(tmp, at_av)
+      @mtx.wait
+    end
+  end
+
+  attr_reader :u
+  attr_reader :v
+  attr_reader :tmp
+  attr_reader :mtx
+
+  def initialize(n, threads = 4)
+    @n        = n
+    @u        = [1.0] * n
+    @v        = Array.new(n)
+    @tmp      = Array.new(n)
+    @threads  = threads
+    @mtx      = Barrier.new(threads)
+  end
+
+  def run
+    vBv = 0
+    vv  = 0
+    ths = []
+    chk = @n / @threads
+
+    @threads.times do |i|
+      r = ((i * chk) .. ((i < (@threads - 1) ? (i * chk) + chk : @n) - 1))
+
+      ths << Thread.new do
+        Thread.current[:worker] = Worker.new(self, r)
+      end
+    end
+
+    ths.each do |t|
+      t.join
+      t_vBv, t_vv = t[:worker].values
+      vBv += t_vBv
+      vv  += t_vv
+    end
+
+    Math.sqrt(vBv / vv)
+  end
+end
+
+print "%0.9f" % SpectralNorm.new(ARGV[0].to_i).run, "\n"
