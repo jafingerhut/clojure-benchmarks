@@ -518,8 +518,12 @@ sub run_measure_cmd {
     if (defined($input_file)) {
 	push @{$args}, '--input-file', $input_file;
     }
-    push @{$args}, '--output-file', $output_file;
-    push @{$args}, '--check-output-cmd', $check_output_cmd;
+    if (defined($output_file)) {
+	push @{$args}, '--output-file', $output_file;
+    }
+    if (defined($check_output_cmd)) {
+	push @{$args}, '--check-output-cmd', $check_output_cmd;
+    }
     if (defined($os_from_cmd_line)) {
 	push @{$args}, '--os', $os_from_cmd_line;
     }
