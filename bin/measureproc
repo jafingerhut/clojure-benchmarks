@@ -624,7 +624,8 @@ if (defined($output_file) && defined($check_output_cmd)) {
 if ($check_output_cmd_fail_info ne '') {
     my ($copy_succeeded, $copy_info);
     ($save_dir_name, $copy_succeeded, $copy_info) =
-	save_copy_of_file($save_dir_name, $output_file, 'output');
+	save_copy_of_file($save_dir_name, $output_file, 'output',
+			  'cmd-output');
     $check_output_cmd_fail_info .= ("\n" . $copy_info);
     printf STDERR "%s\n", $check_output_cmd_fail_info;
 }
@@ -1286,7 +1287,8 @@ sub parse_jvm_gc_log {
 	            $linenum, $gc_log_filename, $line;
 	    my ($copy_succeeded, $copy_info);
 	    ($save_dir_name, $copy_succeeded, $copy_info) =
-		save_copy_of_file($save_dir_name, $gc_log_filename, 'GC log');
+		save_copy_of_file($save_dir_name, $gc_log_filename, 'GC log',
+				  'gc-log');
 	    $parse_gc_log_fail_info .= ("\n" . $copy_info);
 	    printf STDERR "%s\n", $parse_gc_log_fail_info;
 	}
@@ -1317,6 +1319,7 @@ sub save_copy_of_file {
     my $save_dir_name = shift;
     my $filename_to_save = shift;
     my $file_desc = shift;
+    my $save_file_base_name = shift;
 
     if (!defined($save_dir_name)) {
 	$save_dir_name = tempdir( $progname . '-XXXXXX', DIR => '.',
@@ -1324,7 +1327,8 @@ sub save_copy_of_file {
 	# TBD: Check whether tempdir() succeeded, and print an error
 	# message if it didn't.
     }
-    my ($fh, $copy_filename) = tempfile( DIR => $save_dir_name );
+    my ($fh, $copy_filename) = tempfile( $save_file_base_name . '-XXXXXX',
+					 DIR => $save_dir_name );
     close($fh);
     my $copy_succeeded;
     my $copy_info;
