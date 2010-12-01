@@ -113,15 +113,18 @@ fi
 # These don't have input files, just command line parameters that vary
 # for the different "size" tests.
 make_expected_output_files binarytrees quick medium long
-make_expected_output_files pidigits quick medium long
-make_expected_output_files mandelbrot quick medium long
 make_expected_output_files fannkuch quick medium long
 make_expected_output_files fannkuchredux quick medium long
+make_expected_output_files mandelbrot quick medium long
+make_expected_output_files n-body quick medium long
+make_expected_output_files pidigits quick medium long
+make_expected_output_files spectralnorm quick medium long
 
+# These do have input files, which are all output files of the fasta
+# benchmark program.
 make_expected_output_files knuc quick medium long
+make_expected_output_files regex-dna quick long
 make_expected_output_files rcomp quick medium long
 make_expected_output_files rlines long
-make_expected_output_files regex-dna quick long
-make_expected_output_files n-body quick medium long
 
 exit 0
