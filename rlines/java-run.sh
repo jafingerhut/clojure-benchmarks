@@ -96,7 +96,11 @@ source ../env.sh
 #JVM_OPTS="-client -Xmx576m"
 
 # (11) works in about 18 sec
-JVM_OPTS="-client -Xmx544m"
+#JVM_OPTS="-client -Xmx544m"
+
+# -Xmx544m is enough on a 32-bit Hotspot JVM, but apparently not
+# -enough on a 64-bit Hotspot JVM.
+JVM_OPTS="-client -Xmx1024m"
 
 # (12)
 #Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
