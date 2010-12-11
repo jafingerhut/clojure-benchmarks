@@ -29,17 +29,17 @@
   
 (when (= *show* "sysinfo")
   ;; Show a few selected JVM runtime properties.
-  (printf "os.name = %s\n" (. System getProperty "os.name"))
-  (printf "os.version = %s\n" (. System getProperty "os.version"))
-  (printf "java.runtime.version = %s\n"
+  (printf "os.name=%s\n" (. System getProperty "os.name"))
+  (printf "os.version=%s\n" (. System getProperty "os.version"))
+  (printf "java.runtime.version=%s\n"
           (. System getProperty "java.runtime.version"))
   ;; sun.arch.data.model distinguishes between a 32-bit and 64-bit
   ;; JVM.
-  (printf "sun.arch.data.model = %s\n"
+  (printf "sun.arch.data.model=%s\n"
           (. System getProperty "sun.arch.data.model"))
-  (printf "os.arch = %s\n" (. System getProperty "os.arch"))
+  (printf "os.arch=%s\n" (. System getProperty "os.arch"))
   (let [rt (. Runtime getRuntime)]
-    (printf "availableProcessors = %d\n" (. rt availableProcessors)))
+    (printf "availableProcessors=%d\n" (. rt availableProcessors)))
   (flush)
   (. System exit 0))
 
