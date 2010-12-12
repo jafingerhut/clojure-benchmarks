@@ -57,6 +57,8 @@ sub usage {
                [ --language <language_implementation_description_string> ]
                [ --benchmark <benchmark_problem_name> ]
                [ --source-file-name <source_file_name> ]
+               [ --jvm-info { client | server } ]
+               [ --jvm-cmd <jvm_command> ]
                [ --jvm-gc-stats <jvm_type> ]
                [ --jruby-gc-stats <jvm_type> ]
                <measured_cmd> [ arg1 ... ]
@@ -113,6 +115,34 @@ sub usage {
                   time and memory usage of the process.  This is only
                   needed if you wish to override the default command,
                   which for platform '$os' is: $timemem_cmd
+
+    --jvm-info { client | server }
+    --jvm-cmd <jvm_command>
+                  When this option is used, $progname will run a small
+                  compiled Java program JVMInfo.class that should be
+                  installed in the same directory as $progname, before
+                  running <measured_cmd>.  This program will print
+                  some information such as the host OS, JVM version,
+                  and number of available processors, among other
+                  things, and $progname will collect this and include
+                  it in the output.
+
+                  Likely most of this information will be the same
+                  regardless of whether a -client or -server command
+                  line option is used, but in case they are different,
+                  you must specify which to use by the string that
+                  appears after --jvm-info on the command line.
+
+                  If the --jvm-cmd option is specified, $progname will
+                  use that as the command to use when invoking the JVM
+                  to execute JVMInfo.class.  If no --jvm-cmd option is
+                  specified, $progname wil use the first 'word' of
+                  <measured_cmd> as the name of the command to invoke
+                  the JVM.
+
+                  (TBD: This should be tested with path names that
+                  have spaces in them to see whether it works in that
+                  case or not).
 
     --jvm-gc-stats <jvm_type>
                   When this option is used, $progname will assume that
@@ -202,6 +232,8 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
+my $jvm_info;
+my $jvm_cmd;
 my $jvm_gc_stats_from_cmd_line;
 my $jruby_gc_stats_from_cmd_line;
 my $language_implementation_desc_str = '';
@@ -219,6 +251,8 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
+                'jvm-info=s' => \$jvm_info,
+                'jvm-cmd=s' => \$jvm_cmd,
                 'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
                 'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
 		'language=s' => \$language_implementation_desc_str,
@@ -254,6 +288,14 @@ if ($print_csv_name_row and !$output_format_csv) {
 ";
     usage();
     exit(1);
+}
+if (defined($jvm_info)) {
+    if (! (($jvm_info eq 'client') || ($jvm_info eq 'server')) ) {
+	printf STDERR
+"The value after --jvm-info must be 'client' or 'server'.  Found '%s'.
+", $jvm_info;
+	exit 1;
+    }
 }
 my $gc_stats_type;
 my $gc_stats_jruby;
@@ -324,7 +366,8 @@ if (defined($log_file)) {
 ######################################################################
 
 my $gc_log_filename;
-my $cmd_to_time = shift @ARGV;
+my $cmd_first_word = shift @ARGV;
+my $cmd_to_time = $cmd_first_word;
 if (defined($gc_stats_type)) {
     my $tempfh;
     ($tempfh, $gc_log_filename) = tempfile( DIR => $tempdir,
@@ -382,6 +425,60 @@ if ($os eq 'Cygwin') {
 }
 if ($verbose) {
     printf STDERR "\$cmd_to_run='%s'\n", $cmd_to_run;
+}
+
+
+######################################################################
+# If requested, run the JVM to get some information about it and the
+# host machine and OS.
+######################################################################
+
+my $jvm_property_names = [
+    'os.arch',
+    'availableProcessors',
+    'os.name',
+    'os.version',
+    'java.runtime.version',
+    'sun.arch.data.model' ];
+my $jvm_property_xml_tags = {
+    'os.arch' => 'jvm_os_arch',
+    'availableProcessors' => 'jvm_availableProcessors',
+    'os.name' => 'jvm_os_name',
+    'os.version' => 'jvm_os_version',
+    'java.runtime.version' => 'jvm_java_runtime_version',
+    'sun.arch.data.model' => 'jvm_sun_arch_data_model'
+};
+
+my $jvm_info_hash;
+if (defined($jvm_info)) {
+    if (!defined($jvm_cmd)) {
+	$jvm_cmd = $cmd_first_word;
+    }
+    my $jvm_cmd_list = [ $jvm_cmd ];
+    push @{$jvm_cmd_list}, ('-' . $jvm_info),
+        '-classpath', $install_dir, 'JVMInfo';
+    my $jvm_cmd_string = join(' ', @{$jvm_cmd_list});
+    open (JVM_OUT, $jvm_cmd_string . ' |')
+	or die sprintf "Could not execute command '%s' and read its output.\n",
+	    $jvm_cmd_string;
+    my $line;
+    $jvm_info_hash->{'jvm_info_full_cmd'} = $jvm_cmd_string;
+    while ($line = <JVM_OUT>) {
+	if ($line =~ /^([^=]+)=(.*)$/) {
+	    my ($property, $val) = ($1, $2);
+	    if (defined($jvm_property_xml_tags->{$property})) {
+		$jvm_info_hash->{$property} = $val;
+	    } else {
+		die sprintf
+"Unrecognized property name '%s' in output line from command '%s':\n%s",
+	            $property, $jvm_cmd_string, $line;
+	    }
+	} else {
+	    die sprintf "Unrecognized output line from command '%s':\n%s",
+	        $jvm_cmd_string, $line;
+	}
+    }
+    close(JVM_OUT);
 }
 
 
@@ -858,6 +955,17 @@ if ($output_format_csv) {
 	}
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
+    if (defined($jvm_info_hash)) {
+	push @{$tag_text_pairs},
+	    'jvm_info_full_cmd', $jvm_info_hash->{'jvm_info_full_cmd'};
+	foreach my $property (@{$jvm_property_names}) {
+	    if (defined($jvm_info_hash->{$property})) {
+		my $tag = 'jvm_' . $property;
+		$tag =~ s/\./_/g;
+		push @{$tag_text_pairs}, $tag, $jvm_info_hash->{$property};
+	    }
+	}
+    }
 
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
 
@@ -916,6 +1024,17 @@ if ($output_format_csv) {
 	}
     }
     printf $log "    OS description            : %s\n", $os_full;
+    if (defined($jvm_info_hash)) {
+	printf $log "    %-26s: %s\n",
+	    'JVM info full command', $jvm_info_hash->{'jvm_info_full_cmd'};
+	foreach my $property (@{$jvm_property_names}) {
+	    if (defined($jvm_info_hash->{$property})) {
+		my $desc = 'JVM ' . $property;
+		printf $log "    %-26s: %s\n",
+		    $desc, $jvm_info_hash->{$property};
+	    }
+	}
+    }
 }
 
 exit 0;

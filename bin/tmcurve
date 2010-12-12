@@ -75,11 +75,13 @@ sub usage {
                  [ --check-output-cmd <check_output_cmd> ]
                  [ --os <os_name> ]
                  [ --time-cmd <time_cmd> ]
-                 [ --jvm-gc-stats <jvm_type> ]
-                 [ --jruby-gc-stats <jvm_type> ]
                  [ --language <language_implementation_description_string> ]
                  [ --benchmark <benchmark_problem_name> ]
                  [ --source-file-name <source_file_name> ]
+                 [ --jvm-info { client | server } ]
+                 [ --jvm-cmd <jvm_command> ]
+                 [ --jvm-gc-stats <jvm_type> ]
+                 [ --jruby-gc-stats <jvm_type> ]
 
                <measured_cmd> [ args, with %mb where MB value should go ... ]
 
@@ -184,6 +186,8 @@ my $output_file;
 my $check_output_cmd;
 my $os_from_cmd_line;
 my $time_cmd_from_cmd_line;
+my $jvm_info;
+my $jvm_cmd;
 my $jvm_gc_stats_from_cmd_line;
 my $jruby_gc_stats_from_cmd_line;
 my $language_implementation_desc_str;
@@ -212,6 +216,8 @@ if (!GetOptions('help' => \$help,
 		'check-output-cmd=s' => \$check_output_cmd,
 		'os=s' => \$os_from_cmd_line,
 		'time-cmd=s' => \$time_cmd_from_cmd_line,
+                'jvm-info=s' => \$jvm_info,
+                'jvm-cmd=s' => \$jvm_cmd,
                 'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
                 'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
 		'language=s' => \$language_implementation_desc_str,
@@ -529,6 +535,12 @@ sub run_measure_cmd {
     }
     if ($time_cmd_from_cmd_line) {
 	push @{$args}, '--time-cmd', $time_cmd_from_cmd_line;
+    }
+    if ($jvm_info) {
+	push @{$args}, '--jvm-info', $jvm_info;
+    }
+    if ($jvm_cmd) {
+	push @{$args}, '--jvm-cmd', $jvm_cmd;
     }
     if ($jvm_gc_stats_from_cmd_line) {
 	push @{$args}, '--jvm-gc-stats', $jvm_gc_stats_from_cmd_line;
