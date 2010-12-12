@@ -118,7 +118,10 @@
 (def *default-modified-pmap-num-threads*
      (+ 2 (.. Runtime getRuntime availableProcessors)))
 
-(def *allowed-types* ["int" "long" "float-primitive" "double" "double1" "double2" "double-primitive"])
+(def *allowed-types*
+     ["int" "long" "float-primitive"
+      "double" "double1" "double2" "double-primitive"])
+
 
 (defn usage [exit-code]
   (printf "usage: %s type num-jobs job-size num-threads\n" *file*)
@@ -136,51 +139,48 @@
   (. System (exit exit-code)))
 
 
+(defn check-decimal-arg [arg type arg-desc]
+  (if (re-matches #"^\d+$" arg)
+    (condp = type
+        "Integer" (. Integer valueOf arg 10)
+        "BigInteger" (BigInteger. arg))
+    (do
+      (println arg-desc " specified was " arg " but must be an integer")
+      (usage 1))))
+
+
 (defn -main [& args]
   (when (not= 4 (count args))
     (println (str "Expected 4 args but found " (count args)))
     (usage 1))
-  (let [task-fn-specifier (let [arg (nth args 0)
-                                temp ((into #{} *allowed-types*) arg)]
-                            (if temp
-                              temp
+  (let [task-fn-specifier (let [arg (nth args 0)]
+                            (if ((into #{} *allowed-types*) arg)
+                              arg
                               (do
                                 (println "type specified was " arg
                                          " but must be one of: "
                                          (str-join "," *allowed-types*))
                                 (usage 1))))
-        num-jobs (let [arg (nth args 1)]
-                   (when (not (re-matches #"^\d+$" arg))
-                     (println "num-jobs specified was " arg
-                              " but must be an integer")
-                     (usage 1))
-                   (let [temp (. Integer valueOf arg 10)]
-                     (when (< temp 1)
-                       (usage 1))
+        num-jobs (let [temp (check-decimal-arg (nth args 1) "Integer"
+                                               "num-jobs")]
+                   (if (< temp 1)
+                     (usage 1)
                      temp))
-        job-size (let [arg (nth args 2)]
-                   (when (not (re-matches #"^\d+$" arg))
-                     (println "job-size specified was " arg
-                              " but must be an integer")
-                     (usage 1))
-                   (let [temp (BigInteger. arg)]
-                     (cond
-;;           (not= temp (int temp))
-;;           (do
-;;             (println (str "job-size " arg " is too big to fit in Java int,"
-;;                           " so it won't work for Clojure dotimes"))
-;;             (usage 1))
-                      (== temp 0) *default-repetitions*
-                      :else temp)))
-        num-threads (let [arg (nth args 3)]
-                      (when (not (re-matches #"^\d+$" arg))
-                        (println "num-threads specified was " arg
-                                 " but must be an integer")
-                        (usage 1))
-                      (let [temp (. Integer valueOf arg 10)]
-                        (if (== temp 0)
-                          *default-modified-pmap-num-threads*
-                          temp)))
+        job-size (let [temp (check-decimal-arg (nth args 2) "BigInteger"
+                                               "job-size")]
+                   (cond
+;;                    (not= temp (int temp))
+;;                    (do
+;;                      (println (str "job-size " arg " is too big to fit in Java int,"
+;;                                    " so it won't work for Clojure dotimes"))
+;;                      (usage 1))
+                    (== temp 0) *default-repetitions*
+                    :else temp))
+        num-threads (let [temp (check-decimal-arg (nth args 3) "Integer"
+                                                  "num-threads")]
+                      (if (== temp 0)
+                        *default-modified-pmap-num-threads*
+                        temp))
         partial-task-fn (condp = task-fn-specifier
                             "int" spin-int
                             "long" spin-long
