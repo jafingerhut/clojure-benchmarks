@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" pmap-testing.clj "${CLJ_OBJ_DIR}/pmaptesting.clj"
+"${CP}" pmaptesting.clj "${CLJ_OBJ_DIR}/pmaptesting.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile pmaptesting
