@@ -83,7 +83,7 @@ usage (char *prog_name)
     job-size is the number of steps in each job\n\
         0 means to use the default number of steps: %llu\n\
     num-threads-in-parallel is the number of threads to run in parallel\n",
-            DEFAULT_JOB_SIZE);
+            (unsigned long long int) DEFAULT_JOB_SIZE);
 }
 
 
@@ -239,7 +239,9 @@ do_test_measured_part (void *param)
             }
             uint64 elapsed_ms = timeval_diff_msec(&t1, &t2);
             printf("thread %d start=%d.%06d end=%d.%06d elapsed=%.3lf\n",
-                   tp->thread_id, t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec,
+                   tp->thread_id,
+                   (unsigned int) t1.tv_sec, t1.tv_usec,
+                   (unsigned int) t2.tv_sec, t2.tv_usec,
                    (double) elapsed_ms / 1000.0);
         }
         break;
@@ -282,7 +284,9 @@ do_test_measured_part (void *param)
             }
             uint64 elapsed_ms = timeval_diff_msec(&t1, &t2);
             printf("thread %d start=%d.%06d end=%d.%06d elapsed=%.3lf\n",
-                   tp->thread_id, t1.tv_sec, t1.tv_usec, t2.tv_sec, t2.tv_usec,
+                   tp->thread_id,
+                   (unsigned int) t1.tv_sec, t1.tv_usec,
+                   (unsigned int) t2.tv_sec, t2.tv_usec,
                    (double) elapsed_ms / 1000.0);
         }
         break;
