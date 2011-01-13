@@ -11,7 +11,7 @@ BENCHMARK="reverse-complement"
 # /dev/stdin with :element-type '(unsigned-byte 8) for some reason.
 # SBCL 1.0.39 seems to work fine.
 
-ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

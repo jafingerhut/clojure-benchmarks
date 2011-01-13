@@ -63,8 +63,12 @@ then
     then
         CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha3/lib"`
         CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"`
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha4" ]
+    then
+        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha4/lib"`
+        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"`
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
         exit 1
     fi
 
@@ -126,8 +130,12 @@ then
     then
         CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha3/lib"
         CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha4" ]
+    then
+        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha4/lib"
+        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
         exit 1
     fi
 

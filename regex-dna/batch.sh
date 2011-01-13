@@ -13,7 +13,7 @@ BENCHMARK="regex-dna"
 
 # Also how to get module Text.Regex.PCRE available in GHC.
 
-ALL_LANGUAGES="perl java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+ALL_LANGUAGES="perl java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
 ALL_TESTS="quick long"
 
 LANGUAGES=""

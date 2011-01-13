@@ -7,7 +7,7 @@ mkdir -p $OUTPUT_DIR
 
 BENCHMARK="pidigits"
 
-#ALL_LANGUAGES="sbcl perl ghc gcc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+#ALL_LANGUAGES="sbcl perl ghc gcc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
 ALL_LANGUAGES="gcc jruby"
 ALL_TESTS="quick medium long"
 
