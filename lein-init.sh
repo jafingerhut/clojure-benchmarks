@@ -46,3 +46,9 @@ cd clj-1.3.0-alpha3
 cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha3-only" project.clj
 lein deps
 cd ..
+
+lein new clj-1.3.0-alpha4
+cd clj-1.3.0-alpha4
+cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha4-only" project.clj
+lein deps
+cd ..
