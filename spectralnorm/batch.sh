@@ -77,7 +77,6 @@ do
 		;;
 	    jruby)
 		CMD="${JRUBY} --server spectralnorm.jruby"
-		#CMD="${JRUBY} --server spectralnorm.jruby-2.jruby"
 		;;
 	    scala) CMD=./scala-run.sh
 		( ./scala-compile.sh ) >& ${OUTPUT_DIR}/scala-compile-log.txt
