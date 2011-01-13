@@ -7,7 +7,7 @@ mkdir -p $OUTPUT_DIR
 
 BENCHMARK="mandelbrot"
 
-ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3"
+ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 jruby"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -16,7 +16,7 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java|clj*|jruby) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
@@ -70,6 +70,10 @@ do
 		;;
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
+		;;
+	    jruby)
+		CMD="${JRUBY} --server mandelbrot.jruby"
+		;;
 	esac
 	case $L in
 	    sbcl) EXTRA_LANG_ARGS="1"
