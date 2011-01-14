@@ -426,7 +426,7 @@ if ($do_binary_search_phase) {
             $largest_fail_mb, $smallest_success_mb
 		if ($verbose >= 1);
 	while ($smallest_success_mb - $largest_fail_mb > $precision_mb) {
-	    $mb = ($largest_fail_mb + $smallest_success_mb) / 2;
+	    $mb = int(($largest_fail_mb + $smallest_success_mb) / 2);
 	    my ($success, $measurement_xml_info) = cmd_succeeds($mb);
 	    if ($success) {
 		$smallest_success_mb = $mb;
