@@ -180,7 +180,7 @@ then
     ######################################################################
     # Linux/MacOS Perl
     ######################################################################
-    JRUBY="$HOME/sw/jruby-1.5.5/bin/jruby"
+    JRUBY="$HOME/sw/jruby-1.5.6/bin/jruby"
 
 else
     2>&1 echo "In script env.sh: Unknown output from 'uname -o' command:" $OS
