@@ -13,10 +13,8 @@ source ../env.sh
 mkdir -p output
 
 # If Hotspot JVM is in use:
-JVM_TYPE=hotspot
 MAX_HEAP_MB=64
 # If JRockit JVM is in use:
-#JVM_TYPE=jrockit
 #MAX_HEAP_MB=512
 
 # TBD: Does measureproc need this on Cygwin in order to work?  Is

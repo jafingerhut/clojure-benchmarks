@@ -36,9 +36,13 @@ then
     # Windows+Cygwin Java
     ######################################################################
     # Example paths I used successfully on Windows+Cygwin for some JVMs.
-    # JRockit
+
+    # The JVM_TYPE is intended to be used as an argument to
+    # measureproc if you want to get GC statistics, e.g.
+    # measureproc --jvm-gc-stats "${JVM_TYPE}" ...
+    JVM_TYPE="jrockit"
     JAVA_BIN="/cygdrive/c/Program Files/Java/jrmc-4.0.1-1.6.0/bin"
-    # HotSpot
+    #JVM_TYPE="hotspot"
     #JAVA_BIN="/cygdrive/c/Program Files/Java/jdk1.6.0_21/bin"
     JAVAC="${JAVA_BIN}/javac"
     JAVA="${JAVA_BIN}/java"
@@ -110,6 +114,10 @@ then
     ######################################################################
     # Linux/MacOS Java
     ######################################################################
+    # The JVM_TYPE is intended to be used as an argument to
+    # measureproc if you want to get GC statistics, e.g.
+    # measureproc --jvm-gc-stats "${JVM_TYPE}" ...
+    JVM_TYPE="hotspot"
     JAVAC="javac"
     JAVA="java"
 
@@ -210,7 +218,7 @@ CP="/bin/cp"
 RM="/bin/rm"
 DIFF="diff -c"
 
-# On Windows, some programs \r\n for line endings, whereas others
-# produces \n only.  Ignore trailing carriage returns on input.
+# On Windows, some programs produce \r\n for line endings, whereas
+# others produces \n only.  Ignore trailing carriage returns on input.
 CMP="diff --strip-trailing-cr --brief"
 #CMP="cmp"
