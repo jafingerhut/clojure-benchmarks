@@ -17,6 +17,10 @@ public final class JVMInfo {
 	}
 	showProp("os.name");
 	showProp("os.version");
+	showProp("java.version");
+	showProp("java.specification.version");
+	showProp("java.vm.name");
+	showProp("java.vm.version");
 	showProp("java.runtime.version");
 	showProp("sun.arch.data.model");
     }

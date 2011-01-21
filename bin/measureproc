@@ -438,6 +438,10 @@ my $jvm_property_names = [
     'availableProcessors',
     'os.name',
     'os.version',
+    'java.version',
+    'java.specification.version',
+    'java.vm.name',
+    'java.vm.version',
     'java.runtime.version',
     'sun.arch.data.model' ];
 my $jvm_property_xml_tags = {
@@ -445,6 +449,10 @@ my $jvm_property_xml_tags = {
     'availableProcessors' => 'jvm_availableProcessors',
     'os.name' => 'jvm_os_name',
     'os.version' => 'jvm_os_version',
+    'java.version' => 'jvm_java_version',
+    'java.specification.version' => 'jvm_java_specification_version',
+    'java.vm.name' => 'jvm_java_vm_name',
+    'java.vm.version' => 'jvm_java_vm_version',
     'java.runtime.version' => 'jvm_java_runtime_version',
     'sun.arch.data.model' => 'jvm_sun_arch_data_model'
 };
@@ -454,11 +462,21 @@ if (defined($jvm_info)) {
     if (!defined($jvm_cmd)) {
 	$jvm_cmd = $cmd_first_word;
     }
-    my $jvm_cmd_list = [ $jvm_cmd ];
+    my $jvm_cmd_to_use = $jvm_cmd;
+    if ($os eq 'Cygwin') {
+	$jvm_cmd_to_use = `cygpath -u "$jvm_cmd"`;
+	chomp $jvm_cmd_to_use;
+    }
+    my $jvm_cmd_list = [ $jvm_cmd_to_use ];
+    my $install_dir_to_use = $install_dir;
+    if ($os eq 'Cygwin') {
+	$install_dir_to_use = `cygpath -w "$install_dir"`;
+	chomp $install_dir_to_use;
+    }
     push @{$jvm_cmd_list}, ('-' . $jvm_info),
-        '-classpath', $install_dir, 'JVMInfo';
+        '-classpath', $install_dir_to_use, 'JVMInfo';
     my $jvm_cmd_string = join(' ', @{$jvm_cmd_list});
-    open (JVM_OUT, $jvm_cmd_string . ' |')
+    open (JVM_OUT, '-|', @{$jvm_cmd_list})
 	or die sprintf "Could not execute command '%s' and read its output.\n",
 	    $jvm_cmd_string;
     my $line;
@@ -517,6 +535,7 @@ if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
 seek CATCHERR, 0, 0;
 
 my $cmd_exit_status;
+my $unrecognized_cmd_stderr_output = '';
 if ($os eq 'Cygwin') {
     my $found_pid = 0;
     while (<CATCHERR>) {
@@ -535,13 +554,22 @@ if ($os eq 'Cygwin') {
 		$sys_sec = $1;
 	    } elsif (/^\s+Peak Working Set Size \(kbytes\): (\d+)\s*$/) {
 		$max_rss_kbytes = $1;
+	    } elsif (/^\s+Page Fault Count: (\d+)\s*$/) {
+		# Ignore this and the ones immediately below
+	    } elsif (/^\s+Quota Peak Paged Pool Usage: (\d+)\s*$/) {
+	    } elsif (/^\s+Quota Peak Non Paged Pool Usage: (\d+)\s*$/) {
+	    } elsif (/^\s+Peak Pagefile Usage: (\d+)\s*$/) {
 	    } else {
-		# Ignore the others
+		if (! /^\s*$/) {
+		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
+		}
 	    }
 	} else {
 	    # This is a line of output from the program, most likely
 	    # one printed to stderr if stdout has been redirected.
-	    # Ignore it for now.
+	    if (! /^\s*$/) {
+		$unrecognized_cmd_stderr_output .= ($_ . "\n");
+	    }
 	}
     }
 } elsif ($os eq 'Darwin') {
@@ -571,12 +599,16 @@ if ($os eq 'Cygwin') {
 	    } elsif (/^\s*Per core CPU utilization \((\d+) cores\): (.*)$/) {
 		($num_cpus, $usage_per_cpu) = ($1, $2);
 	    } else {
-		# Ignore the others
+		if (! /^\s*$/) {
+		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
+		}
 	    }
 	} else {
 	    # This is a line of output from the program, most likely
 	    # one printed to stderr if stdout has been redirected.
-	    # Ignore it for now.
+	    if (! /^\s*$/) {
+		$unrecognized_cmd_stderr_output .= ($_ . "\n");
+	    }
 	}
     }
 } elsif ($os eq 'GNU/Linux') {
@@ -619,12 +651,16 @@ if ($os eq 'Cygwin') {
 		$max_rss_kbytes_bi->bdiv(4);
 		$max_rss_kbytes = sprintf "%s", $max_rss_kbytes_bi;
 	    } else {
-		# Ignore the others
+		if (! /^\s*$/) {
+		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
+		}
 	    }
 	} else {
 	    # This is a line of output from the program, most likely
 	    # one printed to stderr if stdout has been redirected.
-	    # Ignore it for now.
+	    if (! /^\s*$/) {
+		$unrecognized_cmd_stderr_output .= ($_ . "\n");
+	    }
 	}
     }
 }
@@ -661,6 +697,17 @@ if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
    # Remove leading space.
    $usage_per_cpu = substr($usage_per_cpu, 1);
 }
+if ($unrecognized_cmd_stderr_output ne '') {
+    printf STDERR "
+The following lines were printed to stderr by the program while
+being measured, and were not recognized as part of the output of the
+program that is used for measurement:
+        %s
+
+%s
+",
+        $timemem_cmd, $unrecognized_cmd_stderr_output;
+}
 if ($verbose) {
     printf STDERR "\$elapsed_sec='%s'\n", $elapsed_sec;
     printf STDERR "\$user_sec='%s'\n", $user_sec;
@@ -684,6 +731,19 @@ $timemem_cmd, and requires a corresponding change to $progname
 The command line used was:
 $cmd_to_run
 ";
+    if ($os eq 'Cygwin') {
+	printf STDERR "
+Contents of batch file %s:
+----------------------------------------
+", $cmd_to_run;
+	open(F,"$cmd_to_run") or die sprintf "Could not open file '%s' for reading.\n", $cmd_to_run;
+	while (<F>) {
+	    print STDERR $_;
+	}
+	close(F);
+	printf STDERR
+"----------------------------------------\n";
+    }
     exit 1;
 }
 
@@ -881,11 +941,11 @@ if ($output_format_csv) {
 			 defined($gc_stats->{parse_gc_log_fail_info}))
 			? $gc_stats->{parse_gc_log_fail_info} : '');
     printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{num_gcs} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_mem_collected} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_gc_time} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_avail_mem} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_allocated_mem} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_live_mem} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_mem_collected_kb} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_gc_time_sec} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_avail_mem_kb} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_allocated_mem_kb} : '';
+    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_live_mem_kb} : '';
     printf $log ",%s", csv_str($os_full);
     printf $log "\n";
 
@@ -944,14 +1004,14 @@ if ($output_format_csv) {
 	    push @{$tag_text_pairs}, 'parse_gc_log_failure_details', $gc_stats->{parse_gc_log_failure_details};
 	} else {
 	    push @{$tag_text_pairs}, 'number_of_gcs', $gc_stats->{num_gcs};
-	    push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected};
-	    push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time};
+	    push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected_kb};
+	    push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time_sec};
 	    push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-	        $gc_stats->{max_total_avail_mem};
+	        $gc_stats->{max_total_avail_mem_kb};
 	    push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
-	        $gc_stats->{max_total_allocated_mem};
+	        $gc_stats->{max_total_allocated_mem_kb};
 	    push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-	        $gc_stats->{max_total_live_mem};
+	        $gc_stats->{max_total_live_mem_kb};
 	}
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
@@ -1013,14 +1073,14 @@ if ($output_format_csv) {
 	} else {
 	    printf $log "    Number of GCs             : %s\n", $gc_stats->{num_gcs};
 	    printf $log "    Total memory GCed (KB)    : %s\n",
-	        $gc_stats->{total_mem_collected};
-	    printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time};
+	        $gc_stats->{total_mem_collected_kb};
+	    printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time_sec};
 	    printf $log "    Maximum total available memory (KB): %s\n",
-	        $gc_stats->{max_total_avail_mem};
+	        $gc_stats->{max_total_avail_mem_kb};
 	    printf $log "    Maximum total allocated memory (KB): %s\n",
-	        $gc_stats->{max_total_allocated_mem};
+	        $gc_stats->{max_total_allocated_mem_kb};
 	    printf $log "    Maximum total live memory (KB)     : %s\n",
-	        $gc_stats->{max_total_live_mem};
+	        $gc_stats->{max_total_live_mem_kb};
 	}
     }
     printf $log "    OS description            : %s\n", $os_full;
@@ -1073,7 +1133,7 @@ sub linux_get_cpu_usage {
     my $total_cpu_stats = {};
 
     my $filename = '/proc/stat';
-    open(F,"$filename") or die sprintf "Could not open file '%s' for reading.\n";
+    open(F,"$filename") or die sprintf "Could not open file '%s' for reading.\n", $filename;
     my $line = <F>;
     if ($line =~ /^\s*cpu\s+(\d+) (\d+) (\d+) (\d+)/) {
 	my ($user, $nice, $sys, $idle) = ($1, $2, $3, $4);
@@ -1312,13 +1372,14 @@ sub parse_jvm_gc_log {
     # 'jrockit'
 
     my $num_mem_increase_warnings = 0;
+    my $max_mem_increase_warnings_to_print = 3;
 
     my $num_gcs = 0;
-    my $total_mem_collected = 0;
-    my $total_gc_time = 0;
-    my $max_total_avail_mem = 0;
-    my $max_total_allocated_mem = 0;
-    my $max_total_live_mem = 0;
+    my $total_mem_collected_kb = 0;
+    my $total_gc_time_sec = 0;
+    my $max_total_avail_mem_kb = 0;
+    my $max_total_allocated_mem_kb = 0;
+    my $max_total_live_mem_kb = 0;
     my $parse_gc_log_fail_info;
 
     open(FH, '<', $gc_log_filename)
@@ -1327,59 +1388,139 @@ sub parse_jvm_gc_log {
     # cleanly, i.e. by continuing and printing results without GC
     # summary stats.
     my $linenum = 0;
+    my $already_saved_copy_of_gc_log = 0;
+    my $unparseable_lines = 0;
+    my $max_unparseable_lines_to_print = 5;
     while (my $line = <FH>) {
 	++$linenum;
+	chomp $line;
+	if ($line =~ /\r$/) {
+	    chop $line;
+	}
 	if ($line =~
 	    /^\s*\d+\.\d+:\s+\[(GC|GC--|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
 	{
-	    my ($gc_type, $live_before_this_gc, $live_after_this_gc,
-		$total_avail_space, $gc_time) = ($1, $2, $3, $4, $5);
+	    my ($gc_type, $live_before_this_gc_kb, $live_after_this_gc_kb,
+		$total_avail_space_kb, $gc_time) = ($1, $2, $3, $4, $5);
 	    # Notes from this source:
 	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
 	    
-	    # $live_before_this_gc space consists of objects that are
-	    # actually live, or they are dead but still referenced
+	    # $live_before_this_gc_kb space consists of objects that
+	    # are actually live, or they are dead but still referenced
 	    # from a tenured generation object after a previous minor
 	    # GC.
 	    
-	    # Similarly for $live_after_this_gc
+	    # Similarly for $live_after_this_gc_kb
 	    
-	    # $total_avail_space is the total available space, not
+	    # $total_avail_space_kb is the total available space, not
 	    # counting the space in the permanent generation, which is
 	    # the total heap minus one of the survivor spaces.
 	    
 	    ++$num_gcs;
-	    my $mem_collected_this_gc = ($live_before_this_gc -
-					 $live_after_this_gc);
-	    if ($mem_collected_this_gc < 0) {
-		$mem_collected_this_gc = 0;
-		if ($num_mem_increase_warnings < 3) {
-		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s",
-		        $live_before_this_gc, $live_after_this_gc, $linenum,
-		        $gc_log_filename, $line;
+	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
+					    $live_after_this_gc_kb);
+	    if ($mem_collected_this_gc_kb < 0) {
+		$mem_collected_this_gc_kb = 0;
+		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
+		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
+		        $live_before_this_gc_kb, $live_after_this_gc_kb,
+		        $linenum, $gc_log_filename, $line;
 		}
 		++$num_mem_increase_warnings;
 	    }
-	    $total_mem_collected += $mem_collected_this_gc;
-	    $total_gc_time += $gc_time;
-	    if ($total_avail_space > $max_total_avail_mem) {
-		$max_total_avail_mem = $total_avail_space;
+	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_gc_time_sec += $gc_time;
+	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
+		$max_total_avail_mem_kb = $total_avail_space_kb;
 	    }
-	    if ($live_before_this_gc > $max_total_allocated_mem) {
-		$max_total_allocated_mem = $live_before_this_gc;
+	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
+		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
 	    }
 	    if ($gc_type eq 'GC--') {
 		# I've seen several of these where the
-		# $live_after_this_gc number is larger than the
-		# $live_before_this_gc number, and the after number is
-		# significantly larger than the after number of other
-		# GCs.  Until I find out what these mean, I'm going to
-		# leave such GC lines out of the calculation of the
-		# $max_total_live_mem.
+		# $live_after_this_gc_kb number is larger than the
+		# $live_before_this_gc_kb number, and the after number
+		# is significantly larger than the after number of
+		# other GCs.  Until I find out what these mean, I'm
+		# going to leave such GC lines out of the calculation
+		# of the $max_total_live_mem_kb.
 	    } else {
-		if ($live_after_this_gc > $max_total_live_mem) {
-		    $max_total_live_mem = $live_after_this_gc;
+		if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
+		    $max_total_live_mem_kb = $live_after_this_gc_kb;
 		}
+	    }
+	} elsif ($line =~ /^\s*\[INFO \]\[memory \] \[[YO]C#\d+\] (\d+(\.\d+)?)-(\d+(\.\d+)?): ([YO]C) (\d+)KB->(\d+)KB \((\d+)KB\), (\d+(\.\d+)?) s, sum of pauses (\d+(\.\d+)?) ms, longest pause (\d+(\.\d+)?) ms\.\s*$/) {
+	    # TBD: Try to make this case and the one above share
+	    # common code, rather than duplicating it.
+	    my ($gc_start_time_sec, $gc_end_time_sec, $gc_type,
+		$live_before_this_gc_kb, $live_after_this_gc_kb,
+		$total_avail_space_kb, $gc_time_sec,
+		$gc_time_msec, $gc_longest_pause_time_msec) =
+		($1, $3, $5, $6, $7, $8, $9, $11, $13);
+	    ++$num_gcs;
+	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
+					    $live_after_this_gc_kb);
+	    if ($mem_collected_this_gc_kb < 0) {
+		$mem_collected_this_gc_kb = 0;
+		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
+		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
+		        $live_before_this_gc_kb, $live_after_this_gc_kb,
+		        $linenum, $gc_log_filename, $line;
+		}
+		++$num_mem_increase_warnings;
+	    }
+	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_gc_time_sec += ($gc_time_msec / 1000.0);
+	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
+		$max_total_avail_mem_kb = $total_avail_space_kb;
+	    }
+	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
+		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
+	    }
+	    if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
+		$max_total_live_mem_kb = $live_after_this_gc_kb;
+	    }
+
+	    # Do consistency check on ($gc_end_time_sec -
+	    # $gc_start_time_sec), which I think should be close to
+	    # $gc_time_sec.
+	    my $double_check_gc_time_sec =
+		($gc_end_time_sec - $gc_start_time_sec);
+	    my $max_error_allowed_sec = 0.0015;
+	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
+		$max_error_allowed_sec)
+	    {
+		printf STDERR "Warning: GC start time %s and end time %s give duration %.3f which is more than %s different than the reported time %s in line %d of GC log file '%s': %s\n",
+		    $gc_start_time_sec, $gc_end_time_sec,
+		    $double_check_gc_time_sec, $max_error_allowed_sec,
+		    $gc_time_sec,
+		    $linenum, $gc_log_filename, $line;
+	    }
+
+	    # Do consistency check between values of $gc_time_sec and
+	    # $gc_time_msec.  $gc_time_sec should be equal to
+	    # $gc_time_msec, perhaps rounded off.
+	    $double_check_gc_time_sec = ($gc_time_msec / 1000.0);
+	    # I don't know why, but I've seen these values differ by
+	    # more than merely rounding error.  For example, in this line:
+	    #
+	    # [INFO ][memory ] [OC#4] 9.586-10.564: OC 284932KB->273009KB (489092KB), 0.977 s, sum of pauses 964.737 ms, longest pause 964.737 ms.
+	    $max_error_allowed_sec = 0.020;
+	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
+		$max_error_allowed_sec)
+	    {
+		printf STDERR "Warning: GC duration in msec %s is more than %s different than the reported time %s in sec in line %d of GC log file '%s': %s\n",
+		    $gc_time_msec, $max_error_allowed_sec, $gc_time_sec,
+		    $linenum, $gc_log_filename, $line;
+	    }
+
+	    # Do consistency check between values of
+	    # $gc_longest_pause_time_msec and $gc_time_msec.  I
+	    # believe the former should always be at most the latter.
+	    if ($gc_longest_pause_time_msec > $gc_time_msec) {
+		printf STDERR "Warning: longest pause %s is longer than total pause time %s in line %d of GC log file '%s': %s\n",
+		    $gc_longest_pause_time_msec, $gc_time_msec,
+		    $linenum, $gc_log_filename, $line;
 	    }
 	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
 	    # I have seen the version of the JVM described below
@@ -1399,33 +1540,74 @@ sub parse_jvm_gc_log {
 	    # Java HotSpot(TM) Server VM (build 17.1-b03, mixed mode)
 	    my $gc_time = $1;
 	    ++$num_gcs;
-	    $total_gc_time += $gc_time;
+	    $total_gc_time_sec += $gc_time;
+	} elsif (
+            ($line =~ /^\s*\[INFO \]\[memory \] GC mode: Garbage collection optimized for .+, strategy: .+\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] Heap size: \d+KB, maximal heap size: \d+KB, nursery size: \d+KB\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <start>-<end>: <type> <before>KB-><after>KB \(<heap>KB\), <time> ms, sum of pauses <pause> ms\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <start>  - start time of collection \(seconds since jvm start\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <type>   - OC \(old collection\) or YC \(young collection\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <end>    - end time of collection \(seconds since jvm start\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <before> - memory used by objects before collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <after>  - memory used by objects after collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <heap>   - size of heap after collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <time>   - total time of collection \(milliseconds\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <pause>  - total sum of pauses during collection \(milliseconds\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \]            Run with -Xverbose:gcpause to see individual phases\.\s*$/)
+	    ) {
+	    # Ignore these boilerplate header lines out of the JRockit JVM
+	} elsif ($line =~ /^\s*\[ERROR\].*$/) {
+	    my $err_msg = sprintf "Error: Found ERROR at line %d of GC log file '%s': %s",
+	        $linenum, $gc_log_filename, $line;
+	    if (! $already_saved_copy_of_gc_log) {
+		# TBD: Avoid duplicating code here with the
+		# $unparseable_lines case below.
+		my ($copy_succeeded, $copy_info);
+		($save_dir_name, $copy_succeeded, $copy_info) =
+		    save_copy_of_file($save_dir_name, $gc_log_filename,
+				      'GC log', 'gc-log');
+		$err_msg .= ("\n" . $copy_info);
+		$parse_gc_log_fail_info = $err_msg;
+		$already_saved_copy_of_gc_log = 1;
+	    }
+	    printf STDERR "%s\n", $err_msg;
 	} else {
-	    $parse_gc_log_fail_info =
+	    ++$unparseable_lines;
+	    my $err_msg =
 		sprintf "Could not parse line %d of GC log file %s: '%s'",
 	            $linenum, $gc_log_filename, $line;
-	    my ($copy_succeeded, $copy_info);
-	    ($save_dir_name, $copy_succeeded, $copy_info) =
-		save_copy_of_file($save_dir_name, $gc_log_filename, 'GC log',
-				  'gc-log');
-	    $parse_gc_log_fail_info .= ("\n" . $copy_info);
-	    printf STDERR "%s\n", $parse_gc_log_fail_info;
+	    if (! $already_saved_copy_of_gc_log) {
+		my ($copy_succeeded, $copy_info);
+		($save_dir_name, $copy_succeeded, $copy_info) =
+		    save_copy_of_file($save_dir_name, $gc_log_filename,
+				      'GC log', 'gc-log');
+		$err_msg .= ("\n" . $copy_info);
+		$parse_gc_log_fail_info = $err_msg;
+		$already_saved_copy_of_gc_log = 1;
+	    }
+	    if ($unparseable_lines <= $max_unparseable_lines_to_print) {
+		printf STDERR "%s\n", $err_msg;
+	    }
 	}
     }
     close(FH);
+    if ($unparseable_lines > $max_unparseable_lines_to_print) {
+	printf STDERR "%d additional error messages about unparseable GC log file lines were suppressed.\n",
+	    ($unparseable_lines - $max_unparseable_lines_to_print);
+    }
 
-    if ($num_mem_increase_warnings > 3) {
+    if ($num_mem_increase_warnings > $max_mem_increase_warnings_to_print) {
 	printf STDERR "%d additional warnings about memory use increasing during GC suppressed.\n",
-	    $num_mem_increase_warnings - 3;
+	    $num_mem_increase_warnings - $max_mem_increase_warnings_to_print;
     }
 
     my $gc_stats = {
 	num_gcs => $num_gcs,
-	total_mem_collected => $total_mem_collected,
-	total_gc_time => $total_gc_time,
-	max_total_avail_mem => $max_total_avail_mem,
-	max_total_allocated_mem => $max_total_allocated_mem,
-	max_total_live_mem => $max_total_live_mem
+	total_mem_collected_kb => $total_mem_collected_kb,
+	total_gc_time_sec => $total_gc_time_sec,
+	max_total_avail_mem_kb => $max_total_avail_mem_kb,
+	max_total_allocated_mem_kb => $max_total_allocated_mem_kb,
+	max_total_live_mem_kb => $max_total_live_mem_kb
     };
     if (defined($parse_gc_log_fail_info)) {
 	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
