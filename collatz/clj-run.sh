@@ -10,4 +10,6 @@ shift
 
 source ../env.sh
 
+mkdir -p output
+
 ../bin/measureproc --jvm-info server --jvm-gc-stats hotspot --output output/${CLJ_VERSION}-output.txt "${JAVA}" -server -Xmx64m -classpath "${PS_FULL_CLJ_CLASSPATH}" collatz "$@"
