@@ -619,6 +619,29 @@ if ($os eq 'Cygwin') {
 	if (/^\s*User time \(seconds\):\s*(.*)\s*$/) {
 	    $user_sec = $1;
 	    $found_user = 1;
+        } elsif (/^\s*Command being timed:.*$/ ||
+                 /^\s*Percent of CPU this job got: \d+%\s*$/ ||
+                 /^\s*Average shared text size \(kbytes\): \d+\s*$/ ||
+                 /^\s*Average unshared data size \(kbytes\): \d+\s*$/ ||
+                 /^\s*Average stack size \(kbytes\): \d+\s*$/ ||
+                 /^\s*Average total size \(kbytes\): \d+\s*$/ ||
+                 /^\s*Average resident set size \(kbytes\): \d+\s*$/ ||
+                 /^\s*Major \(requiring I\/O\) page faults: \d+\s*$/ ||
+                 /^\s*Minor \(reclaiming a frame\) page faults: \d+\s*$/ ||
+                 /^\s*Voluntary context switches: \d+\s*$/ ||
+                 /^\s*Involuntary context switches: \d+\s*$/ ||
+                 /^\s*Swaps: \d+\s*$/ ||
+                 /^\s*File system inputs: \d+\s*$/ ||
+                 /^\s*File system outputs: \d+\s*$/ ||
+                 /^\s*Socket messages sent: \d+\s*$/ ||
+                 /^\s*Socket messages received: \d+\s*$/ ||
+                 /^\s*Signals delivered: \d+\s*$/ ||
+                 /^\s*Page size \(bytes\): \d+\s*$/ ||
+                 /^\s*Exit status: \d+\s*$/
+                )
+        {
+            # Ignore these lines, but don't treat them as unrecognized
+            # lines.
 	} elsif ($found_user) {
             if (/^\s*System time \(seconds\):\s*(.*)\s*$/) {
 		$sys_sec = $1;
