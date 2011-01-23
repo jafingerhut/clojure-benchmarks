@@ -12,10 +12,16 @@ source ../env.sh
 
 mkdir -p output
 
-# If Hotspot JVM is in use:
-MAX_HEAP_MB=64
-# If JRockit JVM is in use:
-#MAX_HEAP_MB=512
+if [ "${JVM_TYPE}" == "hotspot" ]
+then
+    MAX_HEAP_MB=64
+elif [ "${JVM_TYPE}" == "jrockit" ]
+then
+    MAX_HEAP_MB=512
+else
+    1>&2 echo "JVM_TYPE=${JVM_TYPE} has unsupported value.  Supported values are: hotspot, jrockit"
+    exit 1
+fi
 
 # TBD: Does measureproc need this on Cygwin in order to work?  Is
 # there some straightforward way to make measureproc detect when this
