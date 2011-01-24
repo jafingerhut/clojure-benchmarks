@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" collatz.clj-1.clj "${CLJ_OBJ_DIR}/collatz.clj"
+"${CP}" collatz.clj-2.clj "${CLJ_OBJ_DIR}/collatz.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile collatz
