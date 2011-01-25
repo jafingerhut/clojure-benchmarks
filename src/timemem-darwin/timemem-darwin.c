@@ -16,20 +16,25 @@ int64 timeval_diff_msec(struct timeval *t1, struct timeval *t2);
 int debug = 0;
 char *global_prog_name;
 
-int global_first_poll;
-int global_wait4_returned_normally;
-int global_task_info_errored;
-struct timeval global_task_info_error_time;
-struct timeval global_prev_poll_time;
-int64 global_consecutive_poll_separation_min_msec = 1000000L;
-int64 global_consecutive_poll_separation_max_msec = -1000000L;
-struct timeval global_poll_time_when_maxrss_first_seen;
-int global_verbose_poll;
-pid_t global_pid_to_poll;
-long global_num_polls;
-natural_t global_max_rss_bytes;
 int global_sigalrm_handled;
-task_port_t global_tp;
+
+struct poll_state {
+    int use_polling;
+    int first_poll;
+    int verbose_poll;
+    pid_t pid_to_poll;
+    long num_polls;
+    int64 consecutive_poll_separation_min_msec;
+    int64 consecutive_poll_separation_max_msec;
+    task_port_t tp;
+
+    int wait4_returned_normally;
+    int task_info_errored;
+    struct timeval task_info_error_time;
+    struct timeval prev_poll_time;
+    struct timeval poll_time_when_maxrss_first_seen;
+    natural_t max_rss_bytes;
+};
 
 
 typedef struct cpu_usage_t {
@@ -40,6 +45,65 @@ typedef struct cpu_usage_t {
     uint64 idle;
     uint64 total;
 } cpu_usage;
+
+
+void
+cleanup_temp_file (char *tmp_name)
+{
+    int ret = unlink(tmp_name);
+    if (ret == -1) {
+        perror(global_prog_name);
+        exit(1);
+    }
+}
+
+
+int
+get_macosx_version (int *major_version_num, int *minor_version_num,
+                    int *subminor_version_num)
+{
+    char *tmp_name = tmpnam(NULL);
+    if (tmp_name == NULL) {
+        perror(global_prog_name);
+        exit(1);
+    }
+    char *uname_cmd;
+    int ret = asprintf(&uname_cmd, "uname -r > %s", tmp_name);
+    if (ret == -1 || uname_cmd == NULL) {
+        fprintf(stderr, "Could not allocate enough memory for command string: uname -r > %s\n", tmp_name);
+        cleanup_temp_file(tmp_name);
+        exit(1);
+    }
+    ret = system(uname_cmd);
+    if (ret != 0) {
+        fprintf(stderr, "error in %s: system(\"%s\") returned %d\n",
+                global_prog_name, uname_cmd, ret);
+        cleanup_temp_file(tmp_name);
+        exit(1);
+    }
+    FILE *f = fopen(tmp_name, "r");
+    if (f == NULL) {
+        perror(global_prog_name);
+        cleanup_temp_file(tmp_name);
+        exit(1);
+    }
+    char buf[512];
+    if (fgets(buf, sizeof(buf), f) == NULL) {
+        perror(global_prog_name);
+        cleanup_temp_file(tmp_name);
+        exit(1);
+    }
+    ret = sscanf(buf, "%d.%d.%d",
+                 major_version_num, minor_version_num, subminor_version_num);
+    fclose(f);
+    cleanup_temp_file(tmp_name);
+    if (ret < 2) {
+        fprintf(stderr, "%s: Output of 'uname -r' was '%s', from which no major and minor version number could be parsed.\n",
+                global_prog_name, buf);
+        exit(1);
+    }
+    return ret;
+}
 
 
 unsigned int
@@ -105,16 +169,21 @@ void sigalrm_handler (int sig)
 
 
 int
-init_polling_process_rss (pid_t pid)
+init_polling_process_rss (pid_t pid, struct poll_state *ps)
 {
     kern_return_t error;
 
-    global_first_poll = 1;
-    global_verbose_poll = debug;
-    global_pid_to_poll = pid;
-    global_num_polls = 0L;
+    ps->first_poll = 1;
+    ps->verbose_poll = debug;
+    ps->pid_to_poll = pid;
+    ps->num_polls = 0L;
+    ps->consecutive_poll_separation_min_msec = 1000000L;
+    ps->consecutive_poll_separation_max_msec = -1000000L;
+
+    ps->wait4_returned_normally = 0;
+    ps->task_info_errored = 0;
     
-    error = task_for_pid(mach_task_self(), pid, &global_tp);
+    error = task_for_pid(mach_task_self(), pid, &(ps->tp));
     if (error != KERN_SUCCESS) {
         fprintf(stderr,
                 "%s: task_for_pid() returned %d != %d == KERN_SUCCESS\n",
@@ -125,16 +194,43 @@ init_polling_process_rss (pid_t pid)
 }
 
 
+int
+get_task_info (struct poll_state *ps, struct task_basic_info *tasks_info)
+{
+    kern_return_t error;
+    unsigned int info_count = TASK_BASIC_INFO_COUNT;
+
+    error = task_info(ps->tp, TASK_BASIC_INFO,
+                      (task_info_t) tasks_info, &info_count);
+    if (error != KERN_SUCCESS) {
+        if (error == KERN_INVALID_ARGUMENT) {
+            // This seems to happen intermittently very near the end
+            // of the child process's life, perhaps after it has
+            // exited.  Try to mask out such intermittent errors.  At
+            // least don't print any error messages to stderr here.
+            return 2;
+        }
+        fprintf(stderr,
+                "%s: task_info() returned %d != %d == KERN_SUCCESS\n",
+                global_prog_name, error, KERN_SUCCESS);
+        fprintf(stderr, "num_polls=%ld wait4_returned_normally=%d\n",
+                ps->num_polls, ps->wait4_returned_normally);
+        return 1;
+    }
+    return 0;
+}
+
+
 void
-poll_process_rss (void)
+poll_process_rss (struct poll_state *ps)
 {
     struct task_basic_info ti;
     int ret;
 
-    ++global_num_polls;
-    ret = get_task_info(global_pid_to_poll, &ti);
+    ++ps->num_polls;
+    ret = get_task_info(ps, &ti);
     if (ret != 0) {
-        if ((ret == 2) && (global_num_polls >= 2)) {
+        if ((ret == 2) && (ps->num_polls >= 2)) {
             // Then guess that this is not because of lack of
             // permissions, because we have successfully made the call
             // before.  Guess that this is because the child process
@@ -146,8 +242,8 @@ poll_process_rss (void)
             // Record the time this has happened, so we can later tell
             // if it is close to the time the child process exits.
             // Also indicate that we should disable the timer now.
-            global_task_info_errored = 1;
-            ret = gettimeofday(&global_task_info_error_time, NULL);
+            ps->task_info_errored = 1;
+            ret = gettimeofday(&(ps->task_info_error_time), NULL);
             // TBD: check ret?
             return;
         }
@@ -155,37 +251,29 @@ poll_process_rss (void)
         exit(1);
     }
     natural_t rss_bytes = ti.resident_size;
-    if (global_verbose_poll) {
+    if (ps->verbose_poll) {
         double rss_mbytes = (double) rss_bytes / (1024.0 * 1024.0);
         printf("rss (mb)=%.1f\n", rss_mbytes);
     }
     struct timeval this_poll_time;
     ret = gettimeofday(&this_poll_time, NULL);
-    if (global_first_poll) {
-        global_first_poll = 0;
-        global_max_rss_bytes = rss_bytes;
-        memcpy(&global_poll_time_when_maxrss_first_seen,
+    if (ps->first_poll || (rss_bytes > ps->max_rss_bytes)) {
+        ps->max_rss_bytes = rss_bytes;
+        memcpy(&(ps->poll_time_when_maxrss_first_seen),
                &this_poll_time, sizeof(struct timeval));
-    } else {
-        if (rss_bytes > global_max_rss_bytes) {
-            global_max_rss_bytes = rss_bytes;
-            memcpy(&global_poll_time_when_maxrss_first_seen,
-                   &this_poll_time, sizeof(struct timeval));
-        }
-        int64 delta = timeval_diff_msec(&global_prev_poll_time,
+    }
+    if (!ps->first_poll) {
+        int64 delta = timeval_diff_msec(&(ps->prev_poll_time),
                                         &this_poll_time);
-        if (delta < global_consecutive_poll_separation_min_msec) {
-            global_consecutive_poll_separation_min_msec = delta;
+        if (delta < ps->consecutive_poll_separation_min_msec) {
+            ps->consecutive_poll_separation_min_msec = delta;
         }
-        if (delta > global_consecutive_poll_separation_max_msec) {
-            global_consecutive_poll_separation_max_msec = delta;
+        if (delta > ps->consecutive_poll_separation_max_msec) {
+            ps->consecutive_poll_separation_max_msec = delta;
         }
     }
-    memcpy(&global_prev_poll_time, &this_poll_time, sizeof(struct timeval));
-
-    // TBD: If we want to get fancy, keep track of the actual time
-    // intervals at which this function was really called, to see how
-    // much jitter there is.
+    ps->first_poll = 0;
+    memcpy(&(ps->prev_poll_time), &this_poll_time, sizeof(struct timeval));
 }
 
 
@@ -344,6 +432,25 @@ main (int argc, char **argv, char **envp)
         exit(1);
     }
 
+    // Determine which version of OS X we are running on.
+    int major_version_num;
+    int minor_version_num;
+    int subminor_version_num;
+    int num_valid_version_components =
+        get_macosx_version(&major_version_num, &minor_version_num,
+                           &subminor_version_num);
+    struct poll_state ps;
+    ps.use_polling = 0;
+    if (major_version_num >= 10) {
+        // Mac OS X 10.5.* and earlier return a number that appears
+        // correct from the ru_maxrss field of getrusage(), also
+        // filled in by wait4().
+
+        // Mac OS X 10.6.* always returns 0 for ru_maxrss, so we must
+        // use a different method to measure it.
+        ps.use_polling = 1;
+    }
+
     int child_argc = argc-1;
     char **child_argv = (char **) malloc((unsigned) argc * sizeof(char *));
     int i;
@@ -385,87 +492,97 @@ main (int argc, char **argv, char **envp)
         perror(global_prog_name);
         exit(2);
 
-    } else {
+    }
 
-        // We are the parent process.
+    // We are the parent process.
 
-        // We want to wait until the child process finishes, but we
-        // also want to periodically poll the child process's resident
-        // set size (memory usage).  On OS X 10.5.8 and earlier simply
-        // using wait4() for the child to finish would fill in the
-        // rusage struct with the maximum resident set size, but this
-        // value is always filled in with 0 in OS X 10.6, hence the
-        // use of polling.
+    // We want to wait until the child process finishes, but we also
+    // want to periodically poll the child process's resident set size
+    // (memory usage).  On OS X 10.5.8 and earlier, simply using
+    // wait4() for the child to finish would fill in the rusage struct
+    // with the maximum resident set size, but this value is always
+    // filled in with 0 in OS X 10.6, hence the use of polling.
 
-        // We implement the polling by calling setitimer() so that we
-        // are sent a SIGALRM signal every 100 msec.  This should
-        // cause wait4() to return early.  We handle the signal, and
-        // then call wait4() again.
+    // We implement the polling by calling setitimer() so that we are
+    // sent a SIGALRM signal every 100 msec.  This should cause
+    // wait4() to return early.  We handle the signal, and then call
+    // wait4() again.
 
-        // Read the current maximum resident set size once before
-        // starting the timer, because the most likely reason for it
-        // to fail is that we are not running with root privileges.
-        global_wait4_returned_normally = 0;
-        global_task_info_errored = 0;
-        if (init_polling_process_rss(pid) != 0) {
+    // Read the current maximum resident set size once before starting
+    // the timer, because the most likely reason for it to fail is
+    // that we are not running with root privileges.
+    if (ps.use_polling) {
+        if (init_polling_process_rss(pid, &ps) != 0) {
             run_as_superuser_msg(global_prog_name);
             exit(1);
         }
-        poll_process_rss();
-
+        poll_process_rss(&ps);
+        
         // Set up the SIGALRM signal handler.
         global_sigalrm_handled = 0;
         enable_handling_sigalrm();
-
+        
         // Set timer to send us a SIGALRM signal every 100 msec.
         int timer_period_msec = 100;
         enable_timer(timer_period_msec);
+    }
 
-        //int wait_opts = WNOHANG;
-        int wait_opts = 0;
-        int wait_status;
-        struct rusage r;
-        while (1) {
-            ret = wait4(pid, &wait_status, wait_opts, &r);
-            if (ret != -1) {
-                break;
-            }
-            if (errno == EINTR) {
-                // Most likely the SIGALRM timer signal was handled.
-                // If so, poll the child process's memory use once.
-                // The timer should automatically signal again
-                // periodically without having to reset it.
-                if (global_sigalrm_handled) {
-                    poll_process_rss();
-                    global_sigalrm_handled = 0;
-                    if (global_task_info_errored) {
-                        disable_timer();
-                        ignore_sigalrm();
-                    }
+    //int wait_opts = WNOHANG;
+    int wait_opts = 0;
+    int wait_status;
+    int wait4_ret;
+    struct rusage r;
+    while (1) {
+        wait4_ret = wait4(pid, &wait_status, wait_opts, &r);
+        if (wait4_ret != -1) {
+            break;
+        }
+        if ((errno == EINTR) && ps.use_polling) {
+            // Most likely the SIGALRM timer signal was handled.  If
+            // so, poll the child process's memory use once.  The
+            // timer should automatically signal again periodically
+            // without having to reset it.
+            if (global_sigalrm_handled) {
+                poll_process_rss(&ps);
+                global_sigalrm_handled = 0;
+                if (ps.task_info_errored) {
+                    disable_timer();
+                    ignore_sigalrm();
                 }
-                // Go around and call wait4() again.
-            } else {
-                fprintf(stderr, "wait4() returned %d.  errno=%d\n",
-                        ret, errno);
-                perror(global_prog_name);
-                exit(5);
             }
+            // Go around and call wait4() again.
+        } else {
+            fprintf(stderr, "wait4() returned %d.  errno=%d\n",
+                    wait4_ret, errno);
+            perror(global_prog_name);
+            exit(5);
         }
+    }
 
-        if (ret != pid) {
-            fprintf(stderr, "wait4() returned pid=%d.  Expected pid"
-                    " %d of child process.  Try again.\n", ret, pid);
-            fprintf(stderr, "wait4->%d wait4 r.ru_maxrss=%ld",
-                    ret, r.ru_maxrss);
-            fprintf(stderr, "\n");
-            exit(7);
-        }
-        global_wait4_returned_normally = 1;
-        if (debug) {
-            fprintf(stderr, "wait4() returned pid=%d of child process."
-                    "  Done!\n", pid);
-        }
-
+    // We may not use end_time if there are errors we haven't checked
+    // for yet from wait4(), but it is more accurate to call this as
+    // soon after wait4() returns as we can.  It is out of the loop
+    // above to avoid the overhead of calling it on every poll time.
+    if (debug) {
+        fprintf(stderr, "About to call gettimeofday()\n");
+    }
+    ret = gettimeofday(&end_time, NULL);
+    // tbd: check ret
+    get_cpu_usage(num_cpus, per_cpu_stats_end, total_cpu_stats_end);
+    
+    if (wait4_ret != pid) {
+        fprintf(stderr, "wait4() returned pid=%d.  Expected pid"
+                " %d of child process.  Try again.\n", wait4_ret, pid);
+        fprintf(stderr, "wait4 r.ru_maxrss=%ld\n", r.ru_maxrss);
+        exit(7);
+    }
+    ps.wait4_returned_normally = 1;
+    if (debug) {
+        fprintf(stderr, "wait4() returned pid=%d of child process."
+                "  Done!\n", pid);
+    }
+    
+    if (ps.use_polling) {
         // Disable the timer.  Ignore SIGALRM, too, just in case one
         // more happens.
         if (debug) {
@@ -476,50 +593,38 @@ main (int argc, char **argv, char **envp)
             fprintf(stderr, "About to ignore SIGALRM\n");
         }
         ignore_sigalrm();
+    }
 
-        // TBD: Consider calling gettimeofday() a little bit earlier,
-        // to avoid counting excess elapsed time after the child is
-        // done.
-        if (debug) {
-            fprintf(stderr, "About to call gettimeofday()\n");
-        }
-        ret = gettimeofday(&end_time, NULL);
-        // tbd: check ret
-        get_cpu_usage(num_cpus, per_cpu_stats_end, total_cpu_stats_end);
+    // Elapsed time
+    int elapsed_msec = timeval_diff_msec(&start_time, &end_time);
+    fprintf(stderr, "real %9d.%03d\n", (elapsed_msec / 1000),
+            (elapsed_msec % 1000));
 
-        // Elapsed time
-        int elapsed_msec = timeval_diff_msec(&start_time, &end_time);
-        fprintf(stderr, "real %9d.%03d\n", (elapsed_msec / 1000),
-                (elapsed_msec % 1000));
-
-        // User, sys times
-        fprintf(stderr, "user %9ld.%03d\n", r.ru_utime.tv_sec,
-                r.ru_utime.tv_usec / 1000);
-        fprintf(stderr, "sys  %9ld.%03d\n", r.ru_stime.tv_sec,
-                r.ru_stime.tv_usec / 1000);
-
-        // Maximum resident set size
-
-        // TBD: This needs to be tested on other version of Mac OS X,
-        // and especially when compiled and running as a 64-bit
-        // process.  I'm not sure how to do that yet.
-
+    // User, sys times
+    fprintf(stderr, "user %9ld.%03d\n", r.ru_utime.tv_sec,
+            r.ru_utime.tv_usec / 1000);
+    fprintf(stderr, "sys  %9ld.%03d\n", r.ru_stime.tv_sec,
+            r.ru_stime.tv_usec / 1000);
+    
+    // Maximum resident set size
+    
+    if (! ps.use_polling) {
         // At least on the Intel Core 2 Duo Mac OS X 10.5.8 machine on
         // which I first tested this code, it seemed to give a value
         // of up to 2^31-4096 bytes correctly, but if it went a little
         // bit over that, the fprintf statement showed it as 0, not
         // 2^31 bytes.  For now, I'll do a special check for 0 and
         // print out what I believe to be the correct value.
-
+        
         // One way to test this on that machine is as follows.  The
         // first command below prints 2^31-4096 bytes as the maximum
         // resident set size.  Without the "if" condition below, the
         // second command below prints 0 as the maximum resident set
         // size.
-
+        
         // ./timemem-darwin ../../memuse/test-memuse 2096863
         // ./timemem-darwin ../../memuse/test-memuse 2096864
-
+        
         // Reference:
         // http://lists.apple.com/archives/darwin-kernel/2009/Mar/msg00005.html
 
@@ -530,93 +635,66 @@ main (int argc, char **argv, char **envp)
             fprintf(stderr, "%10lu  maximum resident set size from getrusage\n",
                     (unsigned long) r.ru_maxrss);
         }
-        long delta = (long) global_max_rss_bytes - (long) r.ru_maxrss;
+    }
+    if (ps.use_polling) {
+        long delta = (long) ps.max_rss_bytes - (long) r.ru_maxrss;
         fprintf(stderr, "%10lu  maximum resident set size from polling (%.1f MB, delta %ld bytes = %.1f MB)\n",
-                (unsigned long) global_max_rss_bytes,
-                (double) global_max_rss_bytes / (1024.0 * 1024.0),
+                (unsigned long) ps.max_rss_bytes,
+                (double) ps.max_rss_bytes / (1024.0 * 1024.0),
                 delta,
                 (double) delta / (1024.0 * 1024.0));
         double elapsed_time_sec = (double) elapsed_msec / 1000.0;
         fprintf(stderr,
                 "number of times rss polled=%ld, avg of %.1f times per second\n", 
-                global_num_polls,
-                (double) global_num_polls / elapsed_time_sec);
+                ps.num_polls,
+                (double) ps.num_polls / elapsed_time_sec);
         fprintf(stderr,
                 "time between consecutive polls: msec min=%.1f msec max=%.1f msec\n",
-                (double) global_consecutive_poll_separation_min_msec,
-                (double) global_consecutive_poll_separation_max_msec);
+                (double) ps.consecutive_poll_separation_min_msec,
+                (double) ps.consecutive_poll_separation_max_msec);
         int64 max_rss_first_seen_msec =
             timeval_diff_msec(&start_time,
-                              &global_poll_time_when_maxrss_first_seen);
+                              &(ps.poll_time_when_maxrss_first_seen));
         fprintf(stderr, "Max RSS observed %.1f sec after start time\n",
                 (double) max_rss_first_seen_msec / 1000.0);
-        if (global_task_info_errored) {
+        if (ps.task_info_errored) {
             int64 diff_msec = timeval_diff_msec(&end_time,
-                                                &global_task_info_error_time);
+                                                &(ps.task_info_error_time));
             fprintf(stderr, "A call to task_info() returned an error.  error_time - end_time = %.3f sec\n",
                     (double) diff_msec / 1000.0);
         }
-
-        // Show separate busy percentage for each CPU core
-        fprintf(stderr, "Per core CPU utilization (%d cores):", num_cpus);
-        for (i = 0; i < num_cpus; i++) {
-            uint64 total = (per_cpu_stats_end[i].total -
-                            per_cpu_stats_start[i].total);
-            int cpu_busy_percent = 0;
-            if (total != 0) {
-                uint64 idle = (per_cpu_stats_end[i].idle -
-                               per_cpu_stats_start[i].idle);
-                cpu_busy_percent =
-                    (int) round(100.0 * (1.0 - ((float) idle)/total));
-            }
-            fprintf(stderr, " %d%%", cpu_busy_percent);
-        }
-        fprintf(stderr, "\n");
-
-        if (WIFEXITED(wait_status)) {
-            // Exit with the same status that the child process did.
-            exit(WEXITSTATUS(wait_status));
-        } else if (WIFSIGNALED(wait_status)) {
-            fprintf(stderr,
-                    "Command stopped due to signal %d without calling exit().\n",
-                    WTERMSIG(wait_status));
-            exit(1);
-        } else {
-            fprintf(stderr,
-                    "Command is stopped due to signal %d, and can be restarted.\n",
-                    WSTOPSIG(wait_status));
-            exit(2);
-        }
     }
 
-    return 0;
-}
-
-
-//#include <mach/mach_types.h>
-
-int
-get_task_info (pid_t pid, struct task_basic_info *tasks_info)
-{
-    kern_return_t error;
-    unsigned int info_count = TASK_BASIC_INFO_COUNT;
-
-    error = task_info(global_tp, TASK_BASIC_INFO,
-                      (task_info_t) tasks_info, &info_count);
-    if (error != KERN_SUCCESS) {
-        if (error == KERN_INVALID_ARGUMENT) {
-            // This seems to happen intermittently very near the end
-            // of the child process's life, perhaps after it has
-            // exited.  Try to mask out such intermittent errors.  At
-            // least don't print any error messages to stderr here.
-            return 2;
+    // Show separate busy percentage for each CPU core
+    fprintf(stderr, "Per core CPU utilization (%d cores):", num_cpus);
+    for (i = 0; i < num_cpus; i++) {
+        uint64 total = (per_cpu_stats_end[i].total -
+                        per_cpu_stats_start[i].total);
+        int cpu_busy_percent = 0;
+        if (total != 0) {
+            uint64 idle = (per_cpu_stats_end[i].idle -
+                           per_cpu_stats_start[i].idle);
+            cpu_busy_percent =
+                (int) round(100.0 * (1.0 - ((float) idle)/total));
         }
+        fprintf(stderr, " %d%%", cpu_busy_percent);
+    }
+    fprintf(stderr, "\n");
+    
+    if (WIFEXITED(wait_status)) {
+        // Exit with the same status that the child process did.
+        exit(WEXITSTATUS(wait_status));
+    } else if (WIFSIGNALED(wait_status)) {
         fprintf(stderr,
-                "%s: task_info() returned %d != %d == KERN_SUCCESS\n",
-                global_prog_name, error, KERN_SUCCESS);
-        fprintf(stderr, "num_polls=%ld wait4_returned_normally=%d\n",
-                global_num_polls, global_wait4_returned_normally);
-        return 1;
+                "Command stopped due to signal %d without calling exit().\n",
+                WTERMSIG(wait_status));
+        exit(1);
+    } else {
+        fprintf(stderr,
+                "Command is stopped due to signal %d, and can be restarted.\n",
+                WSTOPSIG(wait_status));
+        exit(2);
     }
+
     return 0;
 }
