@@ -585,11 +585,18 @@ if ($os eq 'Cygwin') {
 		$user_sec = $1;
 	    } elsif (/^\s*sys\s+(.*)\s*$/) {
 		$sys_sec = $1;
-	    } elsif (/^\s*(\d+)\s+maximum resident set size\s*$/) {
-		# Mac OS X reports max RSS in units of bytes.  Convert
-		# to kbytes.  Use BigInt arithmetic, in case the
-		# integer is very large.
+	    } elsif (/^\s*(\d+)\s+maximum resident set size from (getrusage|polling).*\s*$/)
+	    {
+		# Mac OS X 10.5.* reports max RSS from getrusage in
+		# units of bytes.  Convert to kbytes.  Use BigInt
+		# arithmetic, in case the integer is very large.
+
+		# Mac OS X 10.6.* always reports 0 for max RSS from
+		# getrusage, so the measurement obtained from periodic
+		# polling of the current resident set size should be
+		# used.
 		my $max_rss_kbytes_bi = Math::BigInt->new($1);
+		my $measurement_type = $2;
 		# Add 1023 before dividing (with truncation) by 1024,
 		# so that the net effect is to round the number of
 		# bytes up to the next whole number of kbytes.
@@ -598,6 +605,14 @@ if ($os eq 'Cygwin') {
 		$max_rss_kbytes = sprintf "%s", $max_rss_kbytes_bi;
 	    } elsif (/^\s*Per core CPU utilization \((\d+) cores\): (.*)$/) {
 		($num_cpus, $usage_per_cpu) = ($1, $2);
+	    } elsif (
+		/^\s*number of times rss polled=\d+, avg of \d+(\.\d+)? times per second\s*$/ ||
+		/^\s*time between consecutive polls: msec min=\d+(\.\d+)? msec max=\d+(\.\d+)? msec\s*$/ ||
+		/^\s*Max RSS observed \d+(\.\d+)? sec after start time\s*$/ ||
+		/^\s*A call to task_info\(\) returned an error\.  error_time - end_time = -?\d+(\.\d+)? sec\s*$/)
+	    {
+		# Ignore these lines, but don't treat them as
+		# unrecognized lines.
 	    } else {
 		if (! /^\s*$/) {
 		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
