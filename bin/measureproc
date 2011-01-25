@@ -607,9 +607,9 @@ if ($os eq 'Cygwin') {
 		($num_cpus, $usage_per_cpu) = ($1, $2);
 	    } elsif (
 		/^\s*number of times rss polled=\d+, avg of \d+(\.\d+)? times per second\s*$/ ||
-		/^\s*time between consecutive polls: msec min=\d+(\.\d+)? msec max=\d+(\.\d+)? msec\s*$/ ||
+		/^\s*time between consecutive polls \(msec\): min=\d+(\.\d+)? max=\d+(\.\d+)?\s*$/ ||
 		/^\s*Max RSS observed \d+(\.\d+)? sec after start time\s*$/ ||
-		/^\s*A call to task_info\(\) returned an error\.  error_time - end_time = -?\d+(\.\d+)? sec\s*$/)
+		/^\s*A call to task_info\(\) returned an error\.  error_time - end_time = -?\d+(\.\d+)? sec\.  This may mean the maximum resident set size measurement above is too low\.\s*$/)
 	    {
 		# Ignore these lines, but don't treat them as
 		# unrecognized lines.

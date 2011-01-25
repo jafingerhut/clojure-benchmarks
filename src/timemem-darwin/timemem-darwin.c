@@ -649,7 +649,7 @@ main (int argc, char **argv, char **envp)
                 ps.num_polls,
                 (double) ps.num_polls / elapsed_time_sec);
         fprintf(stderr,
-                "time between consecutive polls: msec min=%.1f msec max=%.1f msec\n",
+                "time between consecutive polls (msec): min=%.1f max=%.1f\n",
                 (double) ps.consecutive_poll_separation_min_msec,
                 (double) ps.consecutive_poll_separation_max_msec);
         int64 max_rss_first_seen_msec =
@@ -660,8 +660,13 @@ main (int argc, char **argv, char **envp)
         if (ps.task_info_errored) {
             int64 diff_msec = timeval_diff_msec(&end_time,
                                                 &(ps.task_info_error_time));
-            fprintf(stderr, "A call to task_info() returned an error.  error_time - end_time = %.3f sec\n",
-                    (double) diff_msec / 1000.0);
+            if (diff_msec <= 0 && diff_msec >= -100) {
+                // Then the error most likely occurred because the
+                // child process had already exited.  Ignore it.
+            } else {
+                fprintf(stderr, "A call to task_info() returned an error.  error_time - end_time = %.3f sec.  This may mean the maximum resident set size measurement above is too low.\n",
+                        (double) diff_msec / 1000.0);
+            }
         }
     }
 
