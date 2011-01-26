@@ -367,6 +367,18 @@ if (defined($log_file)) {
 
 my $gc_log_filename;
 my $cmd_first_word = shift @ARGV;
+if ($os eq 'Cygwin') {
+    # timemem.exe expects a DOS/Windows file name for the command, but
+    # when writing shell scripts that we want to work on both
+    # Windows+Cygwin and Linux/Mac OS X, it is sometimes inconvenient
+    # to make a separate case for such things.
+
+    # Let cygpath -w convert it to DOS/Windows if it is not.  If it
+    # already is, cygpath -w seems to recognize this and leave it
+    # alone.
+    $cmd_first_word = `cygpath -w "$cmd_first_word"`;
+    chomp $cmd_first_word;
+}
 my $cmd_to_time = $cmd_first_word;
 if (defined($gc_stats_type)) {
     my $tempfh;
@@ -1291,87 +1303,9 @@ sub time_cmd_location {
     my $timemem_cmd;
 
     if ($os eq 'Cygwin') {
-        # The default path to timemem.exe should be based on full path
-        # name, and where this script itself is installed.
-
-	# I need to convert the Cygwin path to a Windows path here.
-	# It is not as simple as replacing all / characters with \,
-	# because the command will be run from a BAT file, and the
-	# full path name must start from the Windows root directory,
-	# which is not the same as the Cygwin root directory for files
-	# inside of C:\cygwin.
-
-	# Here is sample output from mount command on Cygwin:
-	#
-        # % mount
-        # C:/cygwin/bin on /usr/bin type ntfs (binary,auto)
-        # C:/cygwin/lib on /usr/lib type ntfs (binary,auto)
-        # C:/cygwin on / type ntfs (binary,auto)
-        # C: on /cygdrive/c type ntfs (binary,posix=0,user,noumount,auto)
-        # F: on /cygdrive/f type hfs (binary,posix=0,user,noumount,auto)
-
-	# I want to extract out the Cygwin paths after the word 'on'
-	# and before the word 'type', and see which of them are
-	# prefixes of $install_dir.  Among those which are, I want the
-	# longest one.  Then remove that prefix from $install_dir,
-	# replace it with the corresponding Windows prefix that
-	# appears before the word 'on', and replace "/"s with "\"s.
-
-	# TBD: See if there is a way to use the 'cygpath' program in
-	# Cygwin to do some of this work for us.  I'm probably
-	# reinventing a wheel here, and perhaps badly.
-
-	my $longest_matching_cygwin_prefix = '';
-	my $corresponding_windows_prefix = '';
-	open(F,"mount |") or die "Could not run command 'mount'.  Aborting.\n";
-	my $line;
-	while ($line = <F>) {
-	    printf STDERR "mount output line: %s", $line if ($verbose);
-	    if ($line =~ /^(.*) on (.*) type /) {
-		my ($windows_prefix, $cygwin_prefix) = ($1, $2);
-		if (substr($install_dir, 0, length($cygwin_prefix)) eq
-		    $cygwin_prefix)
-		{
-		    printf STDERR "    prefix matches" if ($verbose);
-		    if (length($cygwin_prefix) >
-			length($longest_matching_cygwin_prefix))
-		    {
-			printf STDERR " and is longer than any previously"
-			    . " matching prefix" if ($verbose);
-			$longest_matching_cygwin_prefix = $cygwin_prefix;
-			$corresponding_windows_prefix = $windows_prefix;
-		    }
-		    printf STDERR "\n" if ($verbose);
-		} else {
-		    printf STDERR "    no prefix match\n" if ($verbose);
-		}
-	    } else {
-		printf STDERR "Unrecognized output line from 'mount' command."
-		    . "  Skipping it:\n%s", $line if ($verbose);
-	    }
-	}
-	close(F);
-	if (length($longest_matching_cygwin_prefix) > 0) {
-	    printf STDERR "\$corresponding_windows_prefix='%s'\n",
-	        $corresponding_windows_prefix if ($verbose);
-	    printf STDERR "length(\$longest_matching_cygwin_prefix)='%d'\n",
-	        length($longest_matching_cygwin_prefix) if ($verbose);
-	    if ($longest_matching_cygwin_prefix eq '/') {
-		# Don't remove a leading '/' if the longest matching
-		# Cygwin prefix is only '/'.
-		$longest_matching_cygwin_prefix = '';
-	    }
-	    $timemem_cmd = ($corresponding_windows_prefix .
-			    substr($install_dir,
-				   length($longest_matching_cygwin_prefix)) .
-			    '/timemem');
-	    printf STDERR "\$timemem_cmd='%s'\n", $timemem_cmd if ($verbose);
-	    $timemem_cmd =~ s-/-\\-g;
-	    printf STDERR "\$timemem_cmd='%s'\n", $timemem_cmd if ($verbose);
-	} else {
-	    # Just guess a relative pathname and hope it works.
-	    $timemem_cmd = "..\\bin\\timemem";
-        }
+	$timemem_cmd = $install_dir . "/timemem";
+	$timemem_cmd = `cygpath -w "$timemem_cmd"`;
+	chomp $timemem_cmd;
     } elsif ($os eq 'Darwin') {
 	$timemem_cmd = $install_dir . "/timemem-darwin";
     } elsif ($os eq 'GNU/Linux') {
