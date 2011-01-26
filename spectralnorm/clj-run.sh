@@ -1,19 +1,24 @@
 #! /bin/bash
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
-    1>&2 echo "usage: `basename $0` <clj-version> [ cmd line args for Clojure program ]"
+    1>&2 echo "usage: `basename $0` <clj-version> <output-file> [ cmd line args for Clojure program ]"
     exit 1
 fi
 CLJ_VERSION="$1"
 shift
 
-# One argument expected on the command line, an integer.
-
 source ../env.sh
 
-JVM_OPTS="-server"
-#JMX_MONITORING=-Dcom.sun.management.jmxremote
+# Write output to file named after Clojure version on the command line.
+# After that, one argument expected on the command line, an integer.
 
-1>&2 echo "${JAVA} ${JVM_OPTS} ${JVM_MAX_MEM} ${JMX_MONITORING} ${JAVA_PROFILING} -classpath ${PS_FULL_CLJ_CLASSPATH} spectralnorm" "$@"
-           "${JAVA}" ${JVM_OPTS} ${JVM_MAX_MEM} ${JMX_MONITORING} ${JAVA_PROFILING} -classpath "${PS_FULL_CLJ_CLASSPATH}" spectralnorm "$@"
+OUTP="$1"
+shift
+
+# Use a small limit to avoid using lots of memory.  It makes the
+# garbage collector collect more often, but the extra CPU time is not
+# much.
+MAX_HEAP_MB=8
+
+../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" -server -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" spectralnorm "$@"

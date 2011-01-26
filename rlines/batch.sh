@@ -71,9 +71,16 @@ do
 	IN=./input/${T}-input.txt
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
-	echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-	( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
-
+	case $L in
+	    clj*|java)
+		echo "( ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}"
+		( ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}
+		;;
+	    *)
+		echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+		( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
+		;;
+	esac
 	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
     done
 done

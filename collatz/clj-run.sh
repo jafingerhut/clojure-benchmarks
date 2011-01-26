@@ -1,14 +1,17 @@
 #! /bin/bash
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
-    1>&2 echo "usage: `basename $0` <clj-version> [ cmd line args for Clojure program ]"
+    1>&2 echo "usage: `basename $0` <clj-version> <output-file> [ cmd line args for Clojure program ]"
     exit 1
 fi
 CLJ_VERSION="$1"
 shift
 
 source ../env.sh
+
+OUTP="$1"
+shift
 
 mkdir -p output
 
@@ -23,4 +26,4 @@ else
     exit 1
 fi
 
-../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output output/${CLJ_VERSION}-output.txt "${JAVA}" -server -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" collatz "$@"
+../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" -server -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" collatz "$@"
