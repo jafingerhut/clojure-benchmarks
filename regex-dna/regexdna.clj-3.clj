@@ -55,6 +55,13 @@
   (str/replace str (. Pattern (compile iub-str)) iub-replacement))
 
 
+(defn count-regex-occurrences [re s]
+  ;; Prepending (?i) to the regexp in Java makes it
+  ;; case-insensitive.
+  [re (count (re-seq (. Pattern (compile (str "(?i)" re)))
+                     s))])
+
+
 (defn -main
   [& args]
   (let [content (slurp-std-input)
@@ -66,12 +73,11 @@
         content (str/replace content #"(^>.*|\n>.*)?\n" "")
         dna-seq-only-len (count content)]
     
-    (doseq [re dna-seq-regexes]
-      (printf "%s %d\n" re
-              ;; Prepending (?i) to the regexp in Java makes it
-              ;; case-insensitive.
-              (count (re-seq (. Pattern (compile (str "(?i)" re))) content))))
+    (doseq [[re num-matches] (pmap #(count-regex-occurrences % content)
+                                   dna-seq-regexes)]
+      (printf "%s %d\n" re num-matches))
     
     (let [content (reduce one-replacement content iub-codes)]
       (printf "\n%d\n%d\n%d\n" original-len dna-seq-only-len (count content))))
-  (flush))
+  (flush)
+  (. System (exit 0)))

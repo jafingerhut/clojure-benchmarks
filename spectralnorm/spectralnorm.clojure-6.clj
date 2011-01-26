@@ -56,7 +56,7 @@
         chunk-size (int (Math/ceil (/ size num-threads)))
         ranges  (vec (partition 2 1
                                 (take (unchecked-inc num-threads)
-                                      (iterate #(+ chunk-size %)
+                                      (iterate #(min (+ chunk-size %) size)
                                                (int 0)))))
         u (double-array size 1.0)
         tmp (double-array size 0.0)

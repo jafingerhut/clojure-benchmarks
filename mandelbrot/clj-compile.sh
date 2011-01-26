@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" mandelbrot.clj-6.clj "${CLJ_OBJ_DIR}/mandelbrot.clj"
+"${CP}" mandelbrot.clj-8.clj "${CLJ_OBJ_DIR}/mandelbrot.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile mandelbrot

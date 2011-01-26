@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" nbody.clj-13.clj "${CLJ_OBJ_DIR}/nbody.clj"
+"${CP}" nbody.clj-14.clj "${CLJ_OBJ_DIR}/nbody.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile nbody
