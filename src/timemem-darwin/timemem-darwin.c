@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <errno.h>
-#include <mach/mach_host.h>
+#include <mach/mach.h>
 
 
 typedef long long int64;
@@ -436,9 +437,8 @@ main (int argc, char **argv, char **envp)
     int major_version_num;
     int minor_version_num;
     int subminor_version_num;
-    int num_valid_version_components =
-        get_macosx_version(&major_version_num, &minor_version_num,
-                           &subminor_version_num);
+    get_macosx_version(&major_version_num, &minor_version_num,
+                       &subminor_version_num);
     struct poll_state ps;
     ps.use_polling = 0;
     if (major_version_num >= 10) {
@@ -451,7 +451,6 @@ main (int argc, char **argv, char **envp)
         ps.use_polling = 1;
     }
 
-    int child_argc = argc-1;
     char **child_argv = (char **) malloc((unsigned) argc * sizeof(char *));
     int i;
     for (i = 1; i < argc; i++) {
