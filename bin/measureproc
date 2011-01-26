@@ -587,8 +587,14 @@ if ($os eq 'Cygwin') {
 } elsif ($os eq 'Darwin') {
     $cmd_exit_status = $child_exit_status;
     my $found_real = 0;
+    if ($verbose) {
+	printf STDERR "Reading stderr output of command: %s\n", $cmd_to_run;
+    }
     while (<CATCHERR>) {
 	chomp;
+	if ($verbose) {
+	    printf STDERR "stderr line: %s\n", $_;
+	}
 	if (/^\s*real\s+(.*)\s*$/) {
 	    $elapsed_sec = $1;
 	    $found_real = 1;
