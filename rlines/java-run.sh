@@ -120,4 +120,4 @@ JVM_OPTS="-client -Xmx1024m"
 #	at revlines.main(revlines.java:34)
 #JVM_OPTS="-client -Xmx528m"
 
-../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --input "${INP}" --output "${OUTP}" "${JAVA}" -server -classpath "${JAVA_OBJ_DIR}" revcomp "$@"
+../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --input "${INP}" --output "${OUTP}" "${JAVA}" -server -classpath "${JAVA_OBJ_DIR}" revlines "$@"

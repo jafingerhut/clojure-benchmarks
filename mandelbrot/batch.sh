@@ -96,7 +96,7 @@ do
 	case $L in
 	    clj*|java)
 		echo "( ${CMD} ${OUT} ${N} ${EXTRA_LANG_ARGS} ) 2>&1 | tee ${CONSOLE}"
-		( ${CMD} ${N} ${OUT} ${EXTRA_LANG_ARGS} ) 2>&1 | tee ${CONSOLE}
+		( ${CMD} ${OUT} ${N} ${EXTRA_LANG_ARGS} ) 2>&1 | tee ${CONSOLE}
 		;;
 	    *)
 		echo "( time ${CMD} ${N} ${EXTRA_LANG_ARGS} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
