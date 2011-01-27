@@ -155,4 +155,4 @@
       (doseq [r results]
         (println r)
         (flush))))
-  (. System (exit 0)))
+  (shutdown-agents))

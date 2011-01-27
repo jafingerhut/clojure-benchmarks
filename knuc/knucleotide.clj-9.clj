@@ -119,5 +119,4 @@
       (let [tally18 (one-tally-to-str "GGTATTTTAATTTATAGT"
                                       (tally (all-equal-len-subs 18 dna-str)))]
         (println tally18))
-      (flush)))
-  (. System (exit 0)))
+      (flush))))

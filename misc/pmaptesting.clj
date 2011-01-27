@@ -208,4 +208,4 @@
     (time
      (doall (modified-pmap num-threads task-fn (range num-jobs))))
     
-    (. System (exit 0))))
+    (shutdown-agents)))

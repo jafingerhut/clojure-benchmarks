@@ -170,4 +170,4 @@
       (printf "%d\n" checksum)
       (printf "Pfannkuchen(%d) = %d\n" N maxflips)))
   (flush)
-  (. System (exit 0)))
+  (shutdown-agents))

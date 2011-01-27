@@ -16,5 +16,3 @@
 
 (let [input-fname (nth args 0)]
   (printf "input file: %s\n" input-fname))
-
-(. System (exit 0))

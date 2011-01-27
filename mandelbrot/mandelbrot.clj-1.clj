@@ -135,5 +135,4 @@
   (when (< size 1)
     (usage 1))
   (def print-in-text-format (= (count args) 2))
-  (do-mandelbrot size print-in-text-format)
-  (. System (exit 0)))
+  (do-mandelbrot size print-in-text-format))

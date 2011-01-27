@@ -109,8 +109,7 @@
 ;;      (print-reverse-complement-of-str-in-lines bw dna-seq
 ;;						max-dna-chars-per-line)
         (. bw flush))
-      ))
-  (. System (exit 0)))
+      )))
 
 
 (comment

@@ -199,4 +199,4 @@
   (def print-in-text-format (= (count args) 3))
 
   (do-mandelbrot size num-threads print-in-text-format)
-  (. System (exit 0)))
+  (shutdown-agents))

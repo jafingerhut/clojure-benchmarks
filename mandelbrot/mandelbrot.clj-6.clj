@@ -161,4 +161,4 @@
              n))
          *default-modified-pmap-num-threads*))
   (do-mandelbrot size num-threads)
-  (. System (exit 0)))
+  (shutdown-agents))

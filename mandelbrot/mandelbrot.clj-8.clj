@@ -130,4 +130,4 @@
   (when (< size 1)
     (usage 1))
   (do-mandelbrot size)
-  (. System (exit 0)))
+  (shutdown-agents))

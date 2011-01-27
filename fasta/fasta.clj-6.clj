@@ -156,5 +156,4 @@
                        (* 3 n) iub-bytes iub-cdf)
     (make-random-fasta ostream line-length "THREE" "Homo sapiens frequency"
                        (* 5 n) homosapiens-bytes homosapiens-cdf)
-    (.flush ostream))
-  (. System (exit 0)))
+    (.flush ostream)))

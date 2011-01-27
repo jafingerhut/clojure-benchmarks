@@ -18,5 +18,4 @@
         bw (java.io.BufferedWriter. *out*)]
     (doseq [ln (reverse (line-seq br))]
       (println-string-to-buffered-writer bw ln))
-    (. bw flush))
-  (. System (exit 0)))
+    (. bw flush)))

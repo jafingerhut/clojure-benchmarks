@@ -155,5 +155,4 @@
                        (* 3 n) iub-chars iub-cdf)
     (make-random-fasta wrtr line-length "THREE" "Homo sapiens frequency"
                        (* 5 n) homosapiens-chars homosapiens-cdf)
-    (.flush wrtr))
-  (. System (exit 0)))
+    (.flush wrtr)))

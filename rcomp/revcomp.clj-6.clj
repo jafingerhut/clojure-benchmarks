@@ -116,5 +116,4 @@
             (recur next-to-print-before-nl (seq (next str-seq))))
           (when (not= to-print-before-nl max-dna-chars-per-line)
             (. bw newLine)))))
-    (. bw flush))
-  (. System (exit 0)))
+    (. bw flush)))

@@ -131,20 +131,6 @@
 			(tally-dna-subs-with-len 18 dna-str))))
 
 
-(defn modified-pmap
-  "Like pmap from Clojure 1.1, but with only as much parallelism as
-  there are available processors."
-  [f coll & n]
-  (let [n (or (first n) (.. Runtime getRuntime availableProcessors))
-	rets (map #(future (f %)) coll)
-	step (fn step [[x & xs :as vs] fs]
-	       (lazy-seq
-		(if-let [s (seq fs)]
-		  (cons (deref x) (step xs (rest s)))
-		  (map deref vs))))]
-    (step rets (drop n rets))))
-
-
 (defn -main [& args]
   (with-open [br (java.io.BufferedReader. *in*)]
     (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
@@ -153,4 +139,4 @@
       (doseq [r results]
         (println r)
         (flush))))
-  (. System (exit 0)))
+  (shutdown-agents))

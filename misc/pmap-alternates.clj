@@ -324,4 +324,4 @@
         (time (doall (modified-pmap num-threads #(task-fn % job-size)
                                     (range num-jobs))))))
     (flush)
-    (. System (exit 0))))
+    (shutdown-agents)))

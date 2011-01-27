@@ -126,5 +126,4 @@
       (print-char-seq-with-line-breaks bw
         (reverse-complement-of-str-seq str-seq complement-dna-char-fn)
         max-dna-chars-per-line))
-    (. bw flush))
-  (. System (exit 0)))
+    (. bw flush)))

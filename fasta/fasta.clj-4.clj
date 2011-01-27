@@ -158,5 +158,4 @@
                        (* 3 n) iub-genelist)
     (make-random-fasta wrtr line-length "THREE" "Homo sapiens frequency"
                        (* 5 n) homosapiens-genelist)
-    (.flush wrtr))
-  (. System (exit 0)))
+    (.flush wrtr)))

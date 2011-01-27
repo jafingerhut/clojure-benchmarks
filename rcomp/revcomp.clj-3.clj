@@ -118,5 +118,4 @@
       (doseq [[desc dna-seq] (fasta-desc-dna-str-pairs (line-seq br))]
         (println desc)
         (print-string-broken-into-lines (reverse-complement-of-dna-seq dna-seq)
-                                        max-dna-chars-per-line))))
-  (. System (exit 0)))
+                                        max-dna-chars-per-line)))))

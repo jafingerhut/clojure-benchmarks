@@ -166,5 +166,4 @@ order."
     (doseq [p (take 30 fannkuch-order-perms)]
       (println (apply str p))))
   (printf "Pfannkuchen(%d) = %d\n" N (fannkuch N))
-  (flush)
-  (. System (exit 0)))
+  (flush))

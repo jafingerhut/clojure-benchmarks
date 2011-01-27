@@ -85,5 +85,4 @@
 	    (recur (.readLine rdr) buf)))
 	;; else print out revcomp of any string in buf
 	(revcomp-buf-and-write buf wrtr complement-dna-char-array)))
-    (.flush wrtr))
-  (. System (exit 0)))
+    (.flush wrtr)))

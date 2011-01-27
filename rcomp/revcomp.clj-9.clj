@@ -127,5 +127,4 @@
                                                 max-dna-chars-per-line)
       (when more
         (recur (fasta-slurp-br br))))
-    (. bw flush))
-  (. System (exit 0)))
+    (. bw flush)))

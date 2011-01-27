@@ -144,5 +144,4 @@
 ;;    (printf "Pfannkuchen(%d) = %d  %s\n" N
 ;;            (fannkuch-of-permutation max-fannkuch-perm)
 ;;            (str (seq max-fannkuch-perm))))
-  (flush)
-  (. System (exit 0)))
+  (flush))
