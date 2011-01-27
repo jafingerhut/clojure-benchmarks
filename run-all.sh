@@ -1,6 +1,6 @@
 #! /bin/bash
 
-for j in fannkuch fannkuchredux fasta knuc mandelbrot n-body rcomp regex-dna
+for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot nbody regexdna revcomp spectralnorm
 do
     cd $j
     ./batch.sh "$@"

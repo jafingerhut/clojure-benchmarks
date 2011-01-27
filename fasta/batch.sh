@@ -18,7 +18,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj*|jruby) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|knuc|medium|regexdna|long) TESTS="$TESTS $1"
+	quick|knucleotide|medium|regexdna|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -47,15 +47,15 @@ echo "TESTS=$TESTS"
 for T in $TESTS
 do
     case $T in
-	quick)    N=1000
+	quick)       N=1000
 	    ;;
-	knuc)     N=10000
+	knucleotide) N=10000
 	    ;;
-	medium)   N=1000000
+	medium)      N=1000000
 	    ;;
-	regexdna) N=5000000
+	regexdna)    N=5000000
 	    ;;
-	long)     N=25000000
+	long)        N=25000000
 	    ;;
     esac
     for L in $LANGUAGES

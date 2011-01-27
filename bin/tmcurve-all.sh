@@ -12,7 +12,7 @@ ROOT=`pwd`
 if [ $# -ge 1 ]; then
     BENCHMARK="$@"
 else
-    BENCHMARK="fannkuch fannkuch-redux fasta knuc mandelbrot n-body rcomp regex-dna"
+    BENCHMARK="binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot nbody regexdna revcomp revlines spectralnorm"
 fi
 #echo "ROOT: $ROOT  BENCHMARK: $BENCHMARK"
 #exit 0
@@ -44,11 +44,15 @@ do
     ${ECHO_ONLY} ./clj-compile.sh clj-1.3-alpha3
 
     case $b in
+    binarytrees)
+        BENCHMARK_ARGS="binarytrees 20"
+	INFILE=""
+	;;
     fannkuch)
         BENCHMARK_ARGS="fannkuch 12"
 	INFILE=""
 	;;
-    fannkuch-redux)
+    fannkuchredux)
         BENCHMARK_ARGS="fannkuchredux 12"
 	INFILE=""
 	;;
@@ -56,7 +60,7 @@ do
         BENCHMARK_ARGS="fasta 25000000"
 	INFILE=""
 	;;
-    knuc)
+    knucleotide)
         # TBD: Would be nice to have infrastructure that makes it easy
         # to run the same source file with same "size" but different
         # command line args, like having "1" below present, or absent.
@@ -67,17 +71,25 @@ do
         BENCHMARK_ARGS="mandelbrot 1"
 	INFILE=""
 	;;
-    n-body)
+    nbody)
         BENCHMARK_ARGS="nbody"
 	INFILE=""
 	;;
-    rcomp)
+    regexdna)
+        BENCHMARK_ARGS="regexdna"
+	INFILE="input/long-input.txt"
+	;;
+    revcomp)
         BENCHMARK_ARGS="revcomp"
 	INFILE="input/long-input.txt"
 	;;
-    regex-dna)
-        BENCHMARK_ARGS="regexdna"
+    revlines)
+        BENCHMARK_ARGS="revlines"
 	INFILE="input/long-input.txt"
+	;;
+    spectralnorm)
+        BENCHMARK_ARGS="spectralnorm 5500"
+	INFILE=""
 	;;
     *)
         1>&2 echo "Unrecognized value of variable b: $b"

@@ -64,19 +64,19 @@ make_expected_output_files () {
 
 # There are no fasta input files, but its output files are the input
 # files for several other benchmarks.
-make_expected_output_files fasta quick knuc medium regexdna long
+make_expected_output_files fasta quick knucleotide medium regexdna long
 
-# k-nucleotide (knuc) and reverse-complement (rcomp) have input files
-# that are produced as output from the fasta benchmark programs.
-cd knuc
+# knucleotide and revcomp have input files that are produced as output
+# from the fasta benchmark programs.
+cd knucleotide
 mkdir ./input
 cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
-${LINK_OR_COPY} ../../fasta/output/knuc-expected-output.txt quick-input.txt
+${LINK_OR_COPY} ../../fasta/output/knucleotide-expected-output.txt quick-input.txt
 ${LINK_OR_COPY} ../../fasta/output/medium-expected-output.txt medium-input.txt
 ${LINK_OR_COPY} ../../fasta/output/long-expected-output.txt long-input.txt
 cd ../..
-cd rcomp
+cd revcomp
 mkdir ./input
 cd ./input
 /bin/rm -f quick-input.txt medium-input.txt long-input.txt
@@ -85,21 +85,21 @@ ${LINK_OR_COPY} ../../fasta/output/medium-expected-output.txt medium-input.txt
 ${LINK_OR_COPY} ../../fasta/output/long-expected-output.txt long-input.txt
 cd ../..
 
-# rlines isn't one of the benchmarks from the shootout web site.  I
+# revlines isn't one of the benchmarks from the shootout web site.  I
 # created it as a simplified version of reverse-complement, to try to
 # figure out why Clojure was using so much memory for one of my
 # earlier solution attempts.  I'm keeping it around for future
 # reference.
-cd rlines
+cd revlines
 mkdir ./input
 cd ./input
 sed -n -e '/^>THREE/,$p' ../../fasta/output/long-expected-output.txt >| long-input.txt
 cd ../..
 
-cd regex-dna
+cd regexdna
 mkdir ./input
 cd ./input
-${LINK_OR_COPY} ../../fasta/output/knuc-expected-output.txt quick-input.txt
+${LINK_OR_COPY} ../../fasta/output/knucleotide-expected-output.txt quick-input.txt
 ${LINK_OR_COPY} ../../fasta/output/regexdna-expected-output.txt long-input.txt
 cd ../..
 
@@ -116,15 +116,15 @@ make_expected_output_files binarytrees quick medium long
 make_expected_output_files fannkuch quick medium long
 make_expected_output_files fannkuchredux quick medium long
 make_expected_output_files mandelbrot quick medium long
-make_expected_output_files n-body quick medium long
+make_expected_output_files nbody quick medium long
 make_expected_output_files pidigits quick medium long
 make_expected_output_files spectralnorm quick medium long
 
 # These do have input files, which are all output files of the fasta
 # benchmark program.
-make_expected_output_files knuc quick medium long
-make_expected_output_files regex-dna quick long
-make_expected_output_files rcomp quick medium long
-make_expected_output_files rlines long
+make_expected_output_files knucleotide quick medium long
+make_expected_output_files regexdna quick long
+make_expected_output_files revcomp quick medium long
+make_expected_output_files revlines long
 
 exit 0

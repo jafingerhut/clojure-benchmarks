@@ -5,10 +5,16 @@ source ../env.sh
 OUTPUT_DIR=./output
 mkdir -p $OUTPUT_DIR
 
-BENCHMARK="k-nucleotide"
+BENCHMARK="regexdna"
 
-ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
-ALL_TESTS="quick medium long"
+# I need to figure out a way to get CL-PPCRE available in SBCL,
+# preferably with additional installation instructions for people
+# retrieving this and trying it out for themselves.
+
+# Also how to get module Text.Regex.PCRE available in GHC.
+
+ALL_LANGUAGES="perl java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+ALL_TESTS="quick long"
 
 LANGUAGES=""
 TESTS=""
@@ -18,7 +24,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|medium|long) TESTS="$TESTS $1"
+	quick|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -58,21 +64,12 @@ do
 	    sbcl) CMD=./sbcl-run.sh
 		( ./sbcl-compile.sh ) >& ${OUTPUT_DIR}/sbcl-compile-log.txt
 		;;
-	    perl) CMD="$PERL knucleotide.perl-2.perl"
+	    perl) CMD="$PERL regexdna.perl-4.perl"
 		;;
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
 	esac
-	case $L in
-	    # Put a number between the double quotes to make
-	    # knucleotide.clj-8.clj use the specified number of
-	    # threads in parallel.  With an empty string, the default
-	    # is 2 more threads than the number of available
-	    # processors.
-	    clj*)  EXTRA_LANG_ARGS="1"
-		;;
-	esac
-
+	
 	echo
 	echo "benchmark: $BENCHMARK"
 	echo "language: $L"
@@ -86,8 +83,8 @@ do
 		( ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}
 		;;
 	    *)
-		echo "( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
-		( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
+		echo "( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
+		( time ${CMD} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 		;;
 	esac
 	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}

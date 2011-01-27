@@ -1,6 +1,6 @@
 #! /bin/bash
 
-for j in binarytrees fannkuch fannkuchredux fasta knuc mandelbrot n-body rcomp regex-dna rlines spectralnorm
+for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot nbody regexdna revcomp revlines spectralnorm
 do
     for CLJ_VERSION in clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4
     do
