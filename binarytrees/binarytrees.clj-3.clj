@@ -49,7 +49,7 @@
           check (item-check tree)]
       (println (format "stretch tree of depth %d\t check: %d" stretch-depth check)))
     (let [long-lived-tree (bottom-up-tree 0 max-depth) ]
-      (doseq [trees-nfo (map (fn [d]
+      (doseq [trees-nfo (pmap (fn [d]
                                 (iterate-trees max-depth min-depth d))
 			      (range min-depth stretch-depth 2)) ]
         (println trees-nfo))
