@@ -80,4 +80,4 @@
     (let [content (reduce one-replacement content iub-codes)]
       (printf "\n%d\n%d\n%d\n" original-len dna-seq-only-len (count content))))
   (flush)
-  (. System (exit 0)))
+  (shutdown-agents))
