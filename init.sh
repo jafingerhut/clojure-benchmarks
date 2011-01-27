@@ -43,19 +43,19 @@ make_expected_output_files () {
     local B=$1
     shift
     local T
-    local LANG
+    local L
 
     cd $B
     if [ "$B" == "pidigits" ]
     then
-	LANG="gcc"
+	L="gcc"
     else
-	LANG="java"
+	L="java"
     fi
-    ./batch.sh ${LANG} $*
+    ./batch.sh ${L} $*
     for T in $*
     do
-	/bin/mv -f output/${T}-${LANG}-output.txt output/${T}-expected-output.txt
+	/bin/mv -f output/${T}-${L}-output.txt output/${T}-expected-output.txt
     done
     cd ..
 }
