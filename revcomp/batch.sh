@@ -5,7 +5,7 @@ source ../env.sh
 OUTPUT_DIR=./output
 mkdir -p $OUTPUT_DIR
 
-BENCHMARK="reverse-complement"
+BENCHMARK="revcomp"
 
 # SBCL 1.0.23 works on Mac OS X, but SBCL 1.0.29 doesn't like opening
 # /dev/stdin with :element-type '(unsigned-byte 8) for some reason.

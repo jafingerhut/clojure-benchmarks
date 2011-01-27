@@ -5,7 +5,7 @@ source ../env.sh
 OUTPUT_DIR=./output
 mkdir -p $OUTPUT_DIR
 
-BENCHMARK="reverse-lines"
+BENCHMARK="revlines"
 
 ALL_LANGUAGES="java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
 ALL_TESTS="quick medium long"
@@ -58,7 +58,7 @@ do
 	    sbcl) CMD=./sbcl-run.sh
 		( ./sbcl-compile.sh ) >& ${OUTPUT_DIR}/sbcl-compile-log.txt
 		;;
-	    perl) CMD="$PERL reverse-lines.perl-1.perl"
+	    perl) CMD="$PERL revlines.perl-1.perl"
 		;;
 	    ghc) CMD=./ghc-run.sh
 		( ./ghc-compile.sh ) >& ${OUTPUT_DIR}/ghc-compile-log.txt
