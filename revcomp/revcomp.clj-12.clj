@@ -88,7 +88,6 @@
         (when (not= i len)
           (let [next-nl-idx (int (find-next-nl-idx i buf nl))
                 next-gt-idx (int (find-next-gt-idx next-nl-idx buf gt len))]
-            ;(println "i=" i " next-nl-idx=" next-nl-idx " next-gt-idx=" next-gt-idx)
             (reverse-and-complement! buf next-nl-idx
                                      (unchecked-subtract next-gt-idx 2)
                                      complement-dna-char-array nl)
