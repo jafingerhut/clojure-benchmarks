@@ -82,8 +82,8 @@ do
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
 	case $L in
 	    clj*|java)
-		echo "( ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}"
-		( ${CMD} ${IN} ${OUT} ) 2>&1 | tee ${CONSOLE}
+		echo "( ${CMD} ${IN} ${OUT} ${EXTRA_LANG_ARGS} ) 2>&1 | tee ${CONSOLE}"
+		( ${CMD} ${IN} ${OUT} ${EXTRA_LANG_ARGS} ) 2>&1 | tee ${CONSOLE}
 		;;
 	    *)
 		echo "( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}"
