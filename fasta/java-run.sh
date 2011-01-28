@@ -11,4 +11,4 @@ source ../env.sh
 OUTP="$1"
 shift
 
-../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" -server -classpath "${JAVA_OBJ_DIR}" fasta "$@"
+../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -classpath "${JAVA_OBJ_DIR}" fasta "$@"
