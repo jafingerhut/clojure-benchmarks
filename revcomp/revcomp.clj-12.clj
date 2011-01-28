@@ -3,6 +3,10 @@
 
 ;; contributed by Andy Fingerhut
 
+;; WARNING: This program breaks the rules of the problem, which says
+;; that the input file must be read line-by-line.  It is only on the
+;; web site as an "interesting alternate implementation".
+
 (ns revcomp
   (:gen-class))
 

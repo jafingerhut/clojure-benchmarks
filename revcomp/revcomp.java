@@ -3,6 +3,10 @@
  * http://shootout.alioth.debian.org/
  * contributed by Anthony Donnefort
  * redone by Enotus 2010-11-20
+ *
+ * WARNING: This program breaks the rules of the problem, which says
+ * that the input file must be read line-by-line.  It is only on the
+ * web site as an "interesting alternate implementation".
  */
 
 import java.io.*;
