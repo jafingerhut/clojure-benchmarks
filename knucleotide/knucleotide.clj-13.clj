@@ -164,7 +164,6 @@
 
 
 (defn all-tally-to-str [tally fn-key-to-str]
-  (println "all-tally-to-str:" tally)
   (with-out-str
     (let [total (reduce + (vals tally))]
       (doseq [k (sort #(>= (get tally %1) (get tally %2)) ; sort by tally, largest first
