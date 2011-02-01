@@ -206,26 +206,22 @@
 
 
 (defn compute-one-part [dna-str part]
-  (.println System/err (format "Starting part %d" part))
-  (let [ret-val
-	[part
-	 (condp = part
-	     0 (all-tally-to-str (tally-dna-subs-with-len 1 dna-str)
-				 (fn [k] (key-to-dna-str k 1)))
-	     1 (all-tally-to-str (tally-dna-subs-with-len 2 dna-str)
-				 (fn [k] (key-to-dna-str k 2)))
-	     2 (one-tally-to-str "GGT"
-				 (tally-dna-subs-with-len 3 dna-str))
-	     3 (one-tally-to-str "GGTA"
-				 (tally-dna-subs-with-len 4 dna-str))
-	     4 (one-tally-to-str "GGTATT"
-				 (tally-dna-subs-with-len 6 dna-str))
-	     5 (one-tally-to-str "GGTATTTTAATT"
-				 (tally-dna-subs-with-len 12 dna-str))
-	     6 (one-tally-to-str "GGTATTTTAATTTATAGT"
-				 (tally-dna-subs-with-len 18 dna-str)))]]
-    (.println System/err (format "Finished part %d" part))
-    ret-val))
+  [part
+   (condp = part
+       0 (all-tally-to-str (tally-dna-subs-with-len 1 dna-str)
+                           (fn [k] (key-to-dna-str k 1)))
+       1 (all-tally-to-str (tally-dna-subs-with-len 2 dna-str)
+                           (fn [k] (key-to-dna-str k 2)))
+       2 (one-tally-to-str "GGT"
+                           (tally-dna-subs-with-len 3 dna-str))
+       3 (one-tally-to-str "GGTA"
+                           (tally-dna-subs-with-len 4 dna-str))
+       4 (one-tally-to-str "GGTATT"
+                           (tally-dna-subs-with-len 6 dna-str))
+       5 (one-tally-to-str "GGTATTTTAATT"
+                           (tally-dna-subs-with-len 12 dna-str))
+       6 (one-tally-to-str "GGTATTTTAATTTATAGT"
+                           (tally-dna-subs-with-len 18 dna-str)))])
 
 
 (def *default-modified-pmap-num-threads*
