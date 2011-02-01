@@ -182,10 +182,19 @@
 
 (defn all-tally-to-str [tally fn-key-to-str]
   (with-out-str
-    (let [total (reduce + (map getcnt (vals tally)))]
-      (doseq [k (sort #(>= (getcnt (get tally %1))
-                           (getcnt (get tally %2))) ; sort by tally, largest first
-                      (keys tally))]
+    (let [total (reduce + (map getcnt (vals tally)))
+          cmp-keys (fn [k1 k2]
+                     ;; Return negative integer if k1 should come earlier
+                     ;; in the sort order than k2, 0 if they are equal,
+                     ;; otherwise a positive integer.
+                     (let [cnt1 (int (getcnt (get tally k1)))
+                           cnt2 (int (getcnt (get tally k2)))]
+                       (if (not= cnt1 cnt2)
+                         (- cnt2 cnt1)
+                         (let [^String s1 (fn-key-to-str k1)
+                               ^String s2 (fn-key-to-str k2)]
+                           (.compareTo s1 s2)))))]
+      (doseq [k (sort cmp-keys (keys tally))]
         (printf "%s %.3f\n" (fn-key-to-str k)
                 (double (* 100 (/ (getcnt (get tally k)) total))))))))
 
@@ -244,7 +253,6 @@
                        (sort #(< (first %1) (first %2))
                              (modified-pmap num-threads
                                             #(compute-one-part dna-str %)
-                                            ;; '(6 0 1 2 3 4 5)
                                             '(0 5 6 1 2 3 4)
 					    )))]
       (doseq [r results]
