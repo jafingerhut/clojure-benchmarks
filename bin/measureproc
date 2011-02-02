@@ -571,6 +571,9 @@ if ($os eq 'Cygwin') {
 	    } elsif (/^\s+Quota Peak Paged Pool Usage: (\d+)\s*$/) {
 	    } elsif (/^\s+Quota Peak Non Paged Pool Usage: (\d+)\s*$/) {
 	    } elsif (/^\s+Peak Pagefile Usage: (\d+)\s*$/) {
+	    } elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
+		# Ignore this line if JVM profiling via sampling was
+		# enabled.
 	    } else {
 		if (! /^\s*$/) {
 		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
@@ -598,6 +601,9 @@ if ($os eq 'Cygwin') {
 	if (/^\s*real\s+(.*)\s*$/) {
 	    $elapsed_sec = $1;
 	    $found_real = 1;
+	} elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
+	    # Ignore this line if JVM profiling via sampling was
+	    # enabled.
 	} elsif ($found_real) {
 	    if (/^\s*user\s+(.*)\s*$/) {
 		$user_sec = $1;
@@ -675,6 +681,9 @@ if ($os eq 'Cygwin') {
         {
             # Ignore these lines, but don't treat them as unrecognized
             # lines.
+	} elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
+	    # Ignore this line if JVM profiling via sampling was
+	    # enabled.
 	} elsif ($found_user) {
             if (/^\s*System time \(seconds\):\s*(.*)\s*$/) {
 		$sys_sec = $1;
