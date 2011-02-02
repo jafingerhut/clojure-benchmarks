@@ -63,6 +63,9 @@
 (defmacro medusa-future [& body]
   `(medusa-future-thunk (random-uuid) (fn [] (do ~@body))))
 
+(defn shutdown-medusa []
+  (.shutdown THREADPOOL))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; This is the end of the subset of Medusa code.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -316,7 +319,14 @@
                 num-threads task-fn-specifier num-jobs)
         (println (time (doall (medusa-pmap num-threads #(task-fn % job-size)
                                            (range num-jobs)))))
-        ;;(Thread/sleep (* 30 1000))
+;;        (println "Calling shutdown-medusa")
+        (shutdown-medusa)
+;;        (loop []
+;;          (Thread/sleep (* 1 1000))
+;;          (println "")
+;;          (println "(.isShutdown THREADPOOL)=" (.isShutdown THREADPOOL))
+;;          (println "(.isTerminated THREADPOOL)=" (.isTerminated THREADPOOL))
+;;          (recur))
         )
       (do
         (printf "(modified-pmap %d %s (range %d))\n"
