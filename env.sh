@@ -47,6 +47,9 @@ then
     JAVAC="${JAVA_BIN}/javac"
     JAVA="${JAVA_BIN}/java"
 
+    #MEASUREPROC_SHOWS_JVM_INFO="--jvm-info server"
+    MEASUREPROC_SHOWS_JVM_INFO=
+
     ######################################################################
     # Windows+Cygwin Clojure
     ######################################################################
@@ -120,6 +123,9 @@ then
     JVM_TYPE="hotspot"
     JAVAC="javac"
     JAVA="java"
+
+    #MEASUREPROC_SHOWS_JVM_INFO="--jvm-info server"
+    MEASUREPROC_SHOWS_JVM_INFO=
 
     ######################################################################
     # Linux/MacOS Clojure

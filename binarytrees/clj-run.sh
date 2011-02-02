@@ -13,4 +13,4 @@ source ../env.sh
 OUTP="$1"
 shift
 
-../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -classpath "${PS_FULL_CLJ_CLASSPATH}" binarytrees "$@"
+../bin/measureproc ${MEASUREPROC_SHOWS_JVM_INFO} --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -classpath "${PS_FULL_CLJ_CLASSPATH}" binarytrees "$@"

@@ -16,4 +16,4 @@ shift
 # library from.  Try running the GCC version of the program instead,
 # if you wish to create an expected output file.
 
-../bin/measureproc --jvm-info server --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" -Djava.library.path=Include/java ${JAVA_PROFILING} -server -classpath "${JAVA_OBJ_DIR}" pidigits "$@"
+../bin/measureproc ${MEASUREPROC_SHOWS_JVM_INFO} --jvm-gc-stats "${JVM_TYPE}" --output "${OUTP}" "${JAVA}" -Djava.library.path=Include/java ${JAVA_PROFILING} -server -classpath "${JAVA_OBJ_DIR}" pidigits "$@"
