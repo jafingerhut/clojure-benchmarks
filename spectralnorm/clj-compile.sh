@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" spectralnorm.clojure-6.clj "${CLJ_OBJ_DIR}/spectralnorm.clj"
+"${CP}" spectralnorm.clojure-6-corrected.clj "${CLJ_OBJ_DIR}/spectralnorm.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile spectralnorm
