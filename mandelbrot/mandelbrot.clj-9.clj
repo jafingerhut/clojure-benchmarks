@@ -11,6 +11,12 @@
 ;; change by Marko Kocic
 ;; reduced code size by removing functions already present in Clojure
 
+;; change by Andy Fingerhut
+;; Use Java primitive double arrays instead of Clojure sequences in a
+;; few inner loops.  This is a sequential version using map instead of
+;; pmap, since sequential code tends to use less CPU time on 1-core
+;; machines.
+
 (ns mandelbrot
   (:gen-class)
   (:import (java.io BufferedOutputStream)))
