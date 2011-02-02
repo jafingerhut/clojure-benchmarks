@@ -81,9 +81,7 @@ do
 	esac
 
 	echo
-	echo "benchmark: $BENCHMARK"
-	echo "language: $L"
-	echo "test: $T"
+	echo "benchmark: $BENCHMARK  language: $L  test: $T"
 	OUT=${OUTPUT_DIR}/${T}-${L}-output.txt
 	CONSOLE=${OUTPUT_DIR}/${T}-${L}-console.txt
 	case $L in
