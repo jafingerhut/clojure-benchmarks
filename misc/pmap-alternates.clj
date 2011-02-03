@@ -50,12 +50,12 @@
   (dosync (alter running-futures dissoc future-id)))
 
 (defn medusa-future-thunk [future-id thunk]
-  (let [work (fn []
-               (claim-thread future-id)
-               (let [val (thunk)]
-                 (mark-completion future-id)
-                 val))]
-    (.submit THREADPOOL work)))
+  (let [^Callable work (fn []
+                         (claim-thread future-id)
+                         (let [val (thunk)]
+                           (mark-completion future-id)
+                           val))]
+    (.submit ^ExecutorService THREADPOOL work)))
 
 (defn random-uuid []
   (str (java.util.UUID/randomUUID)))
@@ -63,25 +63,21 @@
 (defmacro medusa-future [& body]
   `(medusa-future-thunk (random-uuid) (fn [] (do ~@body))))
 
-(defn shutdown-medusa []
-  (.shutdown THREADPOOL))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; This is the end of the subset of Medusa code.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;; This is my attempt to write a function like pmap, except using
-;; Medusa as a basis.  Note that it does not return a useful value,
-;; the way pmap does.  Perhaps I can fix this in the future.
-
 (defn medusa-pmap [num-threads f coll]
   (if (== num-threads 1)
     (map f coll)
     (do
       (init-medusa num-threads)
       (let [seq-of-futures (doall (map #(medusa-future (f %)) coll))]
-        (map (fn [java-future] (.get java-future)) seq-of-futures)))))
+        (map (fn [java-future] (.get ^java.util.concurrent.Future java-future))
+             seq-of-futures)))))
+
+(defn shutdown-medusa []
+  (.shutdown ^ExecutorService THREADPOOL))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; This is the end of the subset of Medusa code.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defn my-lazy-map
