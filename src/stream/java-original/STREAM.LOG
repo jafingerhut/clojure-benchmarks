@@ -1,0 +1,44 @@
+=== Warmup 0
+PID 0 begins to allocate (0 secs since last report)
+PID 0 checks time quanta (0 secs since last report)
+PID 0 begins to init array (0 secs since last report)
+PID 0 waits on lock (0 secs since last report)
+PID 0 starts main loop (0 secs since last report)
+PID: 0 Copy: 2153.9188170156494MB/sec  Scale: 2150.2803563885277MB/sec  Add: 2308.1428960024577MB/sec  Triad: 2352.3852223075733MB/sec  
+PID 0 exits (0 secs since last report)
+=== Warmup 1
+PID 1 begins to allocate (0 secs since last report)
+PID 1 checks time quanta (0 secs since last report)
+PID 1 begins to init array (0 secs since last report)
+PID 1 waits on lock (0 secs since last report)
+PID 1 starts main loop (0 secs since last report)
+PID: 1 Copy: 2159.197632531111MB/sec  Scale: 2159.6057852231806MB/sec  Add: 2325.3234138028893MB/sec  Triad: 2346.280579873503MB/sec  
+PID 1 exits (0 secs since last report)
+=== Warmup 2
+PID 2 begins to allocate (0 secs since last report)
+PID 2 checks time quanta (0 secs since last report)
+PID 2 begins to init array (0 secs since last report)
+PID 2 waits on lock (0 secs since last report)
+PID 2 starts main loop (0 secs since last report)
+PID: 2 Copy: 2162.4586743196637MB/sec  Scale: 2160.01239489426MB/sec  Add: 2324.065673707984MB/sec  Triad: 2349.8104009992926MB/sec  
+PID 2 exits (0 secs since last report)
+=== Warmup 3
+PID 3 begins to allocate (0 secs since last report)
+PID 3 checks time quanta (0 secs since last report)
+PID 3 begins to init array (0 secs since last report)
+PID 3 waits on lock (0 secs since last report)
+PID 3 starts main loop (0 secs since last report)
+PID: 3 Copy: 2164.9105009985064MB/sec  Scale: 2174.7760682300045MB/sec  Add: 2321.239289638621MB/sec  Triad: 2344.6808311670234MB/sec  
+PID 3 exits (0 secs since last report)
+=== main waits 0 secs, seen 0/1 reach barrier
+PID 0 begins to allocate (0 secs since last report)
+PID 0 checks time quanta (0 secs since last report)
+PID 0 begins to init array (0 secs since last report)
+PID 0 waits on lock (0 secs since last report)
+=== Go!
+PID 0 starts main loop (0 secs since last report)
+PID: 0 Copy: 2167.368235607841MB/sec  Scale: 2159.6057852231806MB/sec  Add: 2325.0079334394873MB/sec  Triad: 2350.7747285687437MB/sec  
+PID 0 exits (0 secs since last report)
+=== Caught the last thread.
+Average cpu bandwidth:  Copy: 2167MB/sec/cpu Scale: 2159MB/sec/cpu Add: 2325MB/sec/cpu Triad: 2350MB/sec/cpu 
+Total system bandwidth: Copy: 2167MB/sec  Scale: 2159MB/sec  Add: 2325MB/sec  Triad: 2350MB/sec  

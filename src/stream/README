@@ -1,0 +1,66 @@
+Source files related to the STREAM benchmark, described further on
+this web page:
+
+http://www.cs.virginia.edu/stream
+
+----------------------------------------------------------------------
+Subdirectory c-original:
+
+stream-original.c is the original C source code I obtained from the
+STREAM benchmarks web page.  The other files in there are also from
+that web page, except stream-modified.c, which is identical to
+stream-original.c except for the array size used in the test.  I made
+it larger to ensure that they would come nowhere near to fitting in
+any of the caches on my computers.  It does make the tests take longer
+to run, and doesn't really give any different results than smaller
+arrays that don't fit in the caches, but at least now I know that from
+actual measurements.
+
+----------------------------------------------------------------------
+Subdirectory java-original:
+
+STREAM-original.java is a program from the Contrib area of the STREAM
+benchmarks web site.  It is similar in behavior to stream-original.c
+above, except for the following difference that could potentially
+cause significant differences in the measurements it reports:
+
++ The C version, when compiled using OpenMP, explicitly synchronizes
+  all parallel threads at the end of running each "kernel" of the test
+  (i.e. it synchronizes all threads at the end of running the Copy
+  kernel, then again at the end of running the Scale kernel, and the
+  Triad kernel, etc.).
+
++ The Java version from the web site does not do this synchronization
+  of threads until they are finished running all of the kernels.  It
+  is not necessarily likely, but it is thus possible that one thread
+  could finish one kernel and begin the next, while other threads were
+  running behind.  The measurements thus obtained would be for a mix
+  of some threads running one kernel while other threads run a
+  different one.
+
+See the next subdirectory for a different Java version that eliminates
+this difference.
+
+----------------------------------------------------------------------
+Subdirectory java-syncthreads:
+
+The file STREAM.java corrects the issue mentioned for java-original
+above, explicitly synchronizing all parallel Java threads at the end
+of each kernel, before starting any thread on the next one.
+
+----------------------------------------------------------------------
+Subdirectory c-plus-extra-tests:
+
+stream.c is based upon c-original/stream-original.c above, and adds
+these additional kernels:
+
++ Write
++ Read
++ Scale1
+
+----------------------------------------------------------------------
+Subdirectory java-syncthreads-plus-extra-tests:
+
+STREAM.java is based upon java-syncthreads/STREAM.java described
+above, and adds the same kernels as the ones described for
+c-plus-extra-tests/stream.c above.

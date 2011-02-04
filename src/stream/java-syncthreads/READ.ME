@@ -1,0 +1,49 @@
+This Java version of STREAM is based upon the STREAM.java posted on
+John McCalpin's STREAM benchmark web site as of January 5, 2011, but
+has been modified to do multiple threads differently than that one.
+
+Both the original and this modified one create a number of threads
+specified on the command line.
+
+The original one starts each of these threads running code that looks
+roughly like this:
+   for (k=0; k<NTIMES; k++) {
+     times[0][k] = mysecond();
+     for (j=0; j<N; j++)      // Copy kernel
+       c[j] = a[j];
+     times[0][k] = mysecond() - times[0][k];
+     times[1][k] = mysecond();
+     for (j=0; j<N; j++)      // Scale kernel
+       b[j] = scalar*c[j];
+     times[1][k] = mysecond() - times[1][k];
+     times[2][k] = mysecond();
+     for (j=0; j<N; j++)      // Add kernel
+       c[j] = a[j]+b[j];
+     times[2][k] = mysecond() - times[2][k];
+     times[3][k] = mysecond();
+     for (j=0; j<N; j++)      // Triad kernel
+       a[j] = b[j]+scalar*c[j];
+     times[3][k] = mysecond() - times[3][k];
+   }
+
+Thus it is possible if the threads run at a slightly different rate,
+one could start the scale kernel while the others were still finishing
+the copy kernel, and in general they could get arbitrarily far off
+from each other in which code they were running at the same time.
+This is not necessarily likely, but it is possible.
+
+The modified version behaves more like the the C version of the STREAM
+benchmark, as I understand its threading behavior.  That is, each
+individual kernel is run such that the loop over all values of j from
+0 to N-1 is split up among the threads, and then all threads must wait
+until they finish their portion of that loop before they can begin the
+next one.
+
+A typical invocation would be:
+	java -server STREAM 1
+
+The file "STREAM.LOG" contains the output for a typical run on a
+MacBook Pro with 2.4 GHz Intel Core 2 Duo processor.
+
+Andy Fingerhut (andy_fingerhut@alum.wustl.edu)
+January 6, 2011
