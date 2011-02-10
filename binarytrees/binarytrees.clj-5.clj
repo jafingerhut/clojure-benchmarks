@@ -5,7 +5,8 @@
 ;
 ;; contributed by Marko Kocic
 ;; modified by Kenneth Jonsson, restructured to allow usage of 'pmap'
-;; modified by Andy Fingerhut to use faster primitive math ops
+;; modified by Andy Fingerhut to use faster primitive math ops,
+;; to use deftype instead of defrecord, and speed up bottom-up-tree.
 
 (ns binarytrees
   (:gen-class))
@@ -17,13 +18,36 @@
   (left [])
   (right []))
 
+;; These TreeNode's take up noticeably less memory than a similar one
+;; implemented using defrecord.
+
 (deftype TreeNode [left right ^int item]
   ITreeNode
   (^int item [this] item)
   (left [this] left)
   (right [this] right))
 
-;; Simulate recursion with our own hand-maintained stack.
+;; OK, bottom-up-tree is not pretty at all.  It is designed to return
+;; the same value that this easier-to-understand function would:
+
+;;(defn bottom-up-tree [item depth]
+;;  (let [int-item (int item)
+;;        int-depth (int depth)]
+;;    (if (zero? int-depth)
+;;      (TreeNode. nil nil int-item)
+;;      (TreeNode.
+;;       (bottom-up-tree (unchecked-dec (unchecked-multiply 2 int-item))
+;;                       (unchecked-dec int-depth))
+;;       (bottom-up-tree (unchecked-multiply 2 int-item)
+;;                       (unchecked-dec int-depth))
+;;       int-item))))
+
+;; The main difference is that to avoid the boxing/unboxing of the
+;; integer arguments on each call, we use iteration with our own
+;; stack, implemented with the stack pointer 'depth' and the variables
+;; with names ending in 'stack' holding the data pushed onto the
+;; stack.
+
 (defn bottom-up-tree [item depth]
   (let [starting-depth (int depth)
         item (int item)
@@ -34,17 +58,9 @@
     (loop [depth (int depth)
            tree-returned nil]
       (let [item (int (aget itemstack depth))]
-        ;;(println "depth=" depth " item=" item " tree-returned=" tree-returned)
-        ;;(println "itemstack=" (seq itemstack))
-        ;;(println "stepstack=" (seq stepstack))
-        ;;(println "leftchildstack=" (seq leftchildstack))
-        ;;(flush)
         (if (zero? depth)
           ;; build leaf node and 'return' by popping
-          (do
-            ;;(println "building leaf...")
-            (recur (inc depth) (TreeNode. nil nil item))
-            )
+          (recur (inc depth) (TreeNode. nil nil item))
           ;; else what to do depends on which step we are at
           (let [step (aget stepstack depth)
                 double-item (int (* (int 2) item))
@@ -52,7 +68,6 @@
             (case step
                   0 ;; push and recursively build left subtree
                   (do
-                    ;;(println "doing step 0...")
                     ;; first increment our step so we do the next one
                     ;; after popping back to this level.
                     (aset stepstack depth (int 1))
@@ -65,7 +80,6 @@
                   1 ;; store the left child returned, and then push
                     ;; and recursively build right subtree
                   (do
-                    ;;(println "doing step 1...")
                     ;; first increment our step so we do the next one
                     ;; after popping back to this level.
                     (aset stepstack depth (int 2))
@@ -81,12 +95,11 @@
                     ;; the right child just returned in order to
                     ;; create the node we will now return.
                   (do
-                    ;;(println "doing step 2...")
                     ;; no need to increment our step.  We are done,
                     ;; and popping up to the next stack frame, which
                     ;; has its own step value.  Of course, we may be
-                    ;; the root stack frame, and we need to check for
-                    ;; that case.
+                    ;; the bottom stack frame, and we need to check
+                    ;; for that case.
                     (let [t (TreeNode. (aget leftchildstack depth)
                                        tree-returned item)]
                       (if (== depth starting-depth)
@@ -117,7 +130,7 @@
           check (item-check tree)]
       (println (format "stretch tree of depth %d\t check: %d" stretch-depth check)))
     (let [long-lived-tree (bottom-up-tree 0 max-depth) ]
-      (doseq [trees-nfo (map (fn [d]
+      (doseq [trees-nfo (pmap (fn [d]
                                 (iterate-trees max-depth min-depth d))
 			      (range min-depth stretch-depth 2)) ]
         (println trees-nfo))
