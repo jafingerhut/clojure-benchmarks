@@ -5,7 +5,8 @@
 ;
 ;; contributed by Marko Kocic
 ;; modified by Kenneth Jonsson, restructured to allow usage of 'pmap'
-;; modified by Andy Fingerhut to use faster primitive math ops
+;; modified by Andy Fingerhut to use faster primitive math ops, and
+;; deftype instead of defrecord for smaller tree nodes.
 
 (ns binarytrees
   (:gen-class))
@@ -16,6 +17,9 @@
   (^int item [])
   (left [])
   (right []))
+
+;; These TreeNode's take up noticeably less memory than a similar one
+;; implemented using defrecord.
 
 (deftype TreeNode [left right ^int item]
   ITreeNode
@@ -58,7 +62,11 @@
           check (item-check tree)]
       (println (format "stretch tree of depth %d\t check: %d" stretch-depth check)))
     (let [long-lived-tree (bottom-up-tree 0 max-depth) ]
-      (doseq [trees-nfo (pmap (fn [d]
+      ;; The following line is where Kenneth Jonsson used pmap.  On a
+      ;; 1-core machine, I have found significantly less user+system
+      ;; CPU time used when it is map, and slightly less elapsed time
+      ;; (at the cost of more user+system CPU time) when it is pmap.
+      (doseq [trees-nfo (map (fn [d]
                                 (iterate-trees max-depth min-depth d))
 			      (range min-depth stretch-depth 2)) ]
         (println trees-nfo))

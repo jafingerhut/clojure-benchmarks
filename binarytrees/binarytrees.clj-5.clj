@@ -8,6 +8,14 @@
 ;; modified by Andy Fingerhut to use faster primitive math ops,
 ;; to use deftype instead of defrecord, and speed up bottom-up-tree.
 
+;; In my measurements on a 4-core 64-bit Ubuntu Linux VM, this version
+;; was actually slightly slower (measured by user+system CPU time)
+;; than binarytrees.clj-4.clj when the pmap is replaced with map, and
+;; about the same speed (measured by elapsed time) when pmap is used.
+;; pmap causes the user+CPU time to go up significantly vs. using map.
+;; Elapsed time only reduce modestly when pmap is used in place of
+;; map.
+
 (ns binarytrees
   (:gen-class))
 
@@ -130,7 +138,11 @@
           check (item-check tree)]
       (println (format "stretch tree of depth %d\t check: %d" stretch-depth check)))
     (let [long-lived-tree (bottom-up-tree 0 max-depth) ]
-      (doseq [trees-nfo (pmap (fn [d]
+      ;; The following line is where Kenneth Jonsson used pmap.  On a
+      ;; 1-core machine, I have found significantly less user+system
+      ;; CPU time used when it is map, and slightly less elapsed time
+      ;; (at the cost of more user+system CPU time) when it is pmap.
+      (doseq [trees-nfo (map (fn [d]
                                 (iterate-trees max-depth min-depth d))
 			      (range min-depth stretch-depth 2)) ]
         (println trees-nfo))
