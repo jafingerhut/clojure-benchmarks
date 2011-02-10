@@ -45,7 +45,7 @@
 (defn iterate-trees [mx mn d]
   (let [iterations (bit-shift-left 1 (int (+ mx mn (- d))))]
     (format "%d\t trees of depth %d\t check: %d" (* 2 iterations) d
-            (reduce + (pmap (fn [i]
+            (reduce + (map (fn [i]
                              (unchecked-add (int (item-check (bottom-up-tree i d)))
                                             (int (item-check (bottom-up-tree (- i) d)))))
                            (range 1 (inc iterations)))))))
@@ -58,7 +58,7 @@
           check (item-check tree)]
       (println (format "stretch tree of depth %d\t check: %d" stretch-depth check)))
     (let [long-lived-tree (bottom-up-tree 0 max-depth) ]
-      (doseq [trees-nfo (map (fn [d]
+      (doseq [trees-nfo (pmap (fn [d]
                                 (iterate-trees max-depth min-depth d))
 			      (range min-depth stretch-depth 2)) ]
         (println trees-nfo))
