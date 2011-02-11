@@ -4,6 +4,12 @@
 ;; contributed by Bill James
 ;; speed improvements by Andy Fingerhut
 
+;; WARNING: This program likely violates the intent of the fasta
+;; problem, which is that the random number generator should be called
+;; once for each random DNA sequence character output in the two
+;; random sequences.  This technique should not be emulated for
+;; programs submitted to the web site.
+
 (ns fasta
   (:gen-class))
 
