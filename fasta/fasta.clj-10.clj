@@ -84,9 +84,17 @@
       (aset random-seed zero new-seed)   ;; <-- line 1
       (int (* new-seed scale)))))        ;; <-- line 2
 
-;; line 1 above accounts for about 12% of CPU time, in
-;; java.lang.Integer.valueOf, and line 2 accounts for another 12% of
-;; CPU time, also in java.lang.Integer.valueOf.
+;; On one of the two machines I tested on, line 1 above accounts for
+;; about 12% of CPU time, in java.lang.Integer.valueOf, and line 2
+;; accounts for another 12% of CPU time, also in
+;; java.lang.Integer.valueOf.
+
+;; On another machine line 1 accounts for about 28% of CPU, and line 2
+;; for another 28%.
+
+;; I have tried several different ways of type hinting things, with no
+;; noticeable change in these percentages.  Is there a way to avoid
+;; those calls to java.lang.Integer.valueOf here, in Clojure 1.2?
 
 ;; This according to the java.hprof.txt file output with Hotspot JVM
 ;; with the command line option below when running the AOT-compiled
