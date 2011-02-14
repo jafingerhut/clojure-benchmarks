@@ -120,4 +120,6 @@ JVM_OPTS="-client -Xmx1024m"
 #	at revlines.main(revlines.java:34)
 #JVM_OPTS="-client -Xmx528m"
 
-../bin/measureproc ${MEASUREPROC_SHOWS_JVM_INFO} --jvm-gc-stats "${JVM_TYPE}" --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -classpath "${JAVA_OBJ_DIR}" revlines "$@"
+MAX_HEAP_MB=768
+
+../bin/measureproc ${MEASUREPROC_SHOWS_JVM_INFO} --jvm-gc-stats "${JVM_TYPE}" --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -Xmx${MAX_HEAP_MB}m -classpath "${JAVA_OBJ_DIR}" revlines "$@"
