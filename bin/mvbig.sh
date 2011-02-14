@@ -6,9 +6,11 @@ then
     exit 1
 fi
 
+SAVE_LOC="$HOME/clj-bench-big"
+
 if [ $1 == "away" ]
 then
-    TARGET="$HOME/clojure-benchmarks-big-files"
+    TARGET="${SAVE_LOC}"
     for j in */input */output */obj
     do
 	d=`dirname $j`
@@ -24,7 +26,7 @@ then
 elif [ $1 == "back" ]
 then
     TARGET=`pwd`
-    SOURCE="$HOME/clojure-benchmarks-big-files"
+    SOURCE="${SAVE_LOC}"
     cd "${SOURCE}"
     for j in */input */output */obj
     do
