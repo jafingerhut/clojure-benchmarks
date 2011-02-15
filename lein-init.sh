@@ -26,11 +26,14 @@ cp -p "../lein-files/project.clj-for-clj-1.2.0-plus-contrib-plus-swank" project.
 lein deps
 cd ..
 
-lein new clj-1.3.0-alpha1
-cd clj-1.3.0-alpha1
-cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha1-only" project.clj
-lein deps
-cd ..
+for alpha in 1 3 4 5
+do
+    lein new clj-1.3.0-alpha${alpha}
+    cd clj-1.3.0-alpha${alpha}
+    cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha${alpha}-only" project.clj
+    lein deps
+    cd ..
+done
 
 # This one doesn't quite work yet, but none of the Clojure programs
 # need anything from clojure-contrib yet.
@@ -40,15 +43,3 @@ cd ..
 #cp -p "${LEIN_FILES}/project.clj-for-clj-1.3.0-plus-contrib" project.clj
 #lein deps
 #cd ..
-
-lein new clj-1.3.0-alpha3
-cd clj-1.3.0-alpha3
-cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha3-only" project.clj
-lein deps
-cd ..
-
-lein new clj-1.3.0-alpha4
-cd clj-1.3.0-alpha4
-cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha4-only" project.clj
-lein deps
-cd ..
