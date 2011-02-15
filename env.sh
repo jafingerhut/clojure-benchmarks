@@ -74,8 +74,12 @@ then
     then
         CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha4/lib"`
         CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"`
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha5" ]
+    then
+        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha5/lib"`
+        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha5.jar"`
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 clj-1.3-alpha5"
         exit 1
     fi
 
@@ -148,8 +152,12 @@ then
     then
         CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha4/lib"
         CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"
+    elif [ "$CLJ_VERSION" == "clj-1.3-alpha5" ]
+    then
+        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha5/lib"
+        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha5.jar"
     else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 clj-1.3-alpha5"
         exit 1
     fi
 
@@ -212,8 +220,8 @@ GCC_OBJ_DIR="./obj/gcc"
 #JAVA_PROFILING="-Xprof"
 #JAVA_PROFILING="-Xrunhprof"
 HPROF_OPTS="cpu=samples,depth=20,thread=y"
-#JAVA_PROFILING="-agentlib:hprof=${HPROF_OPTS}"
-JAVA_PROFILING=
+JAVA_PROFILING="-agentlib:hprof=${HPROF_OPTS}"
+#JAVA_PROFILING=
 
 
 ######################################################################
