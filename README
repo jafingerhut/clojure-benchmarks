@@ -49,13 +49,17 @@ Windows XP SP3 + Cygwin 1.7.7
 
     Packages that should be installed using the Cygwin Setup package
     manager in order for this to work:
+
+    perl (category Interpeters and Perl) - needed if you want to run
+        any of the included Perl scripts, which includes
+        bin/measureproc, the recommended way to make time and memory
+        measurements of the benchmark programs.
     wget (in category Web) - needed if you use Leiningen
-    git (in category Devel) - optional, but useful for getting updated
+    gcc4-core (category Devel) and libgmp-devel (category Libs and
+        Math) - If you want to run those pidigits programs that use
+        the GNU MP library.
+    git (category Devel) - optional, but useful for getting updated
         versions of clojure-contrib from github.com
-    perl - optional for the steps described in this file right now,
-        but needed if you want to run any of the included Perl scripts,
-        which might soon become the recommended way to make time and
-        memory measurements of the benchmark programs.
 
 Tested with recent Java 1.6.0.X HotSpot JVMs from Sun, and JRockit
 from Oracle on Windows XP.
