@@ -282,26 +282,25 @@ if ($output_format_xml) {
     if ($gc_log_filename ne '') {
 	push @{$tag_text_pairs}, 'gc_log_file_name', $gc_log_filename;
     }
-    if (defined($gc_stats->{parse_gc_log_fail_info})) {
-	push @{$tag_text_pairs}, 'parse_gc_log_failure_details',
-	    $gc_stats->{parse_gc_log_failure_details};
-    } else {
-	push @{$tag_text_pairs}, 'number_of_gcs',
-	    $gc_stats->{num_gcs};
-	push @{$tag_text_pairs}, 'total_memory_gced_kb',
-	    $gc_stats->{total_mem_collected_kb};
-	push @{$tag_text_pairs}, 'total_gc_time_sec',
-	    $gc_stats->{total_gc_time_sec};
-	push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-	    $gc_stats->{max_total_avail_mem_kb};
-	push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
-	    $gc_stats->{max_total_allocated_mem_kb};
-	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-	    $gc_stats->{max_total_live_mem_kb};
-	push @{$tag_text_pairs}, 'num_errors',
-	    $gc_stats->{num_errors};
-	push @{$tag_text_pairs}, 'num_warnings',
-	    $gc_stats->{num_warnings};
+    push @{$tag_text_pairs}, 'number_of_gcs',
+        $gc_stats->{num_gcs};
+    push @{$tag_text_pairs}, 'total_memory_gced_kb',
+        $gc_stats->{total_mem_collected_kb};
+    push @{$tag_text_pairs}, 'total_gc_time_sec',
+        $gc_stats->{total_gc_time_sec};
+    push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
+        $gc_stats->{max_total_avail_mem_kb};
+    push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
+        $gc_stats->{max_total_allocated_mem_kb};
+    push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
+        $gc_stats->{max_total_live_mem_kb};
+    push @{$tag_text_pairs}, 'num_warnings',
+        $gc_stats->{num_warnings};
+    push @{$tag_text_pairs}, 'num_errors',
+        $gc_stats->{num_errors};
+    if (defined($gc_stats->{first_gc_log_parse_error})) {
+	push @{$tag_text_pairs}, 'first_gc_log_parse_error',
+	    $gc_stats->{first_gc_log_parse_error};
     }
 
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
@@ -314,26 +313,25 @@ if ($output_format_xml) {
     if ($gc_log_filename ne '') {
 	printf $log "    GC log file name          : %s\n", $gc_log_filename;
     }
-    if (defined($gc_stats->{parse_gc_log_failure_details})) {
-	printf $log "    Failure details of parsing GC log: %s\n",
-	    $gc_stats->{parse_gc_log_failure_details};
-    } else {
-	printf $log "    Number of GCs             : %s\n",
-	    $gc_stats->{num_gcs};
-	printf $log "    Total memory GCed (KB)    : %s\n",
-	    $gc_stats->{total_mem_collected_kb};
-	printf $log "    Total GC time (sec)       : %s\n",
-	    $gc_stats->{total_gc_time_sec};
-	printf $log "    Maximum total available memory (KB): %s\n",
-	    $gc_stats->{max_total_avail_mem_kb};
-	printf $log "    Maximum total allocated memory (KB): %s\n",
-	    $gc_stats->{max_total_allocated_mem_kb};
-	printf $log "    Maximum total live memory (KB)     : %s\n",
-	    $gc_stats->{max_total_live_mem_kb};
-	printf $log "    Number of parsing errors  : %s\n",
-	    $gc_stats->{num_errors};
-	printf $log "    Number of parsing warnings: %s\n",
-	    $gc_stats->{num_warnings};
+    printf $log "    Number of GCs             : %s\n",
+        $gc_stats->{num_gcs};
+    printf $log "    Total memory GCed (KB)    : %s\n",
+        $gc_stats->{total_mem_collected_kb};
+    printf $log "    Total GC time (sec)       : %s\n",
+        $gc_stats->{total_gc_time_sec};
+    printf $log "    Maximum total available memory (KB): %s\n",
+        $gc_stats->{max_total_avail_mem_kb};
+    printf $log "    Maximum total allocated memory (KB): %s\n",
+        $gc_stats->{max_total_allocated_mem_kb};
+    printf $log "    Maximum total live memory (KB)     : %s\n",
+        $gc_stats->{max_total_live_mem_kb};
+    printf $log "    Number of parsing warnings: %s\n",
+        $gc_stats->{num_warnings};
+    printf $log "    Number of parsing errors  : %s\n",
+        $gc_stats->{num_errors};
+    if (defined($gc_stats->{first_gc_log_parse_error})) {
+	printf $log "    First GC log parse error         : %s\n",
+	    $gc_stats->{first_gc_log_parse_error};
     }
 }
 
@@ -364,7 +362,6 @@ sub parse_jvm_gc_log {
     my $max_total_avail_mem_kb = 0;
     my $max_total_allocated_mem_kb = 0;
     my $max_total_live_mem_kb = 0;
-    my $parse_gc_log_fail_info;
 
     open(FH, '<', $gc_log_filename)
 	or die sprintf "Could not open file %s for reading", $gc_log_filename;
@@ -372,7 +369,7 @@ sub parse_jvm_gc_log {
     # cleanly, i.e. by continuing and printing results without GC
     # summary stats.
     my $linenum = 0;
-    my $already_saved_copy_of_gc_log = 0;
+    my $first_gc_log_parse_error;
     while (my $line = <FH>) {
 	++$linenum;
 	chomp $line;
@@ -564,9 +561,8 @@ sub parse_jvm_gc_log {
 	} elsif ($line =~ /^\s*\[ERROR\].*$/) {
 	    my $err_msg = sprintf "Error: Found ERROR at line %d of GC log file '%s': %s",
 	        $linenum, $gc_log_filename, $line;
-	    if (! $already_saved_copy_of_gc_log) {
-		$parse_gc_log_fail_info = $err_msg;
-		$already_saved_copy_of_gc_log = 1;
+	    if (!defined($first_gc_log_parse_error)) {
+		$first_gc_log_parse_error = $err_msg;
 	    }
 	    if ($verbose || ($num_error_lines < $max_error_lines_to_print)) {
 		printf STDERR "%s\n", $err_msg;
@@ -576,9 +572,8 @@ sub parse_jvm_gc_log {
 	    my $err_msg =
 		sprintf "Could not parse line %d of GC log file %s: '%s'",
 	            $linenum, $gc_log_filename, $line;
-	    if (! $already_saved_copy_of_gc_log) {
-		$parse_gc_log_fail_info = $err_msg;
-		$already_saved_copy_of_gc_log = 1;
+	    if (!defined($first_gc_log_parse_error)) {
+		$first_gc_log_parse_error = $err_msg;
 	    }
 	    if ($verbose || ($num_unparseable_lines <
 			     $max_unparseable_lines_to_print))
@@ -641,8 +636,8 @@ sub parse_jvm_gc_log {
 	num_errors => $num_errors,
 	num_warnings => $num_warnings
     };
-    if (defined($parse_gc_log_fail_info)) {
-	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
+    if (defined($first_gc_log_parse_error)) {
+	$gc_stats->{first_gc_log_parse_error} = $first_gc_log_parse_error;
     }
     return $gc_stats;
 }
