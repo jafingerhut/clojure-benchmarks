@@ -555,6 +555,9 @@ if ($os eq 'Cygwin') {
 	s/\r$//;
 	if (/^Process ID/) {
 	    $found_pid = 1;
+        } elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
+            # Ignore this line if JVM profiling via sampling was
+            # enabled.
 	} elsif ($found_pid) {
 	    if (/^\s+exit code: (.*)\s*$/) {
 		$cmd_exit_status = $1;
@@ -571,9 +574,6 @@ if ($os eq 'Cygwin') {
 	    } elsif (/^\s+Quota Peak Paged Pool Usage: (\d+)\s*$/) {
 	    } elsif (/^\s+Quota Peak Non Paged Pool Usage: (\d+)\s*$/) {
 	    } elsif (/^\s+Peak Pagefile Usage: (\d+)\s*$/) {
-	    } elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
-		# Ignore this line if JVM profiling via sampling was
-		# enabled.
 	    } else {
 		if (! /^\s*$/) {
 		    $unrecognized_cmd_stderr_output .= ($_ . "\n");
@@ -1540,8 +1540,10 @@ sub parse_jvm_gc_log {
             ($line =~ /^\s*\[INFO \]\[memory \] <heap>   - size of heap after collection \(KB\)\.\s*$/) ||
             ($line =~ /^\s*\[INFO \]\[memory \] <time>   - total time of collection \(milliseconds\)\.\s*$/) ||
             ($line =~ /^\s*\[INFO \]\[memory \] <pause>  - total sum of pauses during collection \(milliseconds\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \]            Run with -Xverbose:gcpause to see individual phases\.\s*$/)
-	    ) {
+            ($line =~ /^\s*\[INFO \]\[memory \]            Run with -Xverbose:gcpause to see individual phases\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] Running on hypervisor Unknown \(but probably running on a hypervisor\)\s*$/)
+	    )
+	{
 	    # Ignore these boilerplate header lines out of the JRockit JVM
 	} elsif ($line =~ /^\s*\[ERROR\].*$/) {
 	    my $err_msg = sprintf "Error: Found ERROR at line %d of GC log file '%s': %s",
