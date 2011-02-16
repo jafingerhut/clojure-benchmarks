@@ -55,8 +55,9 @@ sub usage {
 
 Examples:
 
-Here is a short GC log file output by the Hotspot JVM, version
-1.6.0_22, when given the -Xloggc:<log_file> option:
+Here is a short GC log file output by the Sun/Oracle Hotspot JVM,
+version 1.6.0_22, when given the -Xloggc:<log_file> option (see
+further below for an example output from the Oracle JRockit JVM):
 
     0.976: [GC 12288K->1168K(47104K), 0.0193362 secs]
     1.529: [GC 13456K->1504K(59392K), 0.0072646 secs]
@@ -71,18 +72,18 @@ Here is a short GC log file output by the Hotspot JVM, version
 	
 The format of these lines is:
 
-    time: [gc_type before->after(heap), duration]
+    <time>: [<gc_type> <before>-><after>(<heap>), <duration>]
 
 where:
 
-    time is the time in sec since the JVM started.
-    gc_type indicates whether it was a full or partial GC.
-    before is the amount of heap memory used before that particular GC
-        invocation began.
-    after is the amount of heap memory used when that GC invocation
+    <time> is the time in sec since the JVM started.
+    <gc_type> indicates whether it was a full or partial GC.
+    <before> is the amount of heap memory used before that particular
+        GC invocation began.
+    <after> is the amount of heap memory used when that GC invocation
         was finished.
-    heap is the total JVM heap size.
-    duration is the time taken for that GC invocation.
+    <heap> is the total JVM heap size.
+    <duration> is the time taken for that GC invocation.
 
 Invoking this command gives the indicated output, explained below in
 more detail:
@@ -99,26 +100,80 @@ more detail:
 'Number of GCs' is the number of times GC was invoked, according to the
 log.  This is once for each of the lines shown above.
 
-'Total memory GCed' is the total of (before-after), summed over all
-GCs.  Note: It sometimes occurs that before < after, i.e. there is
-more heap memory allocated after a GC than before.  I do not know why
-this occurs, but it tends not to increase the allocated memory by very
-much.  $progname does not include such lines in the 'Total memory
-GCed' calculation at all, positively or negatively.
+'Total memory GCed' is the total of (<before>-<after>), summed over
+all GCs.  Note: It sometimes occurs that <before> is less than
+<after>, i.e. there is more heap memory allocated after a GC than
+before.  I do not know why this occurs, but it tends not to increase
+the allocated memory by very much.  $progname does not include such
+lines in the 'Total memory GCed' calculation at all, positively or
+negatively.
 
-'Total GC time' is the total of all 'duration' values.
+'Total GC time' is the total of all <duration> values.
 
-'Maximum total available memory' is the maximum of all 'heap' values.
+'Maximum total available memory' is the maximum of all <heap> values.
 
-'Maximum total allocated memory' is the maximum of all 'before'
+'Maximum total allocated memory' is the maximum of all <before>
 values.  The program may have allocated more than this after the last
 GC, and never performed another GC before finishing.  This cannot be
 accounted for by $progname, which simply goes by what is in the GC
 log.
 
-'Maximum total live memory' is the maximum of all 'after' values.
+'Maximum total live memory' is the maximum of all <after> values.
 There may have been more total live memory allocated at times in
 between GC invocations, but $progname has no way of detecting this.
+
+
+Here is a short GC log file output by the Oracle JRockit JVM, version
+1.6.0_20, when given the options '-Xverbose:memory
+-Xverbloselog:<log_file>':
+
+    [INFO ][memory ] GC mode: Garbage collection optimized for throughput, strategy: Generational Parallel Mark & Sweep.
+    [INFO ][memory ] Heap size: 65536KB, maximal heap size: 1048576KB, nursery size: 32768KB.
+    [INFO ][memory ] <start>-<end>: <type> <before>KB-><after>KB (<heap>KB), <time> ms, sum of pauses <pause> ms.
+    [INFO ][memory ] <start>  - start time of collection (seconds since jvm start).
+    [INFO ][memory ] <type>   - OC (old collection) or YC (young collection).
+    [INFO ][memory ] <end>    - end time of collection (seconds since jvm start).
+    [INFO ][memory ] <before> - memory used by objects before collection (KB).
+    [INFO ][memory ] <after>  - memory used by objects after collection (KB).
+    [INFO ][memory ] <heap>   - size of heap after collection (KB).
+    [INFO ][memory ] <time>   - total time of collection (milliseconds).
+    [INFO ][memory ] <pause>  - total sum of pauses during collection (milliseconds).
+    [INFO ][memory ]            Run with -Xverbose:gcpause to see individual phases.
+    [INFO ][memory ] Running on hypervisor Unknown (but probably running on a hypervisor)
+    [INFO ][memory ] [YC#1] 5.942-5.958: YC 33408KB->10562KB (65536KB), 0.016 s, sum of pauses 15.881 ms, longest pause 15.881 ms.
+    [INFO ][memory ] [YC#2] 6.205-6.239: YC 45042KB->23348KB (65536KB), 0.034 s, sum of pauses 33.860 ms, longest pause 33.860 ms.
+    [INFO ][memory ] [YC#3] 6.484-6.573: YC 57906KB->65536KB (65536KB), 0.089 s, sum of pauses 88.892 ms, longest pause 88.892 ms.
+    [INFO ][memory ] [OC#1] 6.574-6.591: OC 65536KB->11537KB (65536KB), 0.017 s, sum of pauses 15.042 ms, longest pause 15.042 ms.
+    [INFO ][memory ] [YC#4] 7.147-7.168: YC 54068KB->35507KB (65536KB), 0.021 s, sum of pauses 20.484 ms, longest pause 20.484 ms.
+    [INFO ][memory ] [YC#5] 7.610-7.612: YC 60082KB->35508KB (65536KB), 0.001 s, sum of pauses 1.138 ms, longest pause 1.138 ms.
+    [INFO ][memory ] [YC#6] 8.180-8.182: YC 60082KB->35571KB (65536KB), 0.002 s, sum of pauses 2.221 ms, longest pause 2.221 ms.
+    [INFO ][memory ] [YC#7] 8.510-8.551: YC 62130KB->65536KB (65536KB), 0.041 s, sum of pauses 40.855 ms, longest pause 40.855 ms.
+    [INFO ][memory ] [OC#2] 8.551-8.585: OC 65536KB->27180KB (65536KB), 0.034 s, sum of pauses 32.871 ms, longest pause 32.871 ms.
+    [INFO ][memory ] [YC#8] 8.875-8.878: YC 54178KB->33930KB (65536KB), 0.002 s, sum of pauses 2.232 ms, longest pause 2.232 ms.
+    [INFO ][memory ] [YC#9] 9.059-9.060: YC 54178KB->33930KB (65536KB), 0.001 s, sum of pauses 1.268 ms, longest pause 1.268 ms.
+
+The header lines at the beginning are ignored completely.  The format
+of the remaining lines is given in one of the header lines as:
+
+    [INFO ][memory ] <start>-<end>: <type> <before>KB-><after>KB (<heap>KB), <time> ms, sum of pauses <pause> ms.
+
+It is not mentioned there, but many of the line also have 'longest
+pause <longest_pause>' at the end of the line.
+
+<before>, <after>, and <heap> are the same as for the Hotspot JVM GC
+log.  <start>-<end> are like Hotspot's time, except they give both a
+start and end time of this GC invocation relative to when the JVM
+started.  <pause> are the values summed to calculate the output value
+'Total GC time'.
+
+<time> and <pause> seem like they should always be the same, but I
+have seen cases where they were significantly different, so $progname
+prints a warning for such lines in case this is a sign of a problem.
+
+<longest_pause> is ignored by $progname, except that a warning is
+printed if it is longer than <pause>.  Similarly <start> and <end> are
+ignored, except a warning is printed if (<end>-<start>) is
+significantly different than <time>.  <type> is completely ignored.
 
 
 TBD: It might be nice to add more statistics calculation to this
@@ -243,6 +298,10 @@ if ($output_format_xml) {
 	    $gc_stats->{max_total_allocated_mem_kb};
 	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
 	    $gc_stats->{max_total_live_mem_kb};
+	push @{$tag_text_pairs}, 'num_errors',
+	    $gc_stats->{num_errors};
+	push @{$tag_text_pairs}, 'num_warnings',
+	    $gc_stats->{num_warnings};
     }
 
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
@@ -271,6 +330,10 @@ if ($output_format_xml) {
 	    $gc_stats->{max_total_allocated_mem_kb};
 	printf $log "    Maximum total live memory (KB)     : %s\n",
 	    $gc_stats->{max_total_live_mem_kb};
+	printf $log "    Number of parsing errors  : %s\n",
+	    $gc_stats->{num_errors};
+	printf $log "    Number of parsing warnings: %s\n",
+	    $gc_stats->{num_warnings};
     }
 }
 
@@ -281,8 +344,19 @@ sub parse_jvm_gc_log {
     my $gc_stats_type = shift;
     my $gc_log_filename = shift;
 
+    my $num_error_lines = 0;
+    my $max_error_lines_to_print = 5;
+    my $num_unparseable_lines = 0;
+    my $max_unparseable_lines_to_print = 5;
+
     my $num_mem_increase_warnings = 0;
     my $max_mem_increase_warnings_to_print = 3;
+    my $num_start_end_time_warnings = 0;
+    my $max_start_end_time_warnings_to_print = 3;
+    my $num_pause_time_warnings = 0;
+    my $max_pause_time_warnings_to_print = 3;
+    my $num_longest_pause_time_warnings = 0;
+    my $max_longest_pause_time_warnings_to_print = 3;
 
     my $num_gcs = 0;
     my $total_mem_collected_kb = 0;
@@ -299,8 +373,6 @@ sub parse_jvm_gc_log {
     # summary stats.
     my $linenum = 0;
     my $already_saved_copy_of_gc_log = 0;
-    my $unparseable_lines = 0;
-    my $max_unparseable_lines_to_print = 5;
     while (my $line = <FH>) {
 	++$linenum;
 	chomp $line;
@@ -374,7 +446,9 @@ sub parse_jvm_gc_log {
 					    $live_after_this_gc_kb);
 	    if ($mem_collected_this_gc_kb < 0) {
 		$mem_collected_this_gc_kb = 0;
-		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
+		if ($verbose || ($num_mem_increase_warnings <
+				 $max_mem_increase_warnings_to_print))
+		{
 		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
 		        $live_before_this_gc_kb, $live_after_this_gc_kb,
 		        $linenum, $gc_log_filename, $line;
@@ -402,11 +476,17 @@ sub parse_jvm_gc_log {
 	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
 		$max_error_allowed_sec)
 	    {
-		printf STDERR "Warning: GC start time %s and end time %s give duration %.3f which is more than %s different than the reported time %s in line %d of GC log file '%s': %s\n",
-		    $gc_start_time_sec, $gc_end_time_sec,
-		    $double_check_gc_time_sec, $max_error_allowed_sec,
-		    $gc_time_sec,
-		    $linenum, $gc_log_filename, $line;
+		if ($verbose || ($num_start_end_time_warnings <
+				 $max_start_end_time_warnings_to_print))
+		{
+		    printf STDERR "Warning: GC <start> time %s and <end> time %s give duration %.3f which is %s different than the reported <time> %s in line %d of GC log file '%s': %s\n",
+		        $gc_start_time_sec, $gc_end_time_sec,
+		        $double_check_gc_time_sec,
+		        abs($double_check_gc_time_sec - $gc_time_sec),
+		        $gc_time_sec,
+		        $linenum, $gc_log_filename, $line;
+		}
+		++$num_start_end_time_warnings;
 	    }
 
 	    # Do consistency check between values of $gc_time_sec and
@@ -421,18 +501,29 @@ sub parse_jvm_gc_log {
 	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
 		$max_error_allowed_sec)
 	    {
-		printf STDERR "Warning: GC duration in msec %s is more than %s different than the reported time %s in sec in line %d of GC log file '%s': %s\n",
-		    $gc_time_msec, $max_error_allowed_sec, $gc_time_sec,
-		    $linenum, $gc_log_filename, $line;
+		if ($verbose || ($num_pause_time_warnings <
+				 $max_pause_time_warnings_to_print))
+		{
+		    printf STDERR "Warning: GC <pause> time = %s msec is %s msec different than <time> = %s sec in line %d of GC log file '%s': %s\n",
+		        $gc_time_msec,
+		        abs($double_check_gc_time_sec - $gc_time_sec) * 1000.0,
+		        $gc_time_sec, $linenum, $gc_log_filename, $line;
+		}
+		++$num_pause_time_warnings;
 	    }
 
 	    # Do consistency check between values of
 	    # $gc_longest_pause_time_msec and $gc_time_msec.  I
 	    # believe the former should always be at most the latter.
 	    if ($gc_longest_pause_time_msec > $gc_time_msec) {
-		printf STDERR "Warning: longest pause %s is longer than total pause time %s in line %d of GC log file '%s': %s\n",
+		if ($verbose || ($num_longest_pause_time_warnings <
+				 $max_longest_pause_time_warnings_to_print))
+		{
+		    printf STDERR "Warning: <longest_pause> = %s msec is longer than <pause> time = %s msec in line %d of GC log file '%s': %s\n",
 		    $gc_longest_pause_time_msec, $gc_time_msec,
 		    $linenum, $gc_log_filename, $line;
+		}
+		++$num_longest_pause_time_warnings;
 	    }
 	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
 	    # I have seen the version of the JVM described below
@@ -477,7 +568,10 @@ sub parse_jvm_gc_log {
 		$parse_gc_log_fail_info = $err_msg;
 		$already_saved_copy_of_gc_log = 1;
 	    }
-	    printf STDERR "%s\n", $err_msg;
+	    if ($verbose || ($num_error_lines < $max_error_lines_to_print)) {
+		printf STDERR "%s\n", $err_msg;
+	    }
+	    ++$num_error_lines;
 	} else {
 	    my $err_msg =
 		sprintf "Could not parse line %d of GC log file %s: '%s'",
@@ -486,35 +580,66 @@ sub parse_jvm_gc_log {
 		$parse_gc_log_fail_info = $err_msg;
 		$already_saved_copy_of_gc_log = 1;
 	    }
-	    if ($verbose || ($unparseable_lines <
+	    if ($verbose || ($num_unparseable_lines <
 			     $max_unparseable_lines_to_print))
 	    {
 		printf STDERR "%s\n", $err_msg;
 	    }
-	    ++$unparseable_lines;
+	    ++$num_unparseable_lines;
 	}
     }
     close(FH);
-    if (!$verbose && ($unparseable_lines > $max_unparseable_lines_to_print))
-    {
-	printf STDERR "%d additional error messages about unparseable GC log file lines were suppressed.\n",
-	    ($unparseable_lines - $max_unparseable_lines_to_print);
+
+    if (!$verbose) {
+	if ($num_error_lines > $max_error_lines_to_print) {
+	    printf STDERR "%d additional error messages suppressed about [ERROR] lines.  Use --verbose to see them all\n",
+	        ($num_unparseable_lines - $max_unparseable_lines_to_print);
+	}
+	if ($num_unparseable_lines > $max_unparseable_lines_to_print) {
+	    printf STDERR "%d additional error messages suppressed about unparseable GC log file lines.  Use --verbose to see them all\n",
+	        ($num_unparseable_lines - $max_unparseable_lines_to_print);
+	}
+	if ($num_mem_increase_warnings > $max_mem_increase_warnings_to_print) {
+	    printf STDERR "%d additional warnings suppressed about memory use increasing during GC.  Use --verbose to see them all\n",
+	        ($num_mem_increase_warnings -
+		 $max_mem_increase_warnings_to_print);
+	}
+	if ($num_start_end_time_warnings >
+	    $max_start_end_time_warnings_to_print)
+	{
+	    printf STDERR "%d additional warnings suppressed about <end>-<start> time is significantly different than <time>.  Use --verbose to see them all\n",
+	        ($num_start_end_time_warnings -
+	         $max_start_end_time_warnings_to_print);
+	}
+	if ($num_pause_time_warnings > $max_pause_time_warnings_to_print) {
+	    printf STDERR "%d additional warnings suppressed about <pause> time is significantly different than <time>.  Use --verbose to see them all\n",
+	        ($num_pause_time_warnings -
+		 $max_pause_time_warnings_to_print);
+	}
+	if ($num_longest_pause_time_warnings >
+	    $max_longest_pause_time_warnings_to_print)
+	{
+	    printf STDERR "%d additional warnings suppressed about <longest_pause> time is longer than <pause> time.  Use --verbose to see them all\n",
+	        ($num_longest_pause_time_warnings -
+		 $max_longest_pause_time_warnings_to_print);
+	}
     }
 
-    if (!$verbose && ($num_mem_increase_warnings >
-		      $max_mem_increase_warnings_to_print))
-    {
-	printf STDERR "%d additional warnings about memory use increasing during GC suppressed.\n",
-	    $num_mem_increase_warnings - $max_mem_increase_warnings_to_print;
-    }
-
+    my $num_errors = ($num_error_lines +
+		      $num_unparseable_lines);
+    my $num_warnings = ($num_mem_increase_warnings +
+			$num_start_end_time_warnings +
+			$num_pause_time_warnings +
+			$num_longest_pause_time_warnings);
     my $gc_stats = {
 	num_gcs => $num_gcs,
 	total_mem_collected_kb => $total_mem_collected_kb,
 	total_gc_time_sec => $total_gc_time_sec,
 	max_total_avail_mem_kb => $max_total_avail_mem_kb,
 	max_total_allocated_mem_kb => $max_total_allocated_mem_kb,
-	max_total_live_mem_kb => $max_total_live_mem_kb
+	max_total_live_mem_kb => $max_total_live_mem_kb,
+	num_errors => $num_errors,
+	num_warnings => $num_warnings
     };
     if (defined($parse_gc_log_fail_info)) {
 	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
