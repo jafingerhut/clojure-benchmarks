@@ -1,0 +1,541 @@
+: # use perl -*-Perl-*-
+eval 'exec perl -S "$0" ${1+"$@"}'
+    if 0;
+# -*cperl-*-
+
+use strict;
+use Getopt::Long;
+use File::Basename;
+# FindBin is a library to find the directory in which the script is
+# installed.  This can be useful for making it easy to install other
+# auxiliary files needed by the script all in one place, and no matter
+# where someone installs 'the whole package' of files, the script can
+# find them, without needing hand-editing.
+use FindBin;
+use XML::LibXML;
+
+
+my $verbose = 0;
+my $full_progname = $0;
+my $progname = fileparse($full_progname);
+# TBD: Delete save_dir_name if not needed.
+my $save_dir_name;
+
+
+sub usage {
+    print STDERR
+"usage: $progname [ --help ] [ --verbose ]
+               [ --xml ]
+               [ --log-file <log_file> ]
+               [ --jvm-gc-stats <jvm_type> ]
+               <gc-log-file>
+
+    --help        Show this help.
+
+    --verbose     Enable debug messages.  Also, by default only the
+                  first few warnings of a particular kind will be
+                  printed, with the count of how many more that were
+                  not printed.  If --verbose is specified, then all
+                  warnings will be printed in their entirety.
+
+    --xml         Print GC log summary output in XML format.
+
+    --log-file <log_file>
+                  Append output to file <log_file>, creating
+                  <log_file> if it does not exist already.
+
+    --jvm-gc-stats <jvm_type>
+                  When this option is used, $progname will assume that
+                  <gc-log-file> was produced via a JVM of the
+                  specified type.  The following are supported by
+                  $progname:
+
+                    hotspot
+                    jrockit
+
+Examples:
+
+Here is a short GC log file output by the Hotspot JVM, version
+1.6.0_22, when given the -Xloggc:<log_file> option:
+
+    0.976: [GC 12288K->1168K(47104K), 0.0193362 secs]
+    1.529: [GC 13456K->1504K(59392K), 0.0072646 secs]
+    2.771: [GC 26080K->1680K(59392K), 0.0071353 secs]
+    2.972: [GC 24080K->2912K(83968K), 0.0118836 secs]
+    3.149: [GC 52064K->12864K(83968K), 0.0229997 secs]
+    3.441: [GC 62016K->22677K(133056K), 0.0234928 secs]
+    4.223: [GC 120981K->22656K(133056K), 0.0069550 secs]
+    4.796: [GC 120960K->37680K(228416K), 0.0939423 secs]
+    4.890: [Full GC 37680K->26362K(249280K), 0.1673596 secs]
+    6.326: [GC 216954K->26394K(255296K), 0.0008794 secs]
+	
+The format of these lines is:
+
+    time: [gc_type before->after(heap), duration]
+
+where:
+
+    time is the time in sec since the JVM started.
+    gc_type indicates whether it was a full or partial GC.
+    before is the amount of heap memory used before that particular GC
+        invocation began.
+    after is the amount of heap memory used when that GC invocation
+        was finished.
+    heap is the total JVM heap size.
+    duration is the time taken for that GC invocation.
+
+Invoking this command gives the indicated output, explained below in
+more detail:
+
+    % $progname gc-log1.txt 
+        GC log file name          : gc-log1.txt
+        Number of GCs             : 10
+        Total memory GCed (KB)    : 530662
+        Total GC time (sec)       : 0.3612485
+        Maximum total available memory (KB): 255296
+        Maximum total allocated memory (KB): 216954
+        Maximum total live memory (KB)     : 37680
+
+'Number of GCs' is the number of times GC was invoked, according to the
+log.  This is once for each of the lines shown above.
+
+'Total memory GCed' is the total of (before-after), summed over all
+GCs.  Note: It sometimes occurs that before < after, i.e. there is
+more heap memory allocated after a GC than before.  I do not know why
+this occurs, but it tends not to increase the allocated memory by very
+much.  $progname does not include such lines in the 'Total memory
+GCed' calculation at all, positively or negatively.
+
+'Total GC time' is the total of all 'duration' values.
+
+'Maximum total available memory' is the maximum of all 'heap' values.
+
+'Maximum total allocated memory' is the maximum of all 'before'
+values.  The program may have allocated more than this after the last
+GC, and never performed another GC before finishing.  This cannot be
+accounted for by $progname, which simply goes by what is in the GC
+log.
+
+'Maximum total live memory' is the maximum of all 'after' values.
+There may have been more total live memory allocated at times in
+between GC invocations, but $progname has no way of detecting this.
+
+
+TBD: It might be nice to add more statistics calculation to this
+program, e.g. some of those calculated by the GC Portal from
+Sun/Oracle:
+
+http://java.sun.com/developer/technicalArticles/Programming/GCPortal/
+
+This StackOverflow Q&A gives several other tools for analyzing GC
+logs:
+
+http://stackoverflow.com/questions/541832/know-of-any-java-garbage-collection-log-analysis-tools
+";
+}
+
+######################################################################
+# Get command line options
+######################################################################
+
+my $help;
+my $output_format_xml;
+my $log_file;
+my $jvm_gc_stats_from_cmd_line;
+Getopt::Long::Configure('require_order');
+if (!GetOptions('help' => \$help,
+		'verbose' => \$verbose,
+		'xml' => \$output_format_xml,
+		'log-file=s' => \$log_file,
+                'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line
+               ))
+{
+    usage();
+    exit(1);
+}
+
+if ($help) {
+    usage();
+    exit(0);
+}
+my $gc_stats_type;
+if (defined($jvm_gc_stats_from_cmd_line)) {
+    $gc_stats_type = $jvm_gc_stats_from_cmd_line;
+}
+if (defined($gc_stats_type)) {
+    if ($gc_stats_type eq 'hotspot') {
+        # OK
+    } elsif ($gc_stats_type eq 'jrockit') {
+        # OK
+    } else {
+        printf STDERR
+"Unrecognized value '%s' given after option %s
+The following are supported: hotspot jrockit
+",
+            $gc_stats_type,
+            '--jvm-gc-stats';
+        exit 1;
+    }
+}
+
+# TBD: Make it so that specifying -, /dev/stdin, or no file on the
+# command line means to read from stdin.
+my $gc_log_filename;
+if ($#ARGV < 0) {
+    printf STDERR "No GC log file specified.\n";
+    usage();
+    exit 1;
+}
+$gc_log_filename = $ARGV[0];
+
+my $log;
+if (defined($log_file)) {
+    open($log, ">>$log_file")
+	or die sprintf "Could not open log file '%s' for appending: %s",
+	                $log_file, $!;
+} else {
+    $log = *STDOUT;
+}
+
+######################################################################
+# If --jvm-gc-stats option was given, read the GC log file and
+# calculate summary GC performance stats.
+######################################################################
+
+my $gc_stats = parse_jvm_gc_log($gc_stats_type, $gc_log_filename);
+
+
+######################################################################
+# Print the performance stats in the desired format.
+######################################################################
+
+if ($output_format_xml) {
+
+    # Create a new document
+    my $xmldoc = XML::LibXML::Document->new();
+
+    # ... with root element having tag MeasurementList
+    my $mlist = $xmldoc->createElement('MeasurementList');
+    $xmldoc->setDocumentElement($mlist);
+
+    # ... and that root element has a first child with tag Measurement
+    my $measurement = $xmldoc->createElement('Measurement');
+    $mlist->appendChild($measurement);
+    
+    # Now fill in the fields of that measurement
+    my $tag_text_pairs = [];
+    if ($gc_log_filename ne '') {
+	push @{$tag_text_pairs}, 'gc_log_file_name', $gc_log_filename;
+    }
+    if (defined($gc_stats->{parse_gc_log_fail_info})) {
+	push @{$tag_text_pairs}, 'parse_gc_log_failure_details',
+	    $gc_stats->{parse_gc_log_failure_details};
+    } else {
+	push @{$tag_text_pairs}, 'number_of_gcs',
+	    $gc_stats->{num_gcs};
+	push @{$tag_text_pairs}, 'total_memory_gced_kb',
+	    $gc_stats->{total_mem_collected_kb};
+	push @{$tag_text_pairs}, 'total_gc_time_sec',
+	    $gc_stats->{total_gc_time_sec};
+	push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
+	    $gc_stats->{max_total_avail_mem_kb};
+	push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
+	    $gc_stats->{max_total_allocated_mem_kb};
+	push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
+	    $gc_stats->{max_total_live_mem_kb};
+    }
+
+    libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
+
+    # and finally print out the XML file.
+    print $log $xmldoc->toString(1);
+
+} else {
+
+    if ($gc_log_filename ne '') {
+	printf $log "    GC log file name          : %s\n", $gc_log_filename;
+    }
+    if (defined($gc_stats->{parse_gc_log_failure_details})) {
+	printf $log "    Failure details of parsing GC log: %s\n",
+	    $gc_stats->{parse_gc_log_failure_details};
+    } else {
+	printf $log "    Number of GCs             : %s\n",
+	    $gc_stats->{num_gcs};
+	printf $log "    Total memory GCed (KB)    : %s\n",
+	    $gc_stats->{total_mem_collected_kb};
+	printf $log "    Total GC time (sec)       : %s\n",
+	    $gc_stats->{total_gc_time_sec};
+	printf $log "    Maximum total available memory (KB): %s\n",
+	    $gc_stats->{max_total_avail_mem_kb};
+	printf $log "    Maximum total allocated memory (KB): %s\n",
+	    $gc_stats->{max_total_allocated_mem_kb};
+	printf $log "    Maximum total live memory (KB)     : %s\n",
+	    $gc_stats->{max_total_live_mem_kb};
+    }
+}
+
+exit 0;
+
+
+sub parse_jvm_gc_log {
+    my $gc_stats_type = shift;
+    my $gc_log_filename = shift;
+
+    my $num_mem_increase_warnings = 0;
+    my $max_mem_increase_warnings_to_print = 3;
+
+    my $num_gcs = 0;
+    my $total_mem_collected_kb = 0;
+    my $total_gc_time_sec = 0;
+    my $max_total_avail_mem_kb = 0;
+    my $max_total_allocated_mem_kb = 0;
+    my $max_total_live_mem_kb = 0;
+    my $parse_gc_log_fail_info;
+
+    open(FH, '<', $gc_log_filename)
+	or die sprintf "Could not open file %s for reading", $gc_log_filename;
+    # TBD: Handle error in attempting to open file or parse file more
+    # cleanly, i.e. by continuing and printing results without GC
+    # summary stats.
+    my $linenum = 0;
+    my $already_saved_copy_of_gc_log = 0;
+    my $unparseable_lines = 0;
+    my $max_unparseable_lines_to_print = 5;
+    while (my $line = <FH>) {
+	++$linenum;
+	chomp $line;
+	if ($line =~ /\r$/) {
+	    chop $line;
+	}
+	if ($line =~
+	    /^\s*\d+\.\d+:\s+\[(GC|GC--|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
+	{
+	    my ($gc_type, $live_before_this_gc_kb, $live_after_this_gc_kb,
+		$total_avail_space_kb, $gc_time) = ($1, $2, $3, $4, $5);
+	    # Notes from this source:
+	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
+	    
+	    # $live_before_this_gc_kb space consists of objects that
+	    # are actually live, or they are dead but still referenced
+	    # from a tenured generation object after a previous minor
+	    # GC.
+	    
+	    # Similarly for $live_after_this_gc_kb
+	    
+	    # $total_avail_space_kb is the total available space, not
+	    # counting the space in the permanent generation, which is
+	    # the total heap minus one of the survivor spaces.
+	    
+	    ++$num_gcs;
+	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
+					    $live_after_this_gc_kb);
+	    if ($mem_collected_this_gc_kb < 0) {
+		$mem_collected_this_gc_kb = 0;
+		if ($verbose || ($num_mem_increase_warnings <
+				 $max_mem_increase_warnings_to_print))
+		{
+		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
+		        $live_before_this_gc_kb, $live_after_this_gc_kb,
+		        $linenum, $gc_log_filename, $line;
+		}
+		++$num_mem_increase_warnings;
+	    }
+	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_gc_time_sec += $gc_time;
+	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
+		$max_total_avail_mem_kb = $total_avail_space_kb;
+	    }
+	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
+		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
+	    }
+	    if ($gc_type eq 'GC--') {
+		# I've seen several of these where the
+		# $live_after_this_gc_kb number is larger than the
+		# $live_before_this_gc_kb number, and the after number
+		# is significantly larger than the after number of
+		# other GCs.  Until I find out what these mean, I'm
+		# going to leave such GC lines out of the calculation
+		# of the $max_total_live_mem_kb.
+	    } else {
+		if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
+		    $max_total_live_mem_kb = $live_after_this_gc_kb;
+		}
+	    }
+	} elsif ($line =~ /^\s*\[INFO \]\[memory \] \[[YO]C#\d+\] (\d+(\.\d+)?)-(\d+(\.\d+)?): ([YO]C) (\d+)KB->(\d+)KB \((\d+)KB\), (\d+(\.\d+)?) s, sum of pauses (\d+(\.\d+)?) ms, longest pause (\d+(\.\d+)?) ms\.\s*$/) {
+	    # TBD: Try to make this case and the one above share
+	    # common code, rather than duplicating it.
+	    my ($gc_start_time_sec, $gc_end_time_sec, $gc_type,
+		$live_before_this_gc_kb, $live_after_this_gc_kb,
+		$total_avail_space_kb, $gc_time_sec,
+		$gc_time_msec, $gc_longest_pause_time_msec) =
+		($1, $3, $5, $6, $7, $8, $9, $11, $13);
+	    ++$num_gcs;
+	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
+					    $live_after_this_gc_kb);
+	    if ($mem_collected_this_gc_kb < 0) {
+		$mem_collected_this_gc_kb = 0;
+		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
+		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
+		        $live_before_this_gc_kb, $live_after_this_gc_kb,
+		        $linenum, $gc_log_filename, $line;
+		}
+		++$num_mem_increase_warnings;
+	    }
+	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_gc_time_sec += ($gc_time_msec / 1000.0);
+	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
+		$max_total_avail_mem_kb = $total_avail_space_kb;
+	    }
+	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
+		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
+	    }
+	    if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
+		$max_total_live_mem_kb = $live_after_this_gc_kb;
+	    }
+
+	    # Do consistency check on ($gc_end_time_sec -
+	    # $gc_start_time_sec), which I think should be close to
+	    # $gc_time_sec.
+	    my $double_check_gc_time_sec =
+		($gc_end_time_sec - $gc_start_time_sec);
+	    my $max_error_allowed_sec = 0.0015;
+	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
+		$max_error_allowed_sec)
+	    {
+		printf STDERR "Warning: GC start time %s and end time %s give duration %.3f which is more than %s different than the reported time %s in line %d of GC log file '%s': %s\n",
+		    $gc_start_time_sec, $gc_end_time_sec,
+		    $double_check_gc_time_sec, $max_error_allowed_sec,
+		    $gc_time_sec,
+		    $linenum, $gc_log_filename, $line;
+	    }
+
+	    # Do consistency check between values of $gc_time_sec and
+	    # $gc_time_msec.  $gc_time_sec should be equal to
+	    # $gc_time_msec, perhaps rounded off.
+	    $double_check_gc_time_sec = ($gc_time_msec / 1000.0);
+	    # I don't know why, but I've seen these values differ by
+	    # more than merely rounding error.  For example, in this line:
+	    #
+	    # [INFO ][memory ] [OC#4] 9.586-10.564: OC 284932KB->273009KB (489092KB), 0.977 s, sum of pauses 964.737 ms, longest pause 964.737 ms.
+	    $max_error_allowed_sec = 0.020;
+	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
+		$max_error_allowed_sec)
+	    {
+		printf STDERR "Warning: GC duration in msec %s is more than %s different than the reported time %s in sec in line %d of GC log file '%s': %s\n",
+		    $gc_time_msec, $max_error_allowed_sec, $gc_time_sec,
+		    $linenum, $gc_log_filename, $line;
+	    }
+
+	    # Do consistency check between values of
+	    # $gc_longest_pause_time_msec and $gc_time_msec.  I
+	    # believe the former should always be at most the latter.
+	    if ($gc_longest_pause_time_msec > $gc_time_msec) {
+		printf STDERR "Warning: longest pause %s is longer than total pause time %s in line %d of GC log file '%s': %s\n",
+		    $gc_longest_pause_time_msec, $gc_time_msec,
+		    $linenum, $gc_log_filename, $line;
+	    }
+	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
+	    # I have seen the version of the JVM described below
+	    # produce a line in its GC log file very occasionally, as
+	    # in once in _several_ runs of a program that printed 6600
+	    # lines of output to its GC log file.  I am going to
+	    # assume that it means that the time taken for this
+	    # particular GC is the value given after the "GC,", but I
+	    # won't update any of the memory statistics when reading
+	    # such a line.
+
+	    # % uname -a
+	    # Linux ubuntu 2.6.32-25-generic #45-Ubuntu SMP Sat Oct 16 19:48:22 UTC 2010 i686 GNU/Linux
+	    # % java -server -version
+	    # java version "1.6.0_22"
+	    # Java(TM) SE Runtime Environment (build 1.6.0_22-b04)
+	    # Java HotSpot(TM) Server VM (build 17.1-b03, mixed mode)
+	    my $gc_time = $1;
+	    ++$num_gcs;
+	    $total_gc_time_sec += $gc_time;
+	} elsif (
+            ($line =~ /^\s*\[INFO \]\[memory \] GC mode: Garbage collection optimized for .+, strategy: .+\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] Heap size: \d+KB, maximal heap size: \d+KB, nursery size: \d+KB\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <start>-<end>: <type> <before>KB-><after>KB \(<heap>KB\), <time> ms, sum of pauses <pause> ms\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <start>  - start time of collection \(seconds since jvm start\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <type>   - OC \(old collection\) or YC \(young collection\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <end>    - end time of collection \(seconds since jvm start\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <before> - memory used by objects before collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <after>  - memory used by objects after collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <heap>   - size of heap after collection \(KB\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <time>   - total time of collection \(milliseconds\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] <pause>  - total sum of pauses during collection \(milliseconds\)\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \]            Run with -Xverbose:gcpause to see individual phases\.\s*$/) ||
+            ($line =~ /^\s*\[INFO \]\[memory \] Running on hypervisor Unknown \(but probably running on a hypervisor\)\s*$/)
+	    )
+	{
+	    # Ignore these boilerplate header lines out of the JRockit JVM
+	} elsif ($line =~ /^\s*\[ERROR\].*$/) {
+	    my $err_msg = sprintf "Error: Found ERROR at line %d of GC log file '%s': %s",
+	        $linenum, $gc_log_filename, $line;
+	    if (! $already_saved_copy_of_gc_log) {
+		$parse_gc_log_fail_info = $err_msg;
+		$already_saved_copy_of_gc_log = 1;
+	    }
+	    printf STDERR "%s\n", $err_msg;
+	} else {
+	    my $err_msg =
+		sprintf "Could not parse line %d of GC log file %s: '%s'",
+	            $linenum, $gc_log_filename, $line;
+	    if (! $already_saved_copy_of_gc_log) {
+		$parse_gc_log_fail_info = $err_msg;
+		$already_saved_copy_of_gc_log = 1;
+	    }
+	    if ($verbose || ($unparseable_lines <
+			     $max_unparseable_lines_to_print))
+	    {
+		printf STDERR "%s\n", $err_msg;
+	    }
+	    ++$unparseable_lines;
+	}
+    }
+    close(FH);
+    if (!$verbose && ($unparseable_lines > $max_unparseable_lines_to_print))
+    {
+	printf STDERR "%d additional error messages about unparseable GC log file lines were suppressed.\n",
+	    ($unparseable_lines - $max_unparseable_lines_to_print);
+    }
+
+    if (!$verbose && ($num_mem_increase_warnings >
+		      $max_mem_increase_warnings_to_print))
+    {
+	printf STDERR "%d additional warnings about memory use increasing during GC suppressed.\n",
+	    $num_mem_increase_warnings - $max_mem_increase_warnings_to_print;
+    }
+
+    my $gc_stats = {
+	num_gcs => $num_gcs,
+	total_mem_collected_kb => $total_mem_collected_kb,
+	total_gc_time_sec => $total_gc_time_sec,
+	max_total_avail_mem_kb => $max_total_avail_mem_kb,
+	max_total_allocated_mem_kb => $max_total_allocated_mem_kb,
+	max_total_live_mem_kb => $max_total_live_mem_kb
+    };
+    if (defined($parse_gc_log_fail_info)) {
+	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
+    }
+    return $gc_stats;
+}
+
+
+sub libxml_add_children_to_elem {
+    my $xmldoc = shift;
+    my $elem = shift;
+    my $tag_text_pairs = shift;
+
+    my $n = $#{$tag_text_pairs};
+    my $i;
+    for ($i = 0; $i < $n; $i += 2) {
+	my $tag_str = $tag_text_pairs->[$i];
+	my $text_str = $tag_text_pairs->[$i+1];
+	my $child = $xmldoc->createElement($tag_str);
+	my $text = XML::LibXML::Text->new($text_str);
+	$child->appendChild($text);
+	$elem->appendChild($child);
+    }
+}
