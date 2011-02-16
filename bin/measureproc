@@ -61,6 +61,7 @@ sub usage {
                [ --jvm-cmd <jvm_command> ]
                [ --jvm-gc-stats <jvm_type> ]
                [ --jruby-gc-stats <jvm_type> ]
+               [ --save-temp-files ]
                <measured_cmd> [ arg1 ... ]
 
     --help        Show this help.
@@ -155,7 +156,7 @@ sub usage {
 
                     --jvm-gc-stats hotspot
                         -Xloggc:<gc_log_file>
-                    --jvm-gc-stats jrockit  (not yet implemented)
+                    --jvm-gc-stats jrockit
                         -Xverbose:memory -Xverboselog:<gc_log_file>
 
                   $progname will modify the command line given to add
@@ -171,6 +172,18 @@ sub usage {
                   have a '-J' prepended to it, as required by the
                   jruby command in order to pass the options through
                   to the JVM invocation.
+
+    --save-temp-files
+                  Without this option, $progname will generate several
+                  temporary files that are then deleted upon
+                  completion.  With this option, those files will be
+                  saved in a new temporary subdirectory of the current
+                  working directory, so they may be examined
+                  afterwards.  Examples of such files are: The GC log
+                  file (if --jvm-gc-stats or --jruby-gc-stats are
+                  given), the .BAT file used to run the measured
+                  command on Windows/Cygwin. (TBD: Not yet fully
+                  implemented.)
 
     The options below do not affect how the command is run or its
     performance measured.  They are simply printed to the output for
@@ -236,6 +249,7 @@ my $jvm_info;
 my $jvm_cmd;
 my $jvm_gc_stats_from_cmd_line;
 my $jruby_gc_stats_from_cmd_line;
+my $save_temp_files;
 my $language_implementation_desc_str = '';
 my $benchmark_name = '';
 my $source_file_name = '';
@@ -255,6 +269,7 @@ if (!GetOptions('help' => \$help,
                 'jvm-cmd=s' => \$jvm_cmd,
                 'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
                 'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
+                'save-temp-files' => \$save_temp_files,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name
@@ -868,17 +883,18 @@ if ($check_output_cmd_fail_info ne '') {
 my $gc_stats;
 if (defined($gc_stats_type)) {
     $gc_stats = parse_jvm_gc_log($gc_stats_type, $gc_log_filename);
+    if ($save_temp_files) {
+	my ($copy_succeeded, $copy_info);
+	($save_dir_name, $copy_succeeded, $copy_info) =
+	    save_copy_of_file($save_dir_name, $gc_log_filename,
+			      'GC log', 'gc-log');
+    }
 }
 
 
 ######################################################################
 # Print the performance stats in the desired format.
 ######################################################################
-
-# TBD: Add support so that --jvm-gc-stats works for the JRockit JVM.
-# Currently only HotSpot works.  JRockit has different command line
-# arguments to cause it to print GC details, and a different format
-# for its GC messages that requires different parsing.
 
 # TBD: (First part DONE) Make changes so that if a run has bad output,
 # the bad output file is copied to a unique temporary file name that
@@ -913,11 +929,6 @@ if (defined($gc_stats_type)) {
 #	completed with exception <name>
 #        unknown type of completion, output incorrect
 #        killed after taking too long
-
-# TBD: Details about the JVM used, if one is being used.  See
-# misc/jvm-ptr-size.clj for some leads on how to determine whether the
-# JVM is 32-bit or 64-bit, which is a significant factor for run time
-# performance and memory use that should be recorded.
 
 # TBD: Details about the virtual machine being used, e.g. VMware
 # Fusion or Parallels Desktop on a Mac, or other similar things.  This
