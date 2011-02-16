@@ -27,33 +27,29 @@ these do if you are curious):
 
     (3) Use init.sh to create largish input and expected output files
     (total about 850 Mbytes of storage), by running some Java
-    programs.  Takes about 6 mins on my system.
-
-    # 2.4 GHz Intel Core 2 Duo MacBook Pro with 2 cores/3 GB RAM
-    # + Mac OS X 10.5.8 + VMware Fusion 3.1.2 + Win XP SP3 given
-    # 2 cores/2 GB RAM + Cygwin + Oracle JRockit 1.6.0_20-b02 JVM: 18.5 mins
-
-    # 2.4 GHz Intel Core 2 Duo MacBook Pro with 2 cores/3 GB RAM
-    # + Mac OS X 10.5.8 + VMware Fusion 3.1.2 + 64-bit Ubuntu 10.4
-    # 2 cores/2 GB RAM + Sun/Oracle Hotspot 1.6.0_22 JVM: tbd
+    programs:
 
     % ./init.sh output
 
-    (4) Run Java, Clojure 1.2, Clojure 1.3 alpha1, and Clojure 1.3
-    alpha3 versions of all of the benchmark programs.  Takes somewhere
-    around 60 to 90 mins on my system.
+    Time required on some of my systems: 6-7 mins, or 18 mins on a
+    Windows + Cygwin running in a VM.
 
-    % ./run-all.sh long java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3
-
-    # 2.4 GHz Intel Core 2 Duo MacBook Pro with 2 cores/3 GB RAM
-    # + Mac OS X 10.5.8 + VMware Fusion 3.1.2 + Win XP SP3 given
-    # 2 cores/2 GB RAM + Cygwin + Oracle JRockit 1.6.0_20-b02 JVM: 36 mins
+    (4) Run Clojure 1.2 versions of all of the benchmark programs:
 
     % ./run-all.sh clj-1.2
 
+    Time required on some of my systems: 25 - 35 mins (about half the
+    time was spent in fannkuch long, and about 1/4 in knucleotide
+    long.)
+
+    Another example: Run Java, Clojure 1.2, Clojure 1.3 alpha1, and
+    Clojure 1.3 alpha3 versions of all of the benchmark programs.
+
+    % ./run-all.sh long java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3
+
 Systems on which this has been tested:
 Mac OS X 10.5.8
-Mac OS X 10.6.4, both with and without MacPorts installed
+Mac OS X 10.6.6, both with and without MacPorts installed
 Ubuntu 10.4 LTS, 32-bit and 64-bit
 Windows XP SP3 + Cygwin 1.7.7
 
