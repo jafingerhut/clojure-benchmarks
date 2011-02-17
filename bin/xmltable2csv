@@ -15,7 +15,7 @@ my $progname = fileparse($full_progname);
 
 sub usage {
     print STDERR
-"usage: $progname [ --help ] [ --verbose ] [ --print-header-row ] file.xml
+"usage: $progname [ --help ] [ --verbose ] [ --no-header-row ] file.xml
 
 Read in an XML file whose structure is assumed to be like this:
 
@@ -50,17 +50,16 @@ order they were first seen in the input file.
 <ChildElementName> need not be the same from one 'row' to the next.
 They are ignored, as are any attributes of any tags.
 
-If the --print-header-row option is given, then the
-col_name1,col_name2,... line will appear as the first line of the
-output file.  Otherwise, it will not be included.
+If the --no-header-row option is given, then the
+col_name1,col_name2,... line will not be included in the output.
 ";
 }
 
 my $help;
-my $print_header_row;
+my $no_header_row;
 if (!GetOptions('help' => \$help,
 		'verbose' => \$verbose,
-		'print-header-row' => \$print_header_row
+		'no-header-row' => \$no_header_row
                ))
 {
     usage();
@@ -130,7 +129,7 @@ foreach my $root ($tree->childNodes()) {
 
 my $num_cols = 1 + $#{@$col_name_list};
 my $c;
-if ($print_header_row) {
+if (! $no_header_row) {
     $c = 0;
     foreach my $col_name (@{$col_name_list}) {
 	printf "%s", csv_str($col_name);

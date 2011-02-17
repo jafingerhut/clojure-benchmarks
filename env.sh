@@ -214,7 +214,7 @@ fi
 # CSV file, easy to import into spreadsheet programs, by running this
 # command:
 
-# bin/xmltable2csv -p $HOME/results.xml > results.csv
+# bin/xmltable2csv $HOME/results.xml > results.csv
 
 #MP_COMMON_ARGS="--xml --log-file $HOME/results.xml"
 MP_COMMON_ARGS=

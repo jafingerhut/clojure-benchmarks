@@ -45,7 +45,7 @@ these do if you are curious):
     XML file to a CSV file for easier importing into spreadsheets
     with:
 
-    % bin/xmltable2csv -p $HOME/results.xml > results.csv
+    % bin/xmltable2csv $HOME/results.xml > results.csv
 
 Systems on which this has been tested:
 Mac OS X 10.5.8
