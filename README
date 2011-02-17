@@ -1,20 +1,11 @@
 Quick start instructions (see below for a few more details of what
 these do if you are curious):
 
-    (0) Check below for install instructions specific to your OS.
-
-    (1) If you are on Windows, install Cygwin: http://www.cygwin.com
-    Install a JDK of your choice, such as HotSpot or JRockit.  Edit
-    env.sh so that JAVA_BIN points at the directory where your java
-    and javac commands are installed.
-
-    If you are on Ubuntu Linux, install the Sun/Oracle JDK, which I've
-    tested with, or explore new territory by installing whatever JDK
-    you wish and seeing what happens.
+    (1) Check below for install instructions specific to your OS.
 
     Either: (2a) Install Leiningen and run lein-init.sh, which creates
-    directories 'lein' and '.m2' in your home directory (takes about
-    1.5 mins on my system after Leiningen is installed), or (2b) edit
+    directories 'lein' and '.m2' in your home directory (takes about 2
+    mins on my system after Leiningen is installed), or (2b) edit
     env.sh to specify the location of your Clojure JAR files.  Look
     for the CLOJURE_CLASSPATH variable settings.
 
@@ -49,7 +40,7 @@ these do if you are curious):
 
     (5) If you want all results recorded to an XML file, look in
     env.sh for MP_COMMON_ARGS and the comments before it on how to
-    enable this.  Then do a ./run-al.sh command, or individual
+    enable this.  Then do a ./run-all.sh command, or individual
     batch.sh commands as described below.  You can then convert the
     XML file to a CSV file for easier importing into spreadsheets
     with:
@@ -67,6 +58,9 @@ with no Java compiler (javac) is not enough.  You need a compiler for
 Java source files that are used in the "./init.sh output" step above
 to create the input files.  You also need a JVM to run Leiningen, if
 you use that.
+
+Tested with recent Java 1.6.0.X HotSpot JVMs from Sun, and JRockit
+from Oracle on Windows XP.
 
 ----------------------------------------------------------------------
 Install instruction specific to Mac OS X
@@ -140,8 +134,10 @@ http://happy-coding.com/install-sun-java6-jdk-on-ubuntu-10-04-lucid/
 Install instructions specific to Windows+Cygwin
 ----------------------------------------------------------------------
 
-Packages that should be installed using the Cygwin Setup package
-manager in order for this to work:
+Cygwin can be obtained from http://www.cygwin.com
+
+Besides the basic packages added with every Cygwin installation, you
+must install at least some of the following for this software to work:
 
 perl (category Interpeters and Perl) and libxml2 (many categories,
     including Devel) - needed if you want to run any of the included
@@ -151,27 +147,30 @@ wget (in category Web) - needed if you use Leiningen
 git (category Devel) - optional, but useful for getting updated
     versions of clojure-contrib from github.com
 
-I don't yet know how to compile the JNI interface to the GMP library
-so that the Java, Scala, or Clojure programs using that native library
-can run.  The gcc4-core (category Devel) and libgmp-devel (category
-Libs and Math) Cygwin packages can certainly help in compiling the
-files, but so far I haven't compiled them in a way that they can be
-used by a JVM running on Windows.
+Edit env.sh so that JAVA_BIN points at the directory where your java
+and javac commands are installed.  Examples are there already for the
+default install locations of JRockit and Hotspot JVMs (at least
+particular version numbers of them).  If you install the Sun/Oracle
+Hotspot JDK, its default location is C:\Program
+Files\Java\jdk<version>.  For Oracle JRockit the default install
+location is C:\Program Files\Java\jrmc-<version>.
 
-If you install the Sun/Oracle Hotspot JDK, its default location is
-C:\Program Files\Java\jdk<version>.  For Oracle JRockit the default
-install location is C:\Program Files\Java\jrmc-<version>.  I've tried
-to make all bash scripts handle spaces in filenames by using
-"${BASH_VARIABLE_NAME}" syntax to substitute the values of shell
+I've tried to make all bash scripts handle spaces in filenames by
+using "${BASH_VARIABLE_NAME}" syntax to substitute the values of shell
 variables.  There is some weirdness in some places in the scripts
 because Cygwin commands accept paths in Unix notation with /
 separators, but when invoking the JVM commands, they often require
 Windows path names with \ separators.  The Cygwin command 'cygpath' is
 useful in converting between these two formats.
-----------------------------------------------------------------------
 
-Tested with recent Java 1.6.0.X HotSpot JVMs from Sun, and JRockit
-from Oracle on Windows XP.
+Caveat: I don't yet know how to compile the JNI interface to the GMP
+library so that the Java, Scala, or Clojure programs using that native
+library can run.  The gcc4-core (category Devel) and libgmp-devel
+(category Libs and Math) Cygwin packages can certainly help in
+compiling the files, but so far I haven't compiled them in a way that
+they can be used by a JVM running on Windows.  Please let me know if
+you figure out how to do this.
+----------------------------------------------------------------------
 
 The Perl, SBCL, and Haskell programs have been well tested on Mac OS
 X, and more lightly tested on Linux and Windows.  The main issue is
@@ -396,6 +395,12 @@ The following notes come from a reply to a question on Stack Overflow
 about why the Clojure programs are slower than the Scala programs.
 
     http://stackoverflow.com/questions/4148382/why-does-clojure-do-worse-than-scala-in-the-alioth-benchmarks
+
+Note that significant speed improvements were made to many of the
+Clojure programs on the Computer Language Benchmarks Game web site
+after this Stack Overflow discussion occurred, so what the discussion
+participants saw then was noticeably slower (relative to Java -6
+server) than what is on the web site now.
 
 ----------------------------------------
 For example the following features in Clojure are all very cool and
