@@ -1130,14 +1130,34 @@ if ($output_format_xml) {
 	    $output_copy_filename;
     }
     if (defined($gc_stats_type) && defined($gc_stats)) {
+	my $print_gc_details = 1;
+	if ($gc_stats->findvalue('number_of_gcs') == 0) {
+	    # If the number of GCs invocations is 0, then the rest of
+	    # the GC stats are 0, too, so don't bother showing them.
+	    $print_gc_details = 0;
+	}
 	foreach my $h (@{$gc_xml_keys_format_strings}) {
 	    my $key = $h->{key};
 	    my $fmt_string = $h->{fmt_string};
-	    if (($key ne 'first_gc_log_parse_error') ||
-		(defined($gc_stats->findvalue($key)) &&
-		 $gc_stats->findvalue($key) ne ''))
+	    my $val = $gc_stats->findvalue($key);
+	    my $show_this = 0;
+	    if ($key eq 'number_of_gcs') {
+		$show_this = 1;
+	    } elsif ($key eq 'first_gc_log_parse_error') {
+		if ($val ne '') {
+		    $show_this = 1;
+		}
+	    } elsif (($key eq 'num_gc_log_parse_warnings') ||
+		     ($key eq 'num_gc_log_parse_errors'))
 	    {
-		printf $log $fmt_string, $gc_stats->findvalue($key);
+		if ($val != 0) {
+		    $show_this = 1;
+		}
+	    } else {
+		$show_this = $print_gc_details;
+	    }
+	    if ($show_this) {
+		printf $log $fmt_string, $val;
 	    }
 	}
 	if (defined($gc_log_copy_filename)) {
