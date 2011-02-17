@@ -1,0 +1,188 @@
+: # use perl -*-Perl-*-
+eval 'exec perl -S "$0" ${1+"$@"}'
+    if 0;
+# -*cperl-*-
+
+use strict;
+use Getopt::Long;
+use File::Basename;
+use XML::LibXML;
+
+
+my $verbose = 0;
+my $full_progname = $0;
+my $progname = fileparse($full_progname);
+
+sub usage {
+    print STDERR
+"usage: $progname [ --help ] [ --verbose ] [ --print-header-row ] file.xml
+
+Read in an XML file whose structure is assumed to be like this:
+
+  <RootElementName>
+    <ChildElementName>
+      <col_name1>row_1_val_1</col_name1>
+      <col_name2>row_1_val_2</col_name2>
+      <col_name3>row_1_val_3</col_name3>
+      ...
+    </ChildElementName>
+    <ChildElementName>
+      <col_name1>row_2_val_1</col_name1>
+      <col_name2>row_2_val_2</col_name2>
+      <col_name3>row_2_val_3</col_name3>
+      ...
+    </ChildElementName>
+    ...
+  </RootElementName>
+
+and print out a CSV file with the structure:
+
+  col_name1,col_name2,col_name3,...
+  row_1_val_1,row_1_val_2,row_1_val_3,...
+  row_2_val_1,row_2_val_2,row_2_val_3,...
+
+The <col_name> elements need not be the same from one
+<ChildElementName> to the next, nor do they need to appear in the same
+order.  The union of all such names will be used in the output file.
+The order the columns appear in the output file is determined by the
+order they were first seen in the input file.
+
+<ChildElementName> need not be the same from one 'row' to the next.
+They are ignored, as are any attributes of any tags.
+
+If the --print-header-row option is given, then the
+col_name1,col_name2,... line will appear as the first line of the
+output file.  Otherwise, it will not be included.
+";
+}
+
+my $help;
+my $print_header_row;
+if (!GetOptions('help' => \$help,
+		'verbose' => \$verbose,
+		'print-header-row' => \$print_header_row
+               ))
+{
+    usage();
+    exit(1);
+}
+
+if ($help) {
+    usage();
+    exit(0);
+}
+
+if ($#ARGV < 0) {
+    printf STDERR "No input file specified.\n";
+    usage();
+    exit 1;
+}
+my $file = $ARGV[0];
+
+my $parser = XML::LibXML->new();
+my $tree = $parser->parse_file($file);
+
+# There should be one child 'root' of tree that is an element node.
+# However, also allow there to be multiple such roots, and iterate
+# through all of them.
+# e.g. in my XML files, this root node's name is MeasurementList
+
+# 'root' should have one ELEMENT_NODE child R for each 'row' of the table
+# e.g. in my XML files, each R has a name Measurement
+
+# Each R should have one ELEMENT_NODE child C for each 'column' in that row
+
+# e.g. in my XML files, each C has names like 'command_measured',
+# 'input_file', 'elapsed_time_sec', etc.  These should be the names of
+# the columns in the output table.
+
+# Each C should have a text value that is the value in that column
+
+my $num_rows = 0;
+my $col_names_hash = {};
+my $col_name_list = [];
+my $vals;
+foreach my $root ($tree->childNodes()) {
+    if ($root->nodeType() != XML::LibXML->XML_ELEMENT_NODE) {
+	next;
+    }
+    foreach my $row ($root->childNodes()) {
+	if ($row->nodeType() != XML::LibXML->XML_ELEMENT_NODE) {
+	    next;
+	}
+#	printf "\n";
+	foreach my $col ($row->childNodes()) {
+	    if ($col->nodeType() != XML::LibXML->XML_ELEMENT_NODE) {
+		next;
+	    }
+	    my $col_name = $col->nodeName();
+	    my $val = $col->textContent();
+	    if (!defined($col_names_hash->{$col_name})) {
+		push @{$col_name_list}, $col_name;
+		$col_names_hash->{$col_name} = 1;
+	    }
+	    $vals->{$num_rows}{$col_name} = $val;
+#	    printf "row=%d col=%s val='%s'\n", $num_rows, $col_name, $val;
+	}
+	++$num_rows;
+    }
+}
+
+my $num_cols = 1 + $#{@$col_name_list};
+my $c;
+if ($print_header_row) {
+    $c = 0;
+    foreach my $col_name (@{$col_name_list}) {
+	printf "%s", csv_str($col_name);
+	++$c;
+	if ($c != $num_cols) {
+	    printf ",";
+	}
+    }
+    printf "\n";
+}
+
+my $r;
+for ($r = 0; $r < $num_rows; $r++) {
+    $c = 0;
+    foreach my $col_name (@{$col_name_list}) {
+	if (defined($vals->{$r}{$col_name})) {
+	    printf "%s", csv_str($vals->{$r}{$col_name});
+	}
+	++$c;
+	if ($c != $num_cols) {
+	    printf ",";
+	}
+    }
+    printf "\n";
+}
+
+exit 0;
+
+
+# Referring to the "Specification" section of this Wikipedia page:
+
+# http://en.wikipedia.org/wiki/Comma-separated_values
+
+# especially the "Basic rules" part of that section, it appears to me
+# that I should be able to take _any_ string I want to put in a CSV
+# field, whether it has quotes, commas, semicolons, etc. or not, put
+# enclose it in double quotes, and replace all double quotes within
+# the string with two consecutive double quotes, and it should be
+# valid. If I'm misunderstanding that, then I should be able to fix
+# it by modifying this function.
+
+sub csv_str {
+    my $str = shift;
+    my $csv_str;
+
+    $csv_str = $str;
+    # Try to only put double-quotes around strings that need them.
+    # Note that while strings containing spaces might not need double
+    # quotes, I'll go ahead and be extra-safe by doing so.
+    if ($csv_str =~ /,|"|\s|\n/) {
+	$csv_str =~ s/"/""/g;
+	return '"' . $csv_str . '"';
+    }
+    return $csv_str;
+}
