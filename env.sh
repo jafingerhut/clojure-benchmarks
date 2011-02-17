@@ -205,11 +205,29 @@ else
 fi
 
 
+######################################################################
 # Common arguments for all measureproc runs:
+
+# Using the arguments below for MP_COMMON_ARGS will cause all
+# measurement results to be appended to an XML file $HOME/results.xml,
+# creating it if it does not exist.  This file can be converted to a
+# CSV file, easy to import into spreadsheet programs, by running this
+# command:
+
+# bin/xmltable2csv -p $HOME/results.xml > results.csv
+
 #MP_COMMON_ARGS="--xml --log-file $HOME/results.xml"
 MP_COMMON_ARGS=
 
+######################################################################
 # Common arguments for all measureproc runs that measure JVM runs:
+
+# Using the longest list of arguments below for MP_ARGS_FOR_JVM_RUN
+# will cause as many measurement details to be printed about the JVM,
+# the OS, and garbage collection as measureproc is able to record.
+# You might not want all of that information printed for interactive
+# use.
+
 #MP_ARGS_FOR_JVM_RUN="--jvm-info server --jvm-gc-stats ${JVM_TYPE}"
 MP_ARGS_FOR_JVM_RUN="--jvm-gc-stats ${JVM_TYPE}"
 #MP_ARGS_FOR_JVM_RUN=
