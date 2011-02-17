@@ -74,6 +74,11 @@ sub usage {
     --log-file <log_file>
                   Append measurement output to file <log_file>,
                   creating <log_file> if it does not exist already.
+                  If --xml is specified, the XML structure of the
+                  existing measurements in that file is preserved, and
+                  the new measurement is appended to the end.  If
+                  --xml is not specified, the results are simply
+                  appended to the end of the file.
 
     --input-file <input_file>
                   Input file for <measured_cmd> (optional).  If
@@ -361,15 +366,6 @@ if (($os eq 'Cygwin') || defined($gc_stats_type)) {
     # We will later use a temporary directory for creating one or more
     # temporary files.
     $tempdir = tempdir( CLEANUP => 1 );
-}
-
-my $log;
-if (defined($log_file)) {
-    open($log, ">>$log_file")
-	or die sprintf "Could not open log file '%s' for appending: %s",
-	                $log_file, $!;
-} else {
-    $log = *STDOUT;
 }
 
 ######################################################################
@@ -1005,19 +1001,10 @@ my $gc_xml_keys_format_strings = [
     ];
 
 if ($output_format_xml) {
-
-    # Create a new document
-    my $xmldoc = XML::LibXML::Document->new();
-
-    # ... with root element having tag MeasurementList
-    my $mlist = $xmldoc->createElement('MeasurementList');
-    $xmldoc->setDocumentElement($mlist);
-
-    # ... and that root element has a first child with tag Measurement
-    my $measurement = $xmldoc->createElement('Measurement');
-    $mlist->appendChild($measurement);
     
-    # Now fill in the fields of that measurement
+    # Create a list of tag/value pairs that represent all of the
+    # measurements we have made and other info about running the
+    # program.
     my $tag_text_pairs = [];
     if ($benchmark_name ne '') {
 	push @{$tag_text_pairs}, 'benchmark_name', $benchmark_name;
@@ -1085,12 +1072,61 @@ if ($output_format_xml) {
 	}
     }
 
+    # Like the corresponding code in tmcurve, except:
+
+    # tmcurve   here
+    # -------   --------
+    # $tree     $xmldoc
+    # $root     $mlist
+    # $new_elem $measurement
+
+    my $xmldoc;
+    my $mlist;
+    if (defined($log_file) && -r $log_file) {
+	# Append the new results to the existing results file.
+	my $parser = XML::LibXML->new();
+	$xmldoc = $parser->parse_file($log_file);
+	# TBD: What to do if there is an error parsing existing file
+	# contents as XML?  Or it is an XML file with a different
+	# structure than expected?
+	$mlist = $xmldoc->getDocumentElement;
+    } else {
+	# Create a new XML file with the current results.
+	$xmldoc = XML::LibXML::Document->new();
+	# ... with root element having tag MeasurementList
+	$mlist = $xmldoc->createElement('MeasurementList');
+	$xmldoc->setDocumentElement($mlist);
+    }
+
+    # ... and that root element has a first child with tag Measurement
+    my $measurement = $xmldoc->createElement('Measurement');
+    $mlist->appendChild($measurement);
+
+    # Add the tag/text pairs as children of the $measurement element.
     libxml_add_children_to_elem($xmldoc, $measurement, $tag_text_pairs);
 
     # and finally print out the XML file.
-    print $log $xmldoc->toString(1);
+    if (defined($log_file)) {
+	my $fh;
+	open $fh, ">", $log_file;
+	# TBD: Check for failure to open the file for writing.
+	print $fh $xmldoc->toString(1);
+	close $fh;
+    } else {
+	# Write XML to stdout
+	print $xmldoc->toString(1);
+    }
 
 } else {
+
+    my $log;
+    if (defined($log_file)) {
+	open($log, ">>$log_file")
+	    or die sprintf "Could not open log file '%s' for appending: %s",
+	               $log_file, $!;
+    } else {
+	$log = *STDOUT;
+    }
 
     if ($benchmark_name ne '') {
 	printf $log "    Benchmark name            : %s\n", $benchmark_name;
