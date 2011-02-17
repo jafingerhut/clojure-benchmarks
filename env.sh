@@ -206,7 +206,7 @@ fi
 
 
 # Common arguments for all measureproc runs:
-#MP_COMMON_ARGS="--xml $HOME/results.xml"
+#MP_COMMON_ARGS="--xml --log-file $HOME/results.xml"
 MP_COMMON_ARGS=
 
 # Common arguments for all measureproc runs that measure JVM runs:
