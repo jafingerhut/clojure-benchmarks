@@ -47,9 +47,6 @@ then
     JAVAC="${JAVA_BIN}/javac"
     JAVA="${JAVA_BIN}/java"
 
-    #MEASUREPROC_SHOWS_JVM_INFO="--jvm-info server"
-    MEASUREPROC_SHOWS_JVM_INFO=
-
     ######################################################################
     # Windows+Cygwin Clojure
     ######################################################################
@@ -127,9 +124,6 @@ then
     JVM_TYPE="hotspot"
     JAVAC="javac"
     JAVA="java"
-
-    #MEASUREPROC_SHOWS_JVM_INFO="--jvm-info server"
-    MEASUREPROC_SHOWS_JVM_INFO=
 
     ######################################################################
     # Linux/MacOS Clojure
@@ -209,6 +203,17 @@ else
     2>&1 echo "Aborting."
     exit 1
 fi
+
+
+# Common arguments for all measureproc runs:
+#MP_COMMON_ARGS="--xml $HOME/results.xml"
+MP_COMMON_ARGS=
+
+# Common arguments for all measureproc runs that measure JVM runs:
+#MP_ARGS_FOR_JVM_RUN="--jvm-info server --jvm-gc-stats ${JVM_TYPE}"
+MP_ARGS_FOR_JVM_RUN="--jvm-gc-stats ${JVM_TYPE}"
+#MP_ARGS_FOR_JVM_RUN=
+
 
 JAVA_OBJ_DIR="./obj/java"
 GHC_OBJ_DIR="./obj/ghc"
