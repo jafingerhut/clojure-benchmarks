@@ -41,13 +41,13 @@ my $cwd = cwd();
 
 my $install_dir = $FindBin::Bin;
 my $timemem_cmd = time_cmd_location($os, $install_dir);
+my $sumgclog_cmd = sumgclog_location($os, $install_dir);
 
 
 sub usage {
     print STDERR
 "usage: $progname [ --help ] [ --verbose ]
                [ --xml ]
-               [ --csv ] [ --name-row ]
                [ --log-file <log_file> ]
                [ --input-file <input_file> ]
                [ --output-file <output_file> ]
@@ -62,6 +62,7 @@ sub usage {
                [ --jvm-gc-stats <jvm_type> ]
                [ --jruby-gc-stats <jvm_type> ]
                [ --save-temp-files ]
+               [ --never-save-temp-files ]
                <measured_cmd> [ arg1 ... ]
 
     --help        Show this help.
@@ -69,13 +70,6 @@ sub usage {
     --verbose     Enable debug messages.
 
     --xml         Print measurement output in XML format.
-
-    --csv         Print measurement output in CSV format, not really
-                  intended for human consumption.
-
-    --name-row    If --csv is given, then also print a 'header line'
-                  giving the name of each field in the output CSV
-                  file, in addition to the measurements line.
 
     --log-file <log_file>
                   Append measurement output to file <log_file>,
@@ -174,16 +168,30 @@ sub usage {
                   to the JVM invocation.
 
     --save-temp-files
-                  Without this option, $progname will generate several
-                  temporary files that are then deleted upon
-                  completion.  With this option, those files will be
-                  saved in a new temporary subdirectory of the current
-                  working directory, so they may be examined
-                  afterwards.  Examples of such files are: The GC log
-                  file (if --jvm-gc-stats or --jruby-gc-stats are
-                  given), the .BAT file used to run the measured
-                  command on Windows/Cygwin. (TBD: Not yet fully
-                  implemented.)
+    --never-save-temp-files
+                  Without either of these options, $progname will
+                  generate several temporary files that are usually
+                  deleted upon completion.
+
+                  If there are errors in parsing the GC log file, it
+                  will be saved in a file that is not deleted.  The
+                  name of this file will be included in the output.
+
+                  If the --check-output-cmd is given, and has a
+                  non-zero exit status, indicating the output file is
+                  not good, then a copy of the output file will be
+                  made in a new temp directory, and not deleted, even
+                  if many consecutive runs of measureproc are made
+                  with the same output file name.  The name of this
+                  new file will be included in the output.
+
+                  With the option --save-temp-files, these files will
+                  be saved even if there are no errors / the output
+                  file is checked as good.
+
+                  With the option --never-save-temp-files, these files
+                  will not be saved, even if there are parse errors,
+                  or the output file is checked as bad.
 
     The options below do not affect how the command is run or its
     performance measured.  They are simply printed to the output for
@@ -235,10 +243,7 @@ Examples of use on Windows XP + Cygwin:
 ######################################################################
 
 my $help;
-my $csv;
 my $output_format_xml;
-my $output_format_csv;
-my $print_csv_name_row;
 my $log_file;
 my $input_file;
 my $output_file;
@@ -250,6 +255,7 @@ my $jvm_cmd;
 my $jvm_gc_stats_from_cmd_line;
 my $jruby_gc_stats_from_cmd_line;
 my $save_temp_files;
+my $never_save_temp_files;
 my $language_implementation_desc_str = '';
 my $benchmark_name = '';
 my $source_file_name = '';
@@ -257,8 +263,6 @@ Getopt::Long::Configure('require_order');
 if (!GetOptions('help' => \$help,
 		'verbose' => \$verbose,
 		'xml' => \$output_format_xml,
-		'csv' => \$output_format_csv,
-		'name-row' => \$print_csv_name_row,
 		'log-file=s' => \$log_file,
 		'input-file=s' => \$input_file,
 		'output-file=s' => \$output_file,
@@ -270,6 +274,7 @@ if (!GetOptions('help' => \$help,
                 'jvm-gc-stats=s' => \$jvm_gc_stats_from_cmd_line,
                 'jruby-gc-stats=s' => \$jruby_gc_stats_from_cmd_line,
                 'save-temp-files' => \$save_temp_files,
+                'never-save-temp-files' => \$never_save_temp_files,
 		'language=s' => \$language_implementation_desc_str,
 		'benchmark=s' => \$benchmark_name,
 		'source-file-name=s' => \$source_file_name
@@ -288,21 +293,12 @@ if ($help) {
     usage();
     exit(0);
 }
-if ($output_format_csv and $output_format_xml) {
+if (defined($save_temp_files) && defined($never_save_temp_files)) {
     printf STDERR
-"Should supply at most one of the --csv and --xml options for
-selecting the output format.
-";
-    usage();
-    exit(1);
-}
-if ($print_csv_name_row and !$output_format_csv) {
-    printf STDERR
-"Option --name-row has no effect, and should not be given, unless
---csv output format is selected.
-";
-    usage();
-    exit(1);
+"At most one of --save-temp-files and --never-save-temp-files should
+be specified.
+",;
+    exit 1;
 }
 if (defined($jvm_info)) {
     if (! (($jvm_info eq 'client') || ($jvm_info eq 'server')) ) {
@@ -447,6 +443,14 @@ if ($os eq 'Cygwin') {
     close $fh;
     chmod 0755, $batchfile;
     $cmd_to_run = $batchfile;
+
+    if ($save_temp_files) {
+	my ($copy_succeeded, $copy_info, $batch_copy_filename);
+	($save_dir_name, $copy_succeeded, $copy_info, $batch_copy_filename) =
+	    save_copy_of_file($save_dir_name, $batchfile,
+			      'batch file', 'bat-file');
+	printf STDERR "%s", $copy_info;
+    }
 } else {
     $cmd_to_run = $cmd_str;
 }
@@ -858,11 +862,20 @@ if (defined($output_file) && defined($check_output_cmd)) {
 	}
     }
 }
-if ($check_output_cmd_fail_info ne '') {
+my $output_copy_filename;
+my $save_output_copy = 0;
+if ($save_temp_files) {
+    $save_output_copy = 1;
+} elsif ($never_save_temp_files) {
+    $save_output_copy = 0;
+} elsif ($check_output_cmd_fail_info ne '') {
+    $save_output_copy = 1;
+}
+if ($save_output_copy) {
     my ($copy_succeeded, $copy_info);
-    ($save_dir_name, $copy_succeeded, $copy_info) =
-	save_copy_of_file($save_dir_name, $output_file, 'output',
-			  'cmd-output');
+    ($save_dir_name, $copy_succeeded, $copy_info, $output_copy_filename) =
+	save_copy_of_file($save_dir_name, $output_file,
+			  'output', 'cmd-output');
     $check_output_cmd_fail_info .= ("\n" . $copy_info);
     printf STDERR "%s\n", $check_output_cmd_fail_info;
 }
@@ -881,13 +894,23 @@ if ($check_output_cmd_fail_info ne '') {
 ######################################################################
 
 my $gc_stats;
+my $gc_log_copy_filename;
 if (defined($gc_stats_type)) {
     $gc_stats = parse_jvm_gc_log($gc_stats_type, $gc_log_filename);
+    my $save_gc_log_copy = 0;
     if ($save_temp_files) {
+	$save_gc_log_copy = 1;
+    } elsif ($never_save_temp_files) {
+	$save_gc_log_copy = 0;
+    } elsif ($gc_stats->findvalue('num_gc_log_parse_errors') != 0) {
+	$save_gc_log_copy = 1;
+    }
+    if ($save_gc_log_copy) {
 	my ($copy_succeeded, $copy_info);
-	($save_dir_name, $copy_succeeded, $copy_info) =
+	($save_dir_name, $copy_succeeded, $copy_info, $gc_log_copy_filename) =
 	    save_copy_of_file($save_dir_name, $gc_log_filename,
 			      'GC log', 'gc-log');
+	printf STDERR "%s", $copy_info;
     }
 }
 
@@ -898,7 +921,7 @@ if (defined($gc_stats_type)) {
 
 # TBD: (First part DONE) Make changes so that if a run has bad output,
 # the bad output file is copied to a unique temporary file name that
-# is reported on stderr and in the CSV/XML/stdout, so that the user
+# is reported on stderr and in the XML/stdout, so that the user
 # can track down what the bad output was if they wish.  This temporary
 # file should be created in the current working directory, or in a new
 # temporary directory created that is *not* automatically erased when
@@ -908,7 +931,7 @@ if (defined($gc_stats_type)) {
 # TBD: (First part DONE) Similarly, if a GC log file cannot be parsed,
 # copy it to a temporary file that will not be erased when measureproc
 # is done, and report the name of the copy on stderr and in the
-# CSV/XML/stdout output.  (Not done yet) Make an option that disables
+# XML/stdout output.  (Not done yet) Make an option that disables
 # this copying action.
 
 # TBD: percent of cpu this job got while it ran
@@ -951,81 +974,37 @@ if (defined($gc_stats_type)) {
 # Other similar commands mentioned at:
 # http://serverfault.com/questions/14981/getting-cpu-information-from-command-line-in-mac-os-x-server
 
-if ($output_format_csv) {
-    if ($print_csv_name_row) {
-	my $field_names = [ "Benchmark name",
-			    "Language implementation",
-			    "Source file name",
-			    "Command measured",
-			    "Input file",
-			    "Output file",
-			    "Current working directory",
-			    "Elapsed sec",
-			    "User sec",
-			    "System sec",
-			    "Max RSS KiBytes",
-			    "Start time",
-			    "End time",
-			    "Num CPU cores",
-			    "Usage per CPU core",
-			    "Exit status",
-			    "Command used to check output",
-			    "Exit status of command used to check output",
-			    "Failure details of command used to check output",
-			    "Failure details of parsing GC log",
-			    "Number of GCs",
-			    "Total memory GCed (KB)",
-			    "Total GC time (sec)",
-			    "Maximum total available memory (KB)",
-			    "Maximum total allocated memory (KB)",
-			    "Maximum total live memory (KB)",
-			    "OS description" ];
-	my $field_name;
-	my $first = 1;
-	foreach $field_name (@{$field_names}) {
-	    if ($first) {
-		$first = 0;
-	    } else {
-		printf $log ",";
-	    }
-	    printf $log "%s", csv_str($field_name);
-	}
-	printf $log "\n";
+my $gc_xml_keys_format_strings = [
+    { key => 'number_of_gcs',
+      fmt_string => "    Number of GCs             : %s\n"
+    },
+    { key => 'total_memory_gced_kb',
+      fmt_string => "    Total memory GCed (KB)    : %s\n"
+    },
+    { key => 'total_gc_time_sec',
+      fmt_string => "    Total GC time (sec)       : %s\n"
+    },
+    { key => 'maximum_total_available_memory_kb',
+      fmt_string => "    Maximum total available memory (KB): %s\n"
+    },
+    { key => 'maximum_total_allocated_memory_kb',
+      fmt_string => "    Maximum total allocated memory (KB): %s\n"
+    },
+    { key => 'maximum_total_live_memory_kb',
+      fmt_string => "    Maximum total live memory (KB)     : %s\n"
+    },
+    { key => 'num_gc_log_parse_warnings',
+      fmt_string => "    GC log parse warnings     : %s\n"
+    },
+    { key => 'num_gc_log_parse_errors',
+      fmt_string => "    GC log parse errors       : %s\n"
+    },
+    { key => 'first_gc_log_parse_error',
+      fmt_string => "    First GC log parse error  : %s\n"
     }
-    printf $log "%s", csv_str($benchmark_name);
-    printf $log ",%s", csv_str($language_implementation_desc_str);
-    printf $log ",%s", csv_str($source_file_name);
-    printf $log ",%s", csv_str($cmd_to_time);
-    printf $log ",%s", cvs_str(defined($input_file) ? $input_file : '');
-    printf $log ",%s", cvs_str(defined($output_file) ? $output_file : '');
-    printf $log ",%s", csv_str($cwd);
-    printf $log ",%s", $elapsed_sec;
-    printf $log ",%s", $user_sec;
-    printf $log ",%s", $sys_sec;
-    printf $log ",%s", $max_rss_kbytes;
-    printf $log ",%s", csv_str($start_time);
-    printf $log ",%s", csv_str($end_time);
-    printf $log ",%s", $num_cpus;
-    printf $log ",%s", csv_str($usage_per_cpu);
-    printf $log ",%s", $cmd_exit_status;
-    printf $log ",%s", csv_str(defined($check_output_cmd) ? $check_output_cmd
-			       : '');
-    printf $log ",%s", (defined($check_output_cmd_exit_status)
-			? $check_output_cmd_exit_status : '');
-    printf $log ",%s", $check_output_cmd_fail_info;
-    printf $log ",%s", ((defined($gc_stats_type) &&
-			 defined($gc_stats->{parse_gc_log_fail_info}))
-			? $gc_stats->{parse_gc_log_fail_info} : '');
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{num_gcs} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_mem_collected_kb} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{total_gc_time_sec} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_avail_mem_kb} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_allocated_mem_kb} : '';
-    printf $log ",%s", defined($gc_stats_type) ? $gc_stats->{max_total_live_mem_kb} : '';
-    printf $log ",%s", csv_str($os_full);
-    printf $log "\n";
+    ];
 
-} elsif ($output_format_xml) {
+if ($output_format_xml) {
 
     # Create a new document
     my $xmldoc = XML::LibXML::Document->new();
@@ -1075,19 +1054,22 @@ if ($output_format_csv) {
 	        $check_output_cmd_fail_info;
 	}
     }
-    if (defined($gc_stats_type)) {
-	if (defined($gc_stats->{parse_gc_log_fail_info})) {
-	    push @{$tag_text_pairs}, 'parse_gc_log_failure_details', $gc_stats->{parse_gc_log_failure_details};
-	} else {
-	    push @{$tag_text_pairs}, 'number_of_gcs', $gc_stats->{num_gcs};
-	    push @{$tag_text_pairs}, 'total_memory_gced_kb', $gc_stats->{total_mem_collected_kb};
-	    push @{$tag_text_pairs}, 'total_gc_time_sec', $gc_stats->{total_gc_time_sec};
-	    push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-	        $gc_stats->{max_total_avail_mem_kb};
-	    push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
-	        $gc_stats->{max_total_allocated_mem_kb};
-	    push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-	        $gc_stats->{max_total_live_mem_kb};
+    if (defined($output_copy_filename)) {
+	push @{$tag_text_pairs}, 'output_copy_file_name',
+	    $output_copy_filename;
+    }
+    if (defined($gc_stats_type) && defined($gc_stats)) {
+	# Copy all details from $gc_stats to $tag_text_pairs
+	foreach my $h (@{$gc_xml_keys_format_strings}) {
+	    my $key = $h->{key};
+	    if (($key ne 'first_gc_log_parse_error') ||
+		defined($gc_stats->findvalue($key)))
+	    {
+		push @{$tag_text_pairs}, $key, $gc_stats->findvalue($key);
+	    }
+	}
+	if (defined($gc_log_copy_filename)) {
+	    push @{$tag_text_pairs}, 'gc_log_file_name', $gc_log_copy_filename;
 	}
     }
     push @{$tag_text_pairs}, 'operating_system', $os_full;
@@ -1143,20 +1125,24 @@ if ($output_format_csv) {
 	        $check_output_cmd_fail_info;
 	}
     }
-    if (defined($gc_stats_type)) {
-	if (defined($gc_stats->{parse_gc_log_failure_details})) {
-	    printf $log "    Failure details of parsing GC log: %s\n", $gc_stats->{parse_gc_log_failure_details};
-	} else {
-	    printf $log "    Number of GCs             : %s\n", $gc_stats->{num_gcs};
-	    printf $log "    Total memory GCed (KB)    : %s\n",
-	        $gc_stats->{total_mem_collected_kb};
-	    printf $log "    Total GC time (sec)       : %s\n", $gc_stats->{total_gc_time_sec};
-	    printf $log "    Maximum total available memory (KB): %s\n",
-	        $gc_stats->{max_total_avail_mem_kb};
-	    printf $log "    Maximum total allocated memory (KB): %s\n",
-	        $gc_stats->{max_total_allocated_mem_kb};
-	    printf $log "    Maximum total live memory (KB)     : %s\n",
-	        $gc_stats->{max_total_live_mem_kb};
+    if (defined($output_copy_filename)) {
+	printf $log "    Output copy file name     : %s\n",
+	    $output_copy_filename;
+    }
+    if (defined($gc_stats_type) && defined($gc_stats)) {
+	foreach my $h (@{$gc_xml_keys_format_strings}) {
+	    my $key = $h->{key};
+	    my $fmt_string = $h->{fmt_string};
+	    if (($key ne 'first_gc_log_parse_error') ||
+		(defined($gc_stats->findvalue($key)) &&
+		 $gc_stats->findvalue($key) ne ''))
+	    {
+		printf $log $fmt_string, $gc_stats->findvalue($key);
+	    }
+	}
+	if (defined($gc_log_copy_filename)) {
+	    printf $log "    GC log file name          : %s\n",
+	        $gc_log_copy_filename;
 	}
     }
     printf $log "    OS description            : %s\n", $os_full;
@@ -1344,6 +1330,23 @@ sub time_cmd_location {
 }
 
 
+sub sumgclog_location {
+    my $os = shift;
+    my $install_dir = shift;
+
+    my $sumgclog_cmd;
+
+    $sumgclog_cmd = $install_dir . "/sumgclog";
+    if (-x $sumgclog_cmd) {
+	return $sumgclog_cmd;
+    } else {
+	# Don't print a warning until and unless we know the user
+	# actually wants to do GC log analysis.
+	return undef;
+    }
+}
+
+
 sub libxml_add_children_to_elem {
     my $xmldoc = shift;
     my $elem = shift;
@@ -1366,253 +1369,39 @@ sub parse_jvm_gc_log {
     my $gc_stats_type = shift;
     my $gc_log_filename = shift;
 
-    # This works for $gc_stats_type eq 'hotspot'.  Add support for
-    # 'jrockit'
-
-    my $num_mem_increase_warnings = 0;
-    my $max_mem_increase_warnings_to_print = 3;
-
-    my $num_gcs = 0;
-    my $total_mem_collected_kb = 0;
-    my $total_gc_time_sec = 0;
-    my $max_total_avail_mem_kb = 0;
-    my $max_total_allocated_mem_kb = 0;
-    my $max_total_live_mem_kb = 0;
-    my $parse_gc_log_fail_info;
-
-    open(FH, '<', $gc_log_filename)
-	or die sprintf "Could not open file %s for reading", $gc_log_filename;
-    # TBD: Handle error in attempting to open file or parse file more
-    # cleanly, i.e. by continuing and printing results without GC
-    # summary stats.
-    my $linenum = 0;
-    my $already_saved_copy_of_gc_log = 0;
-    my $unparseable_lines = 0;
-    my $max_unparseable_lines_to_print = 5;
-    while (my $line = <FH>) {
-	++$linenum;
-	chomp $line;
-	if ($line =~ /\r$/) {
-	    chop $line;
-	}
-	if ($line =~
-	    /^\s*\d+\.\d+:\s+\[(GC|GC--|Full GC) (\d+)K->(\d+)K\((\d+)K\), (\S+) secs\]\s*$/)
-	{
-	    my ($gc_type, $live_before_this_gc_kb, $live_after_this_gc_kb,
-		$total_avail_space_kb, $gc_time) = ($1, $2, $3, $4, $5);
-	    # Notes from this source:
-	    # http://www.oracle.com/technetwork/java/gc-tuning-5-138395.html
-	    
-	    # $live_before_this_gc_kb space consists of objects that
-	    # are actually live, or they are dead but still referenced
-	    # from a tenured generation object after a previous minor
-	    # GC.
-	    
-	    # Similarly for $live_after_this_gc_kb
-	    
-	    # $total_avail_space_kb is the total available space, not
-	    # counting the space in the permanent generation, which is
-	    # the total heap minus one of the survivor spaces.
-	    
-	    ++$num_gcs;
-	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
-					    $live_after_this_gc_kb);
-	    if ($mem_collected_this_gc_kb < 0) {
-		$mem_collected_this_gc_kb = 0;
-		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
-		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
-		        $live_before_this_gc_kb, $live_after_this_gc_kb,
-		        $linenum, $gc_log_filename, $line;
-		}
-		++$num_mem_increase_warnings;
-	    }
-	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
-	    $total_gc_time_sec += $gc_time;
-	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
-		$max_total_avail_mem_kb = $total_avail_space_kb;
-	    }
-	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
-		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
-	    }
-	    if ($gc_type eq 'GC--') {
-		# I've seen several of these where the
-		# $live_after_this_gc_kb number is larger than the
-		# $live_before_this_gc_kb number, and the after number
-		# is significantly larger than the after number of
-		# other GCs.  Until I find out what these mean, I'm
-		# going to leave such GC lines out of the calculation
-		# of the $max_total_live_mem_kb.
-	    } else {
-		if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
-		    $max_total_live_mem_kb = $live_after_this_gc_kb;
-		}
-	    }
-	} elsif ($line =~ /^\s*\[INFO \]\[memory \] \[[YO]C#\d+\] (\d+(\.\d+)?)-(\d+(\.\d+)?): ([YO]C) (\d+)KB->(\d+)KB \((\d+)KB\), (\d+(\.\d+)?) s, sum of pauses (\d+(\.\d+)?) ms, longest pause (\d+(\.\d+)?) ms\.\s*$/) {
-	    # TBD: Try to make this case and the one above share
-	    # common code, rather than duplicating it.
-	    my ($gc_start_time_sec, $gc_end_time_sec, $gc_type,
-		$live_before_this_gc_kb, $live_after_this_gc_kb,
-		$total_avail_space_kb, $gc_time_sec,
-		$gc_time_msec, $gc_longest_pause_time_msec) =
-		($1, $3, $5, $6, $7, $8, $9, $11, $13);
-	    ++$num_gcs;
-	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
-					    $live_after_this_gc_kb);
-	    if ($mem_collected_this_gc_kb < 0) {
-		$mem_collected_this_gc_kb = 0;
-		if ($num_mem_increase_warnings < $max_mem_increase_warnings_to_print) {
-		    printf STDERR "Warning: %s < %s in line %d of GC log file '%s': %s\n",
-		        $live_before_this_gc_kb, $live_after_this_gc_kb,
-		        $linenum, $gc_log_filename, $line;
-		}
-		++$num_mem_increase_warnings;
-	    }
-	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
-	    $total_gc_time_sec += ($gc_time_msec / 1000.0);
-	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
-		$max_total_avail_mem_kb = $total_avail_space_kb;
-	    }
-	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
-		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
-	    }
-	    if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
-		$max_total_live_mem_kb = $live_after_this_gc_kb;
-	    }
-
-	    # Do consistency check on ($gc_end_time_sec -
-	    # $gc_start_time_sec), which I think should be close to
-	    # $gc_time_sec.
-	    my $double_check_gc_time_sec =
-		($gc_end_time_sec - $gc_start_time_sec);
-	    my $max_error_allowed_sec = 0.0015;
-	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
-		$max_error_allowed_sec)
-	    {
-		printf STDERR "Warning: GC start time %s and end time %s give duration %.3f which is more than %s different than the reported time %s in line %d of GC log file '%s': %s\n",
-		    $gc_start_time_sec, $gc_end_time_sec,
-		    $double_check_gc_time_sec, $max_error_allowed_sec,
-		    $gc_time_sec,
-		    $linenum, $gc_log_filename, $line;
-	    }
-
-	    # Do consistency check between values of $gc_time_sec and
-	    # $gc_time_msec.  $gc_time_sec should be equal to
-	    # $gc_time_msec, perhaps rounded off.
-	    $double_check_gc_time_sec = ($gc_time_msec / 1000.0);
-	    # I don't know why, but I've seen these values differ by
-	    # more than merely rounding error.  For example, in this line:
-	    #
-	    # [INFO ][memory ] [OC#4] 9.586-10.564: OC 284932KB->273009KB (489092KB), 0.977 s, sum of pauses 964.737 ms, longest pause 964.737 ms.
-	    $max_error_allowed_sec = 0.020;
-	    if (abs($double_check_gc_time_sec - $gc_time_sec) >
-		$max_error_allowed_sec)
-	    {
-		printf STDERR "Warning: GC duration in msec %s is more than %s different than the reported time %s in sec in line %d of GC log file '%s': %s\n",
-		    $gc_time_msec, $max_error_allowed_sec, $gc_time_sec,
-		    $linenum, $gc_log_filename, $line;
-	    }
-
-	    # Do consistency check between values of
-	    # $gc_longest_pause_time_msec and $gc_time_msec.  I
-	    # believe the former should always be at most the latter.
-	    if ($gc_longest_pause_time_msec > $gc_time_msec) {
-		printf STDERR "Warning: longest pause %s is longer than total pause time %s in line %d of GC log file '%s': %s\n",
-		    $gc_longest_pause_time_msec, $gc_time_msec,
-		    $linenum, $gc_log_filename, $line;
-	    }
-	} elsif ($line =~ /^\s*\d+\.\d+:\s+\[GC, (\S+) secs\]\s*$/) {
-	    # I have seen the version of the JVM described below
-	    # produce a line in its GC log file very occasionally, as
-	    # in once in _several_ runs of a program that printed 6600
-	    # lines of output to its GC log file.  I am going to
-	    # assume that it means that the time taken for this
-	    # particular GC is the value given after the "GC,", but I
-	    # won't update any of the memory statistics when reading
-	    # such a line.
-
-	    # % uname -a
-	    # Linux ubuntu 2.6.32-25-generic #45-Ubuntu SMP Sat Oct 16 19:48:22 UTC 2010 i686 GNU/Linux
-	    # % java -server -version
-	    # java version "1.6.0_22"
-	    # Java(TM) SE Runtime Environment (build 1.6.0_22-b04)
-	    # Java HotSpot(TM) Server VM (build 17.1-b03, mixed mode)
-	    my $gc_time = $1;
-	    ++$num_gcs;
-	    $total_gc_time_sec += $gc_time;
-	} elsif (
-            ($line =~ /^\s*\[INFO \]\[memory \] GC mode: Garbage collection optimized for .+, strategy: .+\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] Heap size: \d+KB, maximal heap size: \d+KB, nursery size: \d+KB\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <start>-<end>: <type> <before>KB-><after>KB \(<heap>KB\), <time> ms, sum of pauses <pause> ms\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <start>  - start time of collection \(seconds since jvm start\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <type>   - OC \(old collection\) or YC \(young collection\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <end>    - end time of collection \(seconds since jvm start\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <before> - memory used by objects before collection \(KB\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <after>  - memory used by objects after collection \(KB\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <heap>   - size of heap after collection \(KB\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <time>   - total time of collection \(milliseconds\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] <pause>  - total sum of pauses during collection \(milliseconds\)\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \]            Run with -Xverbose:gcpause to see individual phases\.\s*$/) ||
-            ($line =~ /^\s*\[INFO \]\[memory \] Running on hypervisor Unknown \(but probably running on a hypervisor\)\s*$/)
-	    )
-	{
-	    # Ignore these boilerplate header lines out of the JRockit JVM
-	} elsif ($line =~ /^\s*\[ERROR\].*$/) {
-	    my $err_msg = sprintf "Error: Found ERROR at line %d of GC log file '%s': %s",
-	        $linenum, $gc_log_filename, $line;
-	    if (! $already_saved_copy_of_gc_log) {
-		# TBD: Avoid duplicating code here with the
-		# $unparseable_lines case below.
-		my ($copy_succeeded, $copy_info);
-		($save_dir_name, $copy_succeeded, $copy_info) =
-		    save_copy_of_file($save_dir_name, $gc_log_filename,
-				      'GC log', 'gc-log');
-		$err_msg .= ("\n" . $copy_info);
-		$parse_gc_log_fail_info = $err_msg;
-		$already_saved_copy_of_gc_log = 1;
-	    }
-	    printf STDERR "%s\n", $err_msg;
-	} else {
-	    ++$unparseable_lines;
-	    my $err_msg =
-		sprintf "Could not parse line %d of GC log file %s: '%s'",
-	            $linenum, $gc_log_filename, $line;
-	    if (! $already_saved_copy_of_gc_log) {
-		my ($copy_succeeded, $copy_info);
-		($save_dir_name, $copy_succeeded, $copy_info) =
-		    save_copy_of_file($save_dir_name, $gc_log_filename,
-				      'GC log', 'gc-log');
-		$err_msg .= ("\n" . $copy_info);
-		$parse_gc_log_fail_info = $err_msg;
-		$already_saved_copy_of_gc_log = 1;
-	    }
-	    if ($unparseable_lines <= $max_unparseable_lines_to_print) {
-		printf STDERR "%s\n", $err_msg;
-	    }
-	}
+    if (!defined($sumgclog_cmd)) {
+	printf STDERR "Command '%s' either does not exist or is not an executable program.  No GC log analysis will be performed.\n";
+	return undef;
     }
-    close(FH);
-    if ($unparseable_lines > $max_unparseable_lines_to_print) {
-	printf STDERR "%d additional error messages about unparseable GC log file lines were suppressed.\n",
-	    ($unparseable_lines - $max_unparseable_lines_to_print);
+    my $args = [];
+    push @{$args}, '--xml';
+    my ($fh, $temp_log_filename) = tempfile( DIR => $tempdir );
+    # Do I need to close this before opening the file for reading?  Or
+    # could I simply use it to read the file from the beginning?
+    # Seems safer to close this and open the file by name later.
+    close $fh;
+    push @{$args}, '--log-file', $temp_log_filename;
+    if (defined($gc_stats_type)) {
+	push @{$args}, '--jvm-gc-stats', $gc_stats_type;
     }
+    push @{$args}, $gc_log_filename;
 
-    if ($num_mem_increase_warnings > $max_mem_increase_warnings_to_print) {
-	printf STDERR "%d additional warnings about memory use increasing during GC suppressed.\n",
-	    $num_mem_increase_warnings - $max_mem_increase_warnings_to_print;
-    }
+    # Run sumgclog
+    my $exit_status = system $sumgclog_cmd, @{$args};
+    # TBD: At least for now, ignore exit status of sumgclog.
 
-    my $gc_stats = {
-	num_gcs => $num_gcs,
-	total_mem_collected_kb => $total_mem_collected_kb,
-	total_gc_time_sec => $total_gc_time_sec,
-	max_total_avail_mem_kb => $max_total_avail_mem_kb,
-	max_total_allocated_mem_kb => $max_total_allocated_mem_kb,
-	max_total_live_mem_kb => $max_total_live_mem_kb
-    };
-    if (defined($parse_gc_log_fail_info)) {
-	$gc_stats->{parse_gc_log_fail_info} = $parse_gc_log_fail_info;
+    if (-r $temp_log_filename) {
+	my $parser = XML::LibXML->new();
+	my $tree = $parser->parse_file($temp_log_filename);
+	my $root = $tree->getDocumentElement;
+	my $all_measurements = $root->findnodes('Measurement');
+	# There should only be one element in that list.
+	my $measurement_xml_info = $all_measurements->[0];
+	return $measurement_xml_info;
+    } else {
+	printf "Temporary log file '%s' created for sumgclog was not created.  Assume failure." if ($verbose >= 1);
+	return undef;
     }
-    return $gc_stats;
 }
 
 
@@ -1645,6 +1434,7 @@ sub save_copy_of_file {
 	    sprintf "Attempted to copy %s file '%s' (length %d bytes) as '%s', but failed: %s",
 	        $file_desc, $filename_to_save, -s $filename_to_save,
 	        $copy_filename, $!;
+	$copy_filename = undef;
     }
-    return ($save_dir_name, $copy_succeeded, $copy_info);
+    return ($save_dir_name, $copy_succeeded, $copy_info, $copy_filename);
 }
