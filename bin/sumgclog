@@ -283,21 +283,21 @@ if ($output_format_xml) {
 	push @{$tag_text_pairs}, 'gc_log_file_name', $gc_log_filename;
     }
     push @{$tag_text_pairs}, 'number_of_gcs',
-        $gc_stats->{num_gcs};
+        $gc_stats->{number_of_gcs};
     push @{$tag_text_pairs}, 'total_memory_gced_kb',
-        $gc_stats->{total_mem_collected_kb};
+        $gc_stats->{total_memory_gced_kb};
     push @{$tag_text_pairs}, 'total_gc_time_sec',
         $gc_stats->{total_gc_time_sec};
     push @{$tag_text_pairs}, 'maximum_total_available_memory_kb',
-        $gc_stats->{max_total_avail_mem_kb};
+        $gc_stats->{maximum_total_available_memory_kb};
     push @{$tag_text_pairs}, 'maximum_total_allocated_memory_kb',
-        $gc_stats->{max_total_allocated_mem_kb};
+        $gc_stats->{maximum_total_allocated_memory_kb};
     push @{$tag_text_pairs}, 'maximum_total_live_memory_kb',
-        $gc_stats->{max_total_live_mem_kb};
-    push @{$tag_text_pairs}, 'num_warnings',
-        $gc_stats->{num_warnings};
-    push @{$tag_text_pairs}, 'num_errors',
-        $gc_stats->{num_errors};
+        $gc_stats->{maximum_total_live_memory_kb};
+    push @{$tag_text_pairs}, 'num_gc_log_parse_warnings',
+        $gc_stats->{num_gc_log_parse_warnings};
+    push @{$tag_text_pairs}, 'num_gc_log_parse_errors',
+        $gc_stats->{num_gc_log_parse_errors};
     if (defined($gc_stats->{first_gc_log_parse_error})) {
 	push @{$tag_text_pairs}, 'first_gc_log_parse_error',
 	    $gc_stats->{first_gc_log_parse_error};
@@ -314,23 +314,23 @@ if ($output_format_xml) {
 	printf $log "    GC log file name          : %s\n", $gc_log_filename;
     }
     printf $log "    Number of GCs             : %s\n",
-        $gc_stats->{num_gcs};
+        $gc_stats->{number_of_gcs};
     printf $log "    Total memory GCed (KB)    : %s\n",
-        $gc_stats->{total_mem_collected_kb};
+        $gc_stats->{total_memory_gced_kb};
     printf $log "    Total GC time (sec)       : %s\n",
         $gc_stats->{total_gc_time_sec};
     printf $log "    Maximum total available memory (KB): %s\n",
-        $gc_stats->{max_total_avail_mem_kb};
+        $gc_stats->{maximum_total_available_memory_kb};
     printf $log "    Maximum total allocated memory (KB): %s\n",
-        $gc_stats->{max_total_allocated_mem_kb};
+        $gc_stats->{maximum_total_allocated_memory_kb};
     printf $log "    Maximum total live memory (KB)     : %s\n",
-        $gc_stats->{max_total_live_mem_kb};
+        $gc_stats->{maximum_total_live_memory_kb};
     printf $log "    Number of parsing warnings: %s\n",
-        $gc_stats->{num_warnings};
+        $gc_stats->{num_gc_log_parse_warnings};
     printf $log "    Number of parsing errors  : %s\n",
-        $gc_stats->{num_errors};
+        $gc_stats->{num_gc_log_parse_errors};
     if (defined($gc_stats->{first_gc_log_parse_error})) {
-	printf $log "    First GC log parse error         : %s\n",
+	printf $log "    First GC log parse error  : %s\n",
 	    $gc_stats->{first_gc_log_parse_error};
     }
 }
@@ -356,12 +356,12 @@ sub parse_jvm_gc_log {
     my $num_longest_pause_time_warnings = 0;
     my $max_longest_pause_time_warnings_to_print = 3;
 
-    my $num_gcs = 0;
-    my $total_mem_collected_kb = 0;
+    my $number_of_gcs = 0;
+    my $total_memory_gced_kb = 0;
     my $total_gc_time_sec = 0;
-    my $max_total_avail_mem_kb = 0;
-    my $max_total_allocated_mem_kb = 0;
-    my $max_total_live_mem_kb = 0;
+    my $maximum_total_available_memory_kb = 0;
+    my $maximum_total_allocated_memory_kb = 0;
+    my $maximum_total_live_memory_kb = 0;
 
     open(FH, '<', $gc_log_filename)
 	or die sprintf "Could not open file %s for reading", $gc_log_filename;
@@ -395,7 +395,7 @@ sub parse_jvm_gc_log {
 	    # counting the space in the permanent generation, which is
 	    # the total heap minus one of the survivor spaces.
 	    
-	    ++$num_gcs;
+	    ++$number_of_gcs;
 	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
 					    $live_after_this_gc_kb);
 	    if ($mem_collected_this_gc_kb < 0) {
@@ -409,13 +409,13 @@ sub parse_jvm_gc_log {
 		}
 		++$num_mem_increase_warnings;
 	    }
-	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_memory_gced_kb += $mem_collected_this_gc_kb;
 	    $total_gc_time_sec += $gc_time;
-	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
-		$max_total_avail_mem_kb = $total_avail_space_kb;
+	    if ($total_avail_space_kb > $maximum_total_available_memory_kb) {
+		$maximum_total_available_memory_kb = $total_avail_space_kb;
 	    }
-	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
-		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
+	    if ($live_before_this_gc_kb > $maximum_total_allocated_memory_kb) {
+		$maximum_total_allocated_memory_kb = $live_before_this_gc_kb;
 	    }
 	    if ($gc_type eq 'GC--') {
 		# I've seen several of these where the
@@ -424,10 +424,10 @@ sub parse_jvm_gc_log {
 		# is significantly larger than the after number of
 		# other GCs.  Until I find out what these mean, I'm
 		# going to leave such GC lines out of the calculation
-		# of the $max_total_live_mem_kb.
+		# of the $maximum_total_live_memory_kb.
 	    } else {
-		if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
-		    $max_total_live_mem_kb = $live_after_this_gc_kb;
+		if ($live_after_this_gc_kb > $maximum_total_live_memory_kb) {
+		    $maximum_total_live_memory_kb = $live_after_this_gc_kb;
 		}
 	    }
 	} elsif ($line =~ /^\s*\[INFO \]\[memory \] \[[YO]C#\d+\] (\d+(\.\d+)?)-(\d+(\.\d+)?): ([YO]C) (\d+)KB->(\d+)KB \((\d+)KB\), (\d+(\.\d+)?) s, sum of pauses (\d+(\.\d+)?) ms, longest pause (\d+(\.\d+)?) ms\.\s*$/) {
@@ -438,7 +438,7 @@ sub parse_jvm_gc_log {
 		$total_avail_space_kb, $gc_time_sec,
 		$gc_time_msec, $gc_longest_pause_time_msec) =
 		($1, $3, $5, $6, $7, $8, $9, $11, $13);
-	    ++$num_gcs;
+	    ++$number_of_gcs;
 	    my $mem_collected_this_gc_kb = ($live_before_this_gc_kb -
 					    $live_after_this_gc_kb);
 	    if ($mem_collected_this_gc_kb < 0) {
@@ -452,16 +452,16 @@ sub parse_jvm_gc_log {
 		}
 		++$num_mem_increase_warnings;
 	    }
-	    $total_mem_collected_kb += $mem_collected_this_gc_kb;
+	    $total_memory_gced_kb += $mem_collected_this_gc_kb;
 	    $total_gc_time_sec += ($gc_time_msec / 1000.0);
-	    if ($total_avail_space_kb > $max_total_avail_mem_kb) {
-		$max_total_avail_mem_kb = $total_avail_space_kb;
+	    if ($total_avail_space_kb > $maximum_total_available_memory_kb) {
+		$maximum_total_available_memory_kb = $total_avail_space_kb;
 	    }
-	    if ($live_before_this_gc_kb > $max_total_allocated_mem_kb) {
-		$max_total_allocated_mem_kb = $live_before_this_gc_kb;
+	    if ($live_before_this_gc_kb > $maximum_total_allocated_memory_kb) {
+		$maximum_total_allocated_memory_kb = $live_before_this_gc_kb;
 	    }
-	    if ($live_after_this_gc_kb > $max_total_live_mem_kb) {
-		$max_total_live_mem_kb = $live_after_this_gc_kb;
+	    if ($live_after_this_gc_kb > $maximum_total_live_memory_kb) {
+		$maximum_total_live_memory_kb = $live_after_this_gc_kb;
 	    }
 
 	    # Do consistency check on ($gc_end_time_sec -
@@ -539,7 +539,7 @@ sub parse_jvm_gc_log {
 	    # Java(TM) SE Runtime Environment (build 1.6.0_22-b04)
 	    # Java HotSpot(TM) Server VM (build 17.1-b03, mixed mode)
 	    my $gc_time = $1;
-	    ++$num_gcs;
+	    ++$number_of_gcs;
 	    $total_gc_time_sec += $gc_time;
 	} elsif (
             ($line =~ /^\s*\[INFO \]\[memory \] GC mode: Garbage collection optimized for .+, strategy: .+\s*$/) ||
@@ -627,14 +627,14 @@ sub parse_jvm_gc_log {
 			$num_pause_time_warnings +
 			$num_longest_pause_time_warnings);
     my $gc_stats = {
-	num_gcs => $num_gcs,
-	total_mem_collected_kb => $total_mem_collected_kb,
+	number_of_gcs => $number_of_gcs,
+	total_memory_gced_kb => $total_memory_gced_kb,
 	total_gc_time_sec => $total_gc_time_sec,
-	max_total_avail_mem_kb => $max_total_avail_mem_kb,
-	max_total_allocated_mem_kb => $max_total_allocated_mem_kb,
-	max_total_live_mem_kb => $max_total_live_mem_kb,
-	num_errors => $num_errors,
-	num_warnings => $num_warnings
+	maximum_total_available_memory_kb => $maximum_total_available_memory_kb,
+	maximum_total_allocated_memory_kb => $maximum_total_allocated_memory_kb,
+	maximum_total_live_memory_kb => $maximum_total_live_memory_kb,
+	num_gc_log_parse_errors => $num_errors,
+	num_gc_log_parse_warnings => $num_warnings
     };
     if (defined($first_gc_log_parse_error)) {
 	$gc_stats->{first_gc_log_parse_error} = $first_gc_log_parse_error;
