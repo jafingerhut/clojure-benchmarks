@@ -527,7 +527,6 @@
 
 
 (defn -main [& args]
-(time
   (let [tbl (calc-pieces piece-defs)
         [bad-even-triples bad-odd-triples] (create-triples)]
     (solve! tbl bad-even-triples bad-odd-triples)
@@ -541,4 +540,3 @@
       (print-board (nth sorted-solns (dec n)))
       ;; Here just to match the output of the other programs exactly
       (println))))
-)
