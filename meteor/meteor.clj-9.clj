@@ -11,8 +11,6 @@
 
 (set! *warn-on-reflection* true)
 
-;(def debug true)
-
 
 ;; The board is a 50 cell hexagonal pattern.  For    . . . . .
 ;; maximum speed the board will be implemented as     . . . . .
@@ -156,9 +154,6 @@
 ;; Returns wether the specified cell and direction will land outside
 ;; of the board.  Used to determine if a piece is at a legal board
 ;; location or not.
-
-;; TBD: This function is called often enough that its results should
-;; be precalculated and stored in a 2d array indexed by cell and dir.
 
 (defn out-of-bounds [cell dir]
   (case dir
@@ -394,7 +389,7 @@
       (let [^objects piece-arr (aget tbl piece-num)]
         (dotimes [cell 50]  ; second index is board index
           ;; Start with transient vectors.  Later we will change them to
-          ;; arrays after we know how long to make them.
+          ;; Java arrays after we know how long to make them.
           (aset piece-arr cell (transient [])))))
     ;; Find all possible good piece placements
     (dotimes [p npieces]
@@ -689,9 +684,6 @@
 
 
 (defn -main [& args]
-;  (let [^ints num-solutions num-solutions]
-;  (dotimes [rept 20]
-;    (aset num-solutions (int 0) (int 0))
   (let [shift-table (make-shift-table)
         oob-table (make-oob-table)
         tbl (calc-pieces piece-defs shift-table oob-table)
@@ -706,6 +698,4 @@
       (println)
       (print-board (nth sorted-solns (dec n)))
       (println)
-      (println)))  ; Just to match the output of the other programs exactly
-;  ))
-  )
+      (println))))  ; Just to match the output of the other programs exactly
