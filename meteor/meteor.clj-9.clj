@@ -290,11 +290,11 @@
 
 (defn board-empty-region-sizes! [^ints board-arr
                                  ^objects shift-table ^objects oob-table]
-  (loop [sizes []
+  (loop [sizes (transient [])
          num-empty (empty-cells board-arr)
          last-empty-cell 50]
     (if (zero? num-empty)
-      sizes
+      (persistent! sizes)
       ;; else
       (let [next-last-empty-cell (loop [i (int (dec last-empty-cell))]
                                    (if (zero? (aget board-arr i))
@@ -303,7 +303,7 @@
         (fill-contiguous-space! board-arr next-last-empty-cell shift-table
                                 oob-table)
         (let [next-num-empty (empty-cells board-arr)]
-          (recur (conj sizes (- num-empty next-num-empty))
+          (recur (conj! sizes (- num-empty next-num-empty))
                  next-num-empty
                  next-last-empty-cell))))))
 
