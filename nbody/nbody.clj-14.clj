@@ -120,7 +120,7 @@
         (* vx days-year) (* vy days-year) (* vz days-year)))))
 
 ; Data for initial state
-(def *data*
+(def +data+
   (list
     (mk-body :sun
       :x 0.0
@@ -164,26 +164,26 @@
       :mass 5.15138902046611451e-05 ) ))
 
 
-(def *bodies*)
+(def bodies)
 
 (defn init-state []
   ;; Initialize state
   ;; clone is a convenience for repeated runs in the REPL.
-  (def *bodies* (into-array Object (map #(.clone ^Body %) *data*)))
+  (def bodies (into-array Object (map #(.clone ^Body %) +data+)))
   (let [[px py pz] (reduce (fn [[px py pz] ^Body b]
                              (vector
                               (+ px (* (.vx b) (.mass b)))
                               (+ py (* (.vy b) (.mass b)))
                               (+ pz (* (.vz b) (.mass b))) ))
                            [0.0 0.0 0.0]
-                           *bodies*)
-        ^Body sun (aget ^objects *bodies* 0)
+                           bodies)
+        ^Body sun (aget ^objects bodies 0)
         mass (.mass sun) ]
     (.v! sun (/ (- px) mass) (/ (- py) mass) (/ (- pz) mass))))
 
 (defn energy
   ;; Total energy for current state
-  ([] (energy *bodies*)) ; total
+  ([] (energy bodies)) ; total
   ([bodies]              ; loop
     (if-not bodies 0.0
       (+ (.energy ^Body (first bodies) (next bodies))
@@ -191,7 +191,7 @@
 
 (defn advance [dt]
   ;; Move system one dt timestep forwards
-  (let [^objects bodies *bodies*
+  (let [^objects bodies bodies
         len (int (alength bodies))
         dt (double dt) ]
     (dotimes [i len]
