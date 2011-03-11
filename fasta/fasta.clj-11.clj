@@ -9,12 +9,50 @@
 
 (set! *warn-on-reflection* true)
 
+;; Handle slight difference in function name between Clojure 1.2.0 and
+;; 1.3.0-alpha* ability to use type hints to infer fast bit
+;; operations.
+(defmacro my-unchecked-add-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-add ~@args)
+    `(unchecked-add-int ~@args)))
 
-(def *width* 60)
-(def *lookup-size* 222000)
+(defmacro my-unchecked-dec-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-dec ~@args)
+    `(unchecked-dec-int ~@args)))
+
+(defmacro my-unchecked-inc-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-inc ~@args)
+    `(unchecked-inc-int ~@args)))
+
+(defmacro my-unchecked-multiply-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-multiply ~@args)
+    `(unchecked-multiply-int ~@args)))
+
+(defmacro my-unchecked-remainder-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-remainder ~@args)
+    `(unchecked-remainder-int ~@args)))
+
+(defmacro my-unchecked-subtract-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-subtract ~@args)
+    `(unchecked-subtract-int ~@args)))
+
+(def +width+ 60)
+(def +lookup-size+ 222000)
 
 
-(def *alu* (str "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"
+(def +alu+ (str "GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGG"
                 "GAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTCGAGA"
                 "CCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAAT"
                 "ACAAAAATTAGCCGGGCGTGGTGGCGCGCGCCTGTAATCCCA"
@@ -22,12 +60,12 @@
                 "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC"
                 "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA"))
 
-(def *codes* "acgtBDHKMNRSVWY")
+(def +codes+ "acgtBDHKMNRSVWY")
 
-(def *iub* [0.27 0.12 0.12 0.27 0.02 0.02 0.02 0.02
+(def +iub+ [0.27 0.12 0.12 0.27 0.02 0.02 0.02 0.02
            0.02 0.02 0.02 0.02 0.02 0.02 0.02])
 
-(def *homosapiens* [0.3029549426680 0.1979883004921
+(def +homosapiens+ [0.3029549426680 0.1979883004921
                    0.1975473066391 0.3015094502008])
 
 
@@ -36,20 +74,20 @@
          s (seq coll)]
     (if (f (first s))
       i
-      (recur (unchecked-inc i) (rest s)))))
+      (recur (my-unchecked-inc-int i) (rest s)))))
 
 
 (def random-seed (int-array [42]))
-(let [scale (double (/ *lookup-size* 139968))]
+(let [scale (double (/ +lookup-size+ 139968))]
   (defn gen-random-fast []
     (let [^ints random-seed random-seed
           IM (int 139968)
           IA (int 3877)
           IC (int 29573)
           zero (int 0)
-          new-seed (int (unchecked-remainder
-                         (unchecked-add
-                          (unchecked-multiply
+          new-seed (int (my-unchecked-remainder-int
+                         (my-unchecked-add-int
+                          (my-unchecked-multiply-int
                            (aget random-seed zero) IA) IC) IM))
           ;; I had the (aset random-seed zero new-seed) in the body of
           ;; the let before, but strangely the Clojure compiler
@@ -69,7 +107,7 @@
 
 ;; Takes a vector of cumulative probabilities.
 (defn make-lookup-table [v]
-  (let [sz (int *lookup-size*)
+  (let [sz (int +lookup-size+)
         lookup-scale (- sz 0.0001)
         ^ints a (int-array sz)]
     (dotimes [i sz]
@@ -80,7 +118,7 @@
 (defn cycle-bytes [source source-size n
                    ^java.io.BufferedOutputStream ostream]
   (let [source-size (int source-size)
-        width (int *width*)
+        width (int +width+)
         width+1 (int (inc width))
         buffer-size (int (* width+1 4096))
         buffer (byte-array buffer-size (byte 10))]
@@ -89,28 +127,28 @@
            n (int n)]
       (System/arraycopy source i buffer j width)
       (if (> n width)
-        (recur (int (unchecked-remainder
-                     (unchecked-add i width) source-size))
-               (int (let [j (unchecked-add j width+1)]
+        (recur (int (my-unchecked-remainder-int
+                     (my-unchecked-add-int i width) source-size))
+               (int (let [j (my-unchecked-add-int j width+1)]
                       (if (== j buffer-size)
                         (do (.write ostream buffer) (int 0))
                         j)))
-               (unchecked-subtract n width))
+               (my-unchecked-subtract-int n width))
         (do
           (aset buffer (+ j n) (byte 10))
           (.write ostream buffer (int 0) (+ j n 1)))))))
 
 
 (defn fasta-repeat [n ^java.io.BufferedOutputStream ostream]
-  (let [source (.getBytes (str *alu* *alu*))]
-    (cycle-bytes source (count *alu*) n ostream)))
+  (let [source (.getBytes (str +alu+ +alu+))]
+    (cycle-bytes source (count +alu+) n ostream)))
 
 
 (defn fasta-random [probs n ^java.io.BufferedOutputStream ostream]
-  (let [codes (.getBytes (str *codes*))
+  (let [codes (.getBytes (str +codes+))
         lookup-table (ints (make-lookup-table
                             (make-cumulative probs)))
-        width (int *width*)
+        width (int +width+)
         width-1 (int (dec width))
         num-lines-in-buffer (int 2000)
         buf-size (int (* num-lines-in-buffer (inc width)))
@@ -133,17 +171,17 @@
               ;; buffer is full.  write it and start over.
               (.write ostream buffer (int 0) buf-size)
               (aset buffer (int 0) rand-byte)
-              (recur (unchecked-dec n) width-1 (int 1)))
+              (recur (my-unchecked-dec-int n) width-1 (int 1)))
             (do
               (aset buffer i rand-byte)
               (if (== j (int 1))
                 ;; then
                 (do
-                  (aset buffer (unchecked-inc i) (byte 10)) ;; add newline
-                  (recur (unchecked-dec n) width (unchecked-add i 2)))
+                  (aset buffer (my-unchecked-inc-int i) (byte 10)) ;; add newline
+                  (recur (my-unchecked-dec-int n) width (my-unchecked-add-int i 2)))
                 ;; else
-                (recur (unchecked-dec n) (unchecked-dec j)
-                       (unchecked-inc i))))))))))
+                (recur (my-unchecked-dec-int n) (my-unchecked-dec-int j)
+                       (my-unchecked-inc-int i))))))))))
 
 
 (defn write-line [s ^java.io.BufferedOutputStream stream]
@@ -157,7 +195,7 @@
     (write-line ">ONE Homo sapiens alu" ostream)
     (fasta-repeat (* n 2) ostream)
     (write-line ">TWO IUB ambiguity codes" ostream)
-    (fasta-random *iub* (* n 3) ostream)
+    (fasta-random +iub+ (* n 3) ostream)
     (write-line ">THREE Homo sapiens frequency" ostream)
-    (fasta-random *homosapiens* (* n 5) ostream)
+    (fasta-random +homosapiens+ (* n 5) ostream)
     (.flush ostream)))
