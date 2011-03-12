@@ -26,7 +26,7 @@ cp -p "../lein-files/project.clj-for-clj-1.2.0-plus-contrib-plus-swank" project.
 lein deps
 cd ..
 
-for alpha in 1 3 4 5
+for alpha in 1 3 4 5 6
 do
     lein new clj-1.3.0-alpha${alpha}
     cd clj-1.3.0-alpha${alpha}
