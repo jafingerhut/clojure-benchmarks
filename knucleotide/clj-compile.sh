@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" knucleotide.clj-14-web-site.clj "${CLJ_OBJ_DIR}/knucleotide.clj"
+"${CP}" knucleotide.clj-14-for-clj13.clj "${CLJ_OBJ_DIR}/knucleotide.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile knucleotide
