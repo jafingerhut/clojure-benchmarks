@@ -127,7 +127,7 @@ foreach my $root ($tree->childNodes()) {
     }
 }
 
-my $num_cols = 1 + $#{@$col_name_list};
+my $num_cols = 1 + $#{$col_name_list};
 my $c;
 if (! $no_header_row) {
     $c = 0;
