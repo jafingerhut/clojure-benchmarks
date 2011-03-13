@@ -1082,7 +1082,7 @@ if ($output_format_xml) {
 
     my $xmldoc;
     my $mlist;
-    if (defined($log_file) && -r $log_file) {
+    if (defined($log_file) && -r $log_file && (-s $log_file != 0)) {
 	# Append the new results to the existing results file.
 	my $parser = XML::LibXML->new();
 	$xmldoc = $parser->parse_file($log_file);
