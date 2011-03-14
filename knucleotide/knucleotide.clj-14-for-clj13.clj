@@ -153,7 +153,7 @@
 
 
 (defn tally-dna-subs-with-len [len dna-str]
-  (let [mask-width (int (* 2 len))
+  (let [mask-width (* 2 len)
 	mask (key-type (dec (bit-shift-left 1 mask-width)))
 	dna-char-to-code-val dna-char-to-code-val]
     (loop [offset (int (- (count dna-str) len))
@@ -200,8 +200,6 @@
 
 
 (defn one-tally-to-str [dna-str tally]
-  (println (format "andy-debug: one-tally-to-str dna-str='%s' (count (keys tally))=%d\n"
-                   dna-str (count (keys tally))))
   (let [zerotc (TallyCounter. 0)]
     (format "%d\t%s" (getcnt (get tally (dna-str-to-key dna-str) zerotc))
             dna-str)))
