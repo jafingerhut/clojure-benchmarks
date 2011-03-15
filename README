@@ -85,6 +85,18 @@ git-core - optional, but useful for getting updated versions of
 gcc44 - Big, takes a while to install, and only useful if you want to
     compile some of the parallel C memory bandwidth benchmarking
     programs in src/stream.
+p5-xml-libxml - Required if you have installed some version of perl
+    within MacPorts (or more likely, it was installed as a dependency
+    required by something else you did choose to install).  You can
+    tell if the output of 'which perl' shows /opt/local/bin/perl or
+    similar.  Without this package, using a MacPorts-installed Perl
+    will likely result in error messages like the one below when you
+    try to run programs with measureproc:
+
+----------------------------------------------------------------------
+Can't locate XML/LibXML.pm in @INC (@INC contains: /opt/local/lib/perl5/site_perl/5.12.3/darwin-multi-2level /opt/local/lib/perl5/site_perl/5.12.3 /opt/local/lib/perl5/vendor_perl/5.12.3/darwin-multi-2level /opt/local/lib/perl5/vendor_perl/5.12.3 /opt/local/lib/perl5/5.12.3/darwin-multi-2level /opt/local/lib/perl5/5.12.3 /opt/local/lib/perl5/site_perl /opt/local/lib/perl5/vendor_perl .) at ../bin/measureproc line 22.
+BEGIN failed--compilation aborted at ../bin/measureproc line 22.
+----------------------------------------------------------------------
 
 You should have a Sun/Oracle/Apple Hotspot JDK installed by default
 already with java* commands in /usr/bin and some other support files
