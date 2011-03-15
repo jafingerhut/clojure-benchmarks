@@ -63,36 +63,33 @@ int
 get_macosx_version (int *major_version_num, int *minor_version_num,
                     int *subminor_version_num)
 {
+    int exit_status = 1;
     char *tmp_name = tmpnam(NULL);
     if (tmp_name == NULL) {
         perror(global_prog_name);
-        exit(1);
+        goto error_cleanup;
     }
     char *uname_cmd;
     int ret = asprintf(&uname_cmd, "uname -r > %s", tmp_name);
     if (ret == -1 || uname_cmd == NULL) {
         fprintf(stderr, "Could not allocate enough memory for command string: uname -r > %s\n", tmp_name);
-        cleanup_temp_file(tmp_name);
-        exit(1);
+        goto error_cleanup;
     }
     ret = system(uname_cmd);
     if (ret != 0) {
         fprintf(stderr, "error in %s: system(\"%s\") returned %d\n",
                 global_prog_name, uname_cmd, ret);
-        cleanup_temp_file(tmp_name);
-        exit(1);
+        goto error_cleanup;
     }
     FILE *f = fopen(tmp_name, "r");
     if (f == NULL) {
         perror(global_prog_name);
-        cleanup_temp_file(tmp_name);
-        exit(1);
+        goto error_cleanup;
     }
     char buf[512];
     if (fgets(buf, sizeof(buf), f) == NULL) {
         perror(global_prog_name);
-        cleanup_temp_file(tmp_name);
-        exit(1);
+        goto error_cleanup;
     }
     ret = sscanf(buf, "%d.%d.%d",
                  major_version_num, minor_version_num, subminor_version_num);
@@ -104,6 +101,12 @@ get_macosx_version (int *major_version_num, int *minor_version_num,
         exit(1);
     }
     return ret;
+
+ error_cleanup:
+    if (tmp_name != NULL) {
+        cleanup_temp_file(tmp_name);
+    }
+    exit(exit_status);
 }
 
 
@@ -484,7 +487,22 @@ main (int argc, char **argv, char **envp)
     } else if (pid == 0) {
 
         // We are the child process
-        int ret = execvp(child_argv[0], child_argv);
+
+        // Set the uid to the original uid of the process that invoked
+        // the timemem-darwin process, so that the command being
+        // measured is run with that user's priviliges, not with root
+        // privileges.
+        int original_uid = getuid();
+        int ret = setuid(original_uid);
+        if (ret != 0) {
+            fprintf(stderr, "Error return status %d while attempting"
+                    " to set uid to %d.  errno=%d\n", ret, original_uid,
+                    errno);
+            perror(global_prog_name);
+            exit(4);
+        }
+
+        ret = execvp(child_argv[0], child_argv);
         // Normally the call above will not return.
         fprintf(stderr, "Error return status %d while attempting"
                 " to call execvp().  errno=%d\n", ret, errno);
