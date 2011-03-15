@@ -619,6 +619,9 @@ if ($os eq 'Cygwin') {
 	} elsif (/^\s*Dumping CPU usage by sampling running threads \.\.\. done\.\s*$/) {
 	    # Ignore this line if JVM profiling via sampling was
 	    # enabled.
+        } elsif (/^\s*Shared archive: sharing disabled for server vm\s*$/) {
+	    # This line is often printed on my PowerPC-based Mac
+            # by the JVM.
 	} elsif ($found_real) {
 	    if (/^\s*user\s+(.*)\s*$/) {
 		$user_sec = $1;
