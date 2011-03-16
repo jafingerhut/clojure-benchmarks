@@ -509,6 +509,7 @@ if (defined($jvm_info)) {
     my $line;
     $jvm_info_hash->{'jvm_info_full_cmd'} = $jvm_cmd_string;
     while ($line = <JVM_OUT>) {
+	$line =~ s/\r$//;
 	if ($line =~ /^([^=]+)=(.*)$/) {
 	    my ($property, $val) = ($1, $2);
 	    if (defined($jvm_property_xml_tags->{$property})) {
