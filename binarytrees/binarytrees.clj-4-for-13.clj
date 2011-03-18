@@ -13,6 +13,7 @@
   (:gen-class))
 
 (set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
 
 (definterface ITreeNode
   (^long item [])
@@ -70,9 +71,8 @@
 (defn -main [& args]
   (let [n (if (first args) (Integer/parseInt (first args)) 0)
         max-depth (if (> (+ min-depth 2) n) (+ min-depth 2) n)]
-    (binding [*unchecked-math* true]
-      (main max-depth)))
-  (shutdown-agents))
+    (main max-depth)
+    (shutdown-agents)))
 
 (comment
 ;;sample usage
