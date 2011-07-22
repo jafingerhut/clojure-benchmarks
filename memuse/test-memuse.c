@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef unsigned int uint32;
 
@@ -15,7 +16,7 @@ int main (int argc, char *argv[])
     if (argc == 3) {
         do_sleep = 1;
     }
-    fprintf(stderr, "Attempting to allocate %llu kbytes of memory...\n", N);
+    fprintf(stderr, "Attempting to allocate %llu kbytes (%llu bytes) of memory...\n", N, N*1024);
     uint32 *p = (uint32 *) malloc(N * 1024);
     if (p == NULL) {
         fprintf(stderr, "Failed.  Aborting.\n");
