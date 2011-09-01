@@ -14,11 +14,14 @@ cp -pr "${LEIN_FILES}"/* "${HOME}/lein/lein-files/"
 
 cd "${HOME}/lein"
 
-lein new clj-1.2.0
-cd clj-1.2.0
-cp -p "../lein-files/project.clj-for-clj-1.2.0-only" project.clj
-lein deps
-cd ..
+for point_release in 0 1
+do
+    lein new clj-1.2.${point_release}
+    cd clj-1.2.${point_release}
+    cp -p "../lein-files/project.clj-for-clj-1.2.${point_release}-only" project.clj
+    lein deps
+    cd ..
+done
 
 lein new swank-clj-1.2.0
 cd swank-clj-1.2.0
@@ -43,3 +46,12 @@ done
 #cp -p "${LEIN_FILES}/project.clj-for-clj-1.3.0-plus-contrib" project.clj
 #lein deps
 #cd ..
+
+for beta in 1 2
+do
+    lein new clj-1.3.0-beta${beta}
+    cd clj-1.3.0-beta${beta}
+    cp -p "../lein-files/project.clj-for-clj-1.3.0-beta${beta}-only" project.clj
+    lein deps
+    cd ..
+done
