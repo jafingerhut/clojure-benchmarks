@@ -47,7 +47,7 @@ done
 #lein deps
 #cd ..
 
-for beta in 1 2
+for beta in 1 2 3
 do
     lein new clj-1.3.0-beta${beta}
     cd clj-1.3.0-beta${beta}
