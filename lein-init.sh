@@ -55,3 +55,12 @@ do
     lein deps
     cd ..
 done
+
+for RC in 0
+do
+    lein new clj-1.3.0-RC${RC}
+    cd clj-1.3.0-RC${RC}
+    cp -p "../lein-files/project.clj-for-clj-1.3.0-RC${RC}-only" project.clj
+    lein deps
+    cd ..
+done
