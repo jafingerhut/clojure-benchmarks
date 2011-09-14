@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" pidigits.clojure-1.clj "${CLJ_OBJ_DIR}/pidigits.clj"
+"${CP}" pidigits.clojure-2.clj "${CLJ_OBJ_DIR}/pidigits.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile pidigits
