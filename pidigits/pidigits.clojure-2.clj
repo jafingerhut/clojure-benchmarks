@@ -8,19 +8,18 @@
 (ns pidigits
   (:gen-class))
 
-(defmacro when-available [sym if-expr else-expr]
+(defmacro if-available [sym if-expr else-expr]
   (try
     (resolve sym)
     if-expr
-    (catch ClassNotFoundException _
+    (catch Exception _
       else-expr)))
 
 ;; 'fixup' allows this code to work on both Clojure 1.3, which has the
 ;; new class clojure.lang.BigInt, and Clojure 1.2, which does not.
 
 (defmacro fixup [j]
-  (when-available
-   clojure.lang.BigInt
+  (if-available clojure.lang.BigInt
    `(let [j# ~j]
       (if (instance? clojure.lang.BigInt j#)
         (.toBigInteger j#)
