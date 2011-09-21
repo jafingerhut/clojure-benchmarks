@@ -3,16 +3,16 @@
 
 ;; contributed by Johannes Friestad
 ;; modified by Marko Kocic
-;; modified slightly by Andy Fingerhut so it would compile on 1.2, and
-;; 1.3 alpha 1, 3, and 4.
+;; modified slightly by Andy Fingerhut so it would compile and run on
+;; Clojure 1.2 and 1.3
 
 (ns nbody
   (:gen-class))
 
 (set! *warn-on-reflection* true)
 
-;; Handle slight difference in function name between Clojure 1.2.0 and
-;; 1.3.0-alpha*.
+;; Handle slight difference in function name between Clojure 1.2 and
+;; 1.3.
 (defmacro my-unchecked-inc-int [& args]
   (if (and (== (*clojure-version* :major) 1)
            (== (*clojure-version* :minor) 2))
