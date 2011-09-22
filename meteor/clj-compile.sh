@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" meteor.clj-9.clj "${CLJ_OBJ_DIR}/meteor.clj"
+"${CP}" meteor.clj-10.clj "${CLJ_OBJ_DIR}/meteor.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile meteor
