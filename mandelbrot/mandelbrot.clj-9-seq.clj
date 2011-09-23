@@ -23,6 +23,33 @@
 
 (set! *warn-on-reflection* true)
 
+;; Handle slight difference in function name between Clojure 1.2.0 and
+;; 1.3.0-alpha* ability to use type hints to infer fast bit
+;; operations.
+(defmacro my-unchecked-add-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-add ~@args)
+    `(unchecked-add-int ~@args)))
+
+(defmacro my-unchecked-dec-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-dec ~@args)
+    `(unchecked-dec-int ~@args)))
+
+(defmacro my-unchecked-divide-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-divide ~@args)
+    `(unchecked-divide-int ~@args)))
+
+(defmacro my-unchecked-inc-int [& args]
+  (if (and (== (*clojure-version* :major) 1)
+           (== (*clojure-version* :minor) 2))
+    `(unchecked-inc ~@args)
+    `(unchecked-inc-int ~@args)))
+
 
 (def max-iterations 50)
 (def limit-square (double 4.0))
@@ -38,14 +65,14 @@
     ;; pr <-> Cr, pi <-> Ci, zi <-> Zi, zr <-> Zr, zr2 <-> Tr, zi2 <-> Ti
     (loop [zr (double 0.0)
            zi (double 0.0)
-           i (int (unchecked-inc iterations-remaining))]
+           i (int (my-unchecked-inc-int iterations-remaining))]
       (let [zr2 (* zr zr)
             zi2 (* zi zi)]
         (if (and (not (zero? i))
                  (< (+ zr2 zi2) limit-square))
           (recur (+ (- zr2 zi2) pr)
                  (+ (* (* f2 zr) zi) pi)
-                 (unchecked-dec i))
+                 (my-unchecked-dec-int i))
           (zero? i))))))
 
 
@@ -62,7 +89,7 @@
 (defn compute-row [#^doubles x-vals y]
   (let [y (double y)
         n (int (alength x-vals))
-        num-bytes-out (int (unchecked-divide (unchecked-add n 7) 8))
+        num-bytes-out (int (my-unchecked-divide-int (my-unchecked-add-int n 7) 8))
         #^bytes result (byte-array num-bytes-out)
         zero (int 0)
         one (int 1)]
@@ -79,17 +106,17 @@
           result)
         ;; else
         (let [new-bit (int (if (dot (aget x-vals i) y) one zero))
-              new-b (int (unchecked-add (bit-shift-left b one) new-bit))]
+              new-b (int (my-unchecked-add-int (bit-shift-left b one) new-bit))]
           (if (== num-filled-bits 7)
             (let [byte-val (byte (ubyte new-b))]
               (aset result result-idx byte-val)
-              (recur (unchecked-inc i)
+              (recur (my-unchecked-inc-int i)
                      zero
                      zero
-                     (unchecked-inc result-idx)))
-            (recur (unchecked-inc i)
+                     (my-unchecked-inc-int result-idx)))
+            (recur (my-unchecked-inc-int i)
                    new-b
-                   (unchecked-inc num-filled-bits)
+                   (my-unchecked-inc-int num-filled-bits)
                    result-idx)))))))
 
 
