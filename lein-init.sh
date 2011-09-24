@@ -14,11 +14,11 @@ cp -pr "${LEIN_FILES}"/* "${HOME}/lein/lein-files/"
 
 cd "${HOME}/lein"
 
-for point_release in 0 1
+for clj_1_2_point_release in 0 1
 do
-    lein new clj-1.2.${point_release}
-    cd clj-1.2.${point_release}
-    cp -p "../lein-files/project.clj-for-clj-1.2.${point_release}-only" project.clj
+    lein new clj-1.2.${clj_1_2_point_release}
+    cd clj-1.2.${clj_1_2_point_release}
+    cp -p "../lein-files/project.clj-for-clj-1.2.${clj_1_2_point_release}-only" project.clj
     lein deps
     cd ..
 done
@@ -56,11 +56,11 @@ do
     cd ..
 done
 
-for RC in 0
+for clj_1_3_point_release in 0
 do
-    lein new clj-1.3.0-RC${RC}
-    cd clj-1.3.0-RC${RC}
-    cp -p "../lein-files/project.clj-for-clj-1.3.0-RC${RC}-only" project.clj
+    lein new clj-1.3.${clj_1_3_point_release}
+    cd clj-1.3.${clj_1_3_point_release}
+    cp -p "../lein-files/project.clj-for-clj-1.3.${clj_1_3_point_release}-only" project.clj
     lein deps
     cd ..
 done

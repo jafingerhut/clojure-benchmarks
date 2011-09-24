@@ -2,12 +2,12 @@
 
 if [ $# -lt 1 ]
 then
-    CLJ_VERSIONS="clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 clj-1.3-alpha4 clj-1.3-alpha6"
+    CLJ_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-beta3 clj-1.3.0"
 else
     CLJ_VERSIONS="$@"
 fi
 
-for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot nbody regexdna revcomp revlines spectralnorm
+for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot meteor nbody pidigits regexdna revcomp revlines spectralnorm
 do
     for CLJ_VERSION in ${CLJ_VERSIONS}
     do
