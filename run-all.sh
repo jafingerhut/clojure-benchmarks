@@ -15,7 +15,7 @@
 
 #for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot meteor nbody pidigits regexdna revcomp spectralnorm
 
-for j in binarytrees fannkuchredux fasta knucleotide mandelbrot meteor nbody regexdna revcomp spectralnorm
+for j in binarytrees fannkuchredux fasta knucleotide mandelbrot nbody pidigits regexdna revcomp spectralnorm
 do
     cd $j
     ./batch.sh "$@"

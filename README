@@ -91,7 +91,7 @@ p5-xml-libxml - Required if you have installed some version of perl
     tell if the output of 'which perl' shows /opt/local/bin/perl or
     similar.  Without this package, using a MacPorts-installed Perl
     will likely result in error messages like the one below when you
-    try to run programs with measureproc:
+    try to run programs with measureproc (invoked by batch.sh):
 
 ----------------------------------------------------------------------
 Can't locate XML/LibXML.pm in @INC (@INC contains: /opt/local/lib/perl5/site_perl/5.12.3/darwin-multi-2level /opt/local/lib/perl5/site_perl/5.12.3 /opt/local/lib/perl5/vendor_perl/5.12.3/darwin-multi-2level /opt/local/lib/perl5/vendor_perl/5.12.3 /opt/local/lib/perl5/5.12.3/darwin-multi-2level /opt/local/lib/perl5/5.12.3 /opt/local/lib/perl5/site_perl /opt/local/lib/perl5/vendor_perl .) at ../bin/measureproc line 22.
