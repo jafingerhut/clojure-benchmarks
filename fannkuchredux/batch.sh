@@ -21,7 +21,7 @@ do
     case $1 in
 	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
 	    ;;
-	quick|medium|long) TESTS="$TESTS $1"
+	quick|medium*|long) TESTS="$TESTS $1"
 	    ;;
 	*)
 	    1>&2 echo "Unrecognized command line parameter: $1"
@@ -53,6 +53,8 @@ do
 	quick)  N=7
 	    ;;
 	medium) N=10
+	    ;;
+	medium2) N=11
 	    ;;
 	long)   N=12
 	    ;;
@@ -93,6 +95,6 @@ do
 		( time ${CMD} ${N} ${EXTRA_LANG_ARGS} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 		;;
 	esac
-	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
+	cmp_and_rm_2nd_if_correct ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
     done
 done

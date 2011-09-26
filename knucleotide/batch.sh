@@ -69,7 +69,7 @@ do
 	    # threads in parallel.  With an empty string, the default
 	    # is 2 more threads than the number of available
 	    # processors.
-	    clj*)  EXTRA_LANG_ARGS=""
+	    clj*)  EXTRA_LANG_ARGS="1"
 		;;
 	esac
 
@@ -88,6 +88,6 @@ do
 		( time ${CMD} ${EXTRA_LANG_ARGS} < ${IN} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 		;;
 	esac
-	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
+	cmp_and_rm_2nd_if_correct ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
     done
 done

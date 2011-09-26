@@ -315,3 +315,15 @@ DIFF="diff -c"
 # others produces \n only.  Ignore trailing carriage returns on input.
 CMP="diff --strip-trailing-cr --brief"
 #CMP="cmp"
+
+cmp_and_rm_2nd_if_correct()
+{
+	local F1="$1"
+	local F2="$2"
+	${CMP} "${F1}" "${F2}"
+	local cmp_exit_status=$?
+	if [ $cmp_exit_status == 0 ]
+	then
+		${RM} "${F2}"
+	fi
+}

@@ -97,6 +97,6 @@ do
 		( time ${CMD} ${N} > ${OUT} ) 2>&1 | tee ${CONSOLE}
 		;;
 	esac
-	$CMP ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
+	cmp_and_rm_2nd_if_correct ${OUTPUT_DIR}/${T}-expected-output.txt ${OUT} 2>&1 | tee -a ${CONSOLE}
     done
 done
