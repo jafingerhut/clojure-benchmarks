@@ -29,14 +29,14 @@ cp -p "../lein-files/project.clj-for-clj-1.2.0-plus-contrib-plus-swank" project.
 lein deps
 cd ..
 
-for alpha in 1 3 4 5 6
-do
-    lein new clj-1.3.0-alpha${alpha}
-    cd clj-1.3.0-alpha${alpha}
-    cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha${alpha}-only" project.clj
-    lein deps
-    cd ..
-done
+#for alpha in 1 3 4 5 6
+#do
+#    lein new clj-1.3.0-alpha${alpha}
+#    cd clj-1.3.0-alpha${alpha}
+#    cp -p "../lein-files/project.clj-for-clj-1.3.0-alpha${alpha}-only" project.clj
+#    lein deps
+#    cd ..
+#done
 
 # This one doesn't quite work yet, but none of the Clojure programs
 # need anything from clojure-contrib yet.
@@ -61,6 +61,24 @@ do
     lein new clj-1.3.${clj_1_3_point_release}
     cd clj-1.3.${clj_1_3_point_release}
     cp -p "../lein-files/project.clj-for-clj-1.3.${clj_1_3_point_release}-only" project.clj
+    lein deps
+    cd ..
+done
+
+for alpha in 1 2 3 4 5
+do
+    lein new clj-1.4.0-alpha${alpha}
+    cd clj-1.4.0-alpha${alpha}
+    cp -p "../lein-files/project.clj-for-clj-1.4.0-alpha${alpha}-only" project.clj
+    lein deps
+    cd ..
+done
+
+for beta in 1
+do
+    lein new clj-1.4.0-beta${beta}
+    cd clj-1.4.0-beta${beta}
+    cp -p "../lein-files/project.clj-for-clj-1.4.0-beta${beta}-only" project.clj
     lein deps
     cd ..
 done

@@ -2,7 +2,7 @@
 
 if [ $# -lt 1 ]
 then
-    CLJ_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-beta3 clj-1.3.0"
+    CLJ_VERSIONS="clj-1.2.1 clj-1.3.0 clj-1.4-beta1"
 else
     CLJ_VERSIONS="$@"
 fi
