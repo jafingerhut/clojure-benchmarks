@@ -21,6 +21,10 @@ shift
 # Use a small limit to avoid using lots of memory.  It makes the
 # garbage collector collect more often, but the extra CPU time is not
 # much.
-MAX_HEAP_MB=512
+#MAX_HEAP_MB=512  # too small for Clojure 1.2.1
+#MAX_HEAP_MB=576  # enough for Clojure 1.2.1
+#MAX_HEAP_MB=608  # too small for Clojure 1.3.0, 1.4-beta1
+MAX_HEAP_MB=616
+#MAX_HEAP_MB=616  # enough for Clojure 1.3.0, 1.4-beta
 
 ../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" regexdna "$@"
