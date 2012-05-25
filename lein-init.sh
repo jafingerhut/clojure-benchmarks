@@ -74,11 +74,20 @@ do
     cd ..
 done
 
-for beta in 1
+for beta in 1 2 3 4 5 6 7
 do
     lein new clj-1.4.0-beta${beta}
     cd clj-1.4.0-beta${beta}
     cp -p "../lein-files/project.clj-for-clj-1.4.0-beta${beta}-only" project.clj
+    lein deps
+    cd ..
+done
+
+for clj_1_4_point_release in 0
+do
+    lein new clj-1.4.${clj_1_4_point_release}
+    cd clj-1.4.${clj_1_4_point_release}
+    cp -p "../lein-files/project.clj-for-clj-1.3.${clj_1_4_point_release}-only" project.clj
     lein deps
     cd ..
 done
