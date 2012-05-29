@@ -21,6 +21,6 @@ shift
 # Use a small limit to avoid using lots of memory.  It makes the
 # garbage collector collect more often, but the extra CPU time is not
 # much.
-MAX_HEAP_MB=768
+MAX_HEAP_MB=384
 
-../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" revcomp "$@"
+../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -XX:+TieredCompilation -XX:+AggressiveOpts -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" revcomp "$@"
