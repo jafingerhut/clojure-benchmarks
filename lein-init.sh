@@ -91,3 +91,12 @@ do
     lein deps
     cd ..
 done
+
+for alpha in 1
+do
+    lein new clj-1.5.0-alpha${alpha}
+    cd clj-1.5.0-alpha${alpha}
+    cp -p "../lein-files/project.clj-for-clj-1.5.0-alpha${alpha}-only" project.clj
+    lein deps
+    cd ..
+done
