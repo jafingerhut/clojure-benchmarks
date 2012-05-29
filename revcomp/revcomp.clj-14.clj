@@ -6,7 +6,8 @@
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
-(ns alioth.reverse-complement)
+(ns revcomp
+  (:gen-class))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
@@ -25,7 +26,7 @@
 (defn revcomp
   "Reverse and complement a in range begin (inclusive) - end (exclusive).
    Updates in place."
-  [^bytes a ^long begin ^long end]
+  [^bytes a begin end]
   (when-not (= (int \>) (aget a begin))
     (loop [begin begin
            end (dec end)]
