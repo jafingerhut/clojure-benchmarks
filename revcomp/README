@@ -1,3 +1,25 @@
+As of May 28, 2012, the fastest Java and Clojure versions on the
+Alioth web site were:
+
+Benchmark      Fastest Java prog    Fastest Clojure prog
+machine
+
+32-bit 1 core  revcomp.java-6.java  revcomp.clojure-4.clojure
+32-bit 4 core  revcomp.java-3.java  revcomp.clojure-4.clojure
+64-bit 1 core  revcomp.java-6.java  revcomp.clojure-4.clojure
+64-bit 4 core  revcomp.java-3.java  revcomp.clojure-4.clojure
+
+revcomp.clojure-4.clojure from the web site is what I call
+revcomp.clj-13.clj in my github repository.
+
+These were all run on Ubuntu with jdk1.7.0_04, clojure-1.4.0
+
+What I call revcomp.clj-14.clj in my github repository was written by
+Stuart Halloway and added to the test.benchmark namespace on May 28,
+2012.  I will compare its performance to the others above soon.
+
+----------------------------------------------------------------------
+
 Mac OS X 10.5.8 with java 1.5.0_24 failed with this exception when
 running revcomp.clj-10.clj.  Perhaps this program relies on a change
 made in java 1.6?
