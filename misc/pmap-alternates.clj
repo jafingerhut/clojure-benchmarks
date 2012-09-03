@@ -35,11 +35,8 @@
 (defmacro defrunonce [fn-name args & body]
   `(def ~fn-name (create-runonce (fn ~args ~@body))))
 
-(defn new-fixed-threadpool [size]
-  (Executors/newFixedThreadPool size))
-
 (defrunonce init-medusa [pool-size]
-  (def THREADPOOL (new-fixed-threadpool pool-size)))
+  (def THREADPOOL (Executors/newFixedThreadPool pool-size)))
 
 (defn claim-thread [future-id]
   (let [thread-info {:thread (Thread/currentThread) :future-id future-id
