@@ -40,13 +40,24 @@ function for the same substring length, each operating in parallel on
 different portions of dna-str.  Its performance is identical to
 knucleotide.clojure-6.clojure.
 
-One thing in the latest Java programs for this problem that is not
-being taken advantage of is to use a JavaHashMap where the items
-stored in it have the key and the value the same.  See class Fragment
-in knucleotide.java-9.java.  This can save memory, by not needing a
-separate Object for the key and the value.  I think it might save run
-time because they define their own custom hashCode() method that
-simply returns the key value.
+knucleotide.clojure-6d-java9inspired.clojure
+Use a class like the Fragment class in knucleotide.java-9.java.  This
+is used as both a key and value in the JavaHashMap's, which saves
+memory by having only one object per hash table entry instead of two
+(each with their own Object overheads), and also by having a custome
+hashCode() method that just uses the key value, instead of hashing
+that key value.
+
+knucleotide.clojure-6e-java9inspired-moreparallel.clojure
+Like previous version, but breaks work up into smaller pieces,
+e.g. instead of running one thread to calculate all of the hash table
+for length 18 substrings, break that work up into separate threads
+that each calculate a hash table for a subset of the input string,
+then combine their results together at the end.
+
+knucleotide.clojure-7.clojure
+Like previous version, but uses medusa-pmap instead of pmap for higher
+parallelism.
 
 ----------------------------------------------------------------------
 x86 Ubuntu Intel Q6600 one core (32-bit 1 core)
