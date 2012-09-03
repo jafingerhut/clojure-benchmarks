@@ -23,12 +23,22 @@ whether #4 is or not.
 
 knucleotide.clojure-4.clojure = knucleotide.clj-14-for-clj13.clj
 
-knucleotide.clojure-5-edited.clojure is nearly identical to my
+knucleotide.clojure-5.clojure is nearly identical to my
 knucleotide.clj-14-for-clj13.clj
 
-knucleotide.clojure-6-edited.clojure seems to start with 5, and make
+knucleotide.clojure-6.clojure seems to start with 5, and make
 several performance optimizations from there.  It is nearly identical
 except for whitespace to knucleotide.clj-15.clj
+
+knucleotide.clojure-6c-minoredits.clojure is nearly identical to
+knucleotide.clojure-6.clojure.  It removes some vestigial code that
+allowed it to compile and run with Clojure 1.2, and some code that
+allows it to read from a resource file instead of standard input that
+isn't needed.  It also adds a start-offset and end-offset parameter to
+tally-dna-subs-with-len that is a step towards making calls to this
+function for the same substring length, each operating in parallel on
+different portions of dna-str.  Its performance is identical to
+knucleotide.clojure-6.clojure.
 
 One thing in the latest Java programs for this problem that is not
 being taken advantage of is to use a JavaHashMap where the items
