@@ -1,0 +1,243 @@
+;;   The Computer Language Benchmarks Game
+;;   http://shootout.alioth.debian.org/
+
+;; contributed by Andy Fingerhut
+;; modified by Marko Kocic
+;; modified by Mike Anderson to make better use of primitive operations
+
+(ns knucleotide
+  (:gen-class))
+
+(set! *warn-on-reflection* true)
+
+
+(defmacro key-type [num]
+  `(long ~num))
+
+(definterface IFragment
+  (set_key_BANG_ [^long k])
+  (^long get_key [])
+  (inc_BANG_ [])
+  (^int get_count []))
+
+
+(deftype Fragment [^{:unsynchronized-mutable true :tag long} key
+                       ^{:unsynchronized-mutable true :tag int} cnt]
+  Object
+  ;; TBD: Is there a way to return an int hashCode that is a truncated
+  ;; version of the long value key without using bit-and?  Simply
+  ;; using (int key) throws an exception if key is larger than
+  ;; Integer/MAX_VALUE, e.g. (int Long/MAX_VALUE).
+  (^int hashCode [this]
+    (int (bit-and key Integer/MAX_VALUE)))
+  (^boolean equals [this ^Object o]
+    (let [^Fragment f o]
+      (== key (.key f))))
+
+  IFragment
+  (set-key! [this ^long k]
+    (set! key k))
+  (get-key [this] key)
+  (inc! [this]
+    (set! cnt (unchecked-inc-int cnt)))
+  (get-count [this] cnt))
+
+ 
+
+;; Return true when the line l is a FASTA description line
+
+(defn fasta-description-line [l]
+  (= \> (first (seq l))))
+
+
+;; Return true when the line l is a FASTA description line that begins
+;; with the string desc-str.
+
+(defn fasta-description-line-beginning [desc-str l]
+  (and (fasta-description-line l)
+       (= desc-str (subs l 1 (min (count l) (inc (count desc-str)))))))
+
+
+;; Take a sequence of lines from a FASTA format file, and a string
+;; desc-str.  Look for a FASTA record with a description that begins
+;; with desc-str, and if one is found, return its DNA sequence as a
+;; single (potentially quite long) string.  If input file is big,
+;; you'll save lots of memory if you call this function in a with-open
+;; for the file, and don't hold on to the head of the lines parameter.
+
+(defn fasta-dna-str-with-desc-beginning [desc-str lines]
+  (when-let [x (drop-while
+		(fn [l] (not (fasta-description-line-beginning desc-str l)))
+		lines)]
+    (when-let [x (seq x)]
+      (let [y (take-while (fn [l] (not (fasta-description-line l)))
+                          (map (fn [#^java.lang.String s] (.toUpperCase s))
+                               (rest x)))]
+        (apply str y)))))
+
+
+(def dna-char-to-code-val-map {\A 0, \C 1, \T 2, \G 3})
+(def code-val-to-dna-char {0 \A, 1 \C, 2 \T, 3 \G})
+
+(defmacro dna-char-to-code-val [ch]
+  `(case ~ch
+     ~@(flatten (seq dna-char-to-code-val-map))))
+
+;; In the hash map 'tally' in tally-dna-subs-with-len, it is more
+;; straightforward to use a Clojure string (same as a Java string) as
+;; the key, but such a key is significantly bigger than it needs to
+;; be, increasing memory and time required to hash the value.  By
+;; converting a string of A, C, T, and G characters down to an integer
+;; that contains only 2 bits for each character, we make a value that
+;; is significantly smaller and faster to use as a key in the map.
+
+;;    most                 least
+;; significant          significant
+;; bits of int          bits of int
+;;  |                         |
+;;  V                         V
+;; code code code ....  code code
+;;  ^                         ^
+;;  |                         |
+;; code for               code for
+;; *latest*               *earliest*
+;; char in                char in
+;; sequence               sequence
+
+;; Note: Given Clojure 1.2's implementation of bit-shift-left/right
+;; operations, when the value being shifted is larger than a 32-bit
+;; int, they are faster when the shift amount is a compile time
+;; constant.
+
+(defn ^:static dna-str-to-key 
+  (^long [^String s] (dna-str-to-key s 0 (count s)))
+  (^long [^String s ^long start ^long length]
+    ;; Accessing a local let binding is much faster than accessing a var
+    (loop [key (long 0)
+           offset (int (+ start length -1))]
+      (if (< offset start)
+        key
+        (let [c (.charAt s offset)
+              code (int (dna-char-to-code-val c))
+              new-key (+ (bit-shift-left key 2) code)]
+          (recur new-key (dec offset)))))))
+
+
+(defn key-to-dna-str [^Fragment f len]
+  (let [k (.get-key f)]
+    (apply str (map code-val-to-dna-char
+                    (map (fn [pos] (bit-and 3 (bit-shift-right k pos)))
+                         (range 0 (* 2 len) 2))))))
+
+;; required function : "to update a hashtable of k-nucleotide keys and
+;; count values, for a particular reading-frame"
+
+(defn tally-dna-subs-with-len [len dna-str start-offset end-offset]
+  (let [len (int len)
+        start-offset (int start-offset)
+        dna-str ^String dna-str
+        mask-width (* 2 len)
+        mask (key-type (dec (bit-shift-left 1 mask-width)))]
+    (loop [offset (int end-offset)
+           key (key-type (dna-str-to-key dna-str offset len))
+           tally (let [h (java.util.HashMap.)
+                       one (Fragment. (long key) (int 1))]
+                   (.put h one one)
+                   h)
+           fragment (Fragment. (long 0) (int 1))]
+      (if (<= offset start-offset)
+        tally
+        (let [new-offset (unchecked-dec offset)
+              new-first-char-code (dna-char-to-code-val
+                                   (.charAt dna-str new-offset))
+              new-key (key-type (bit-and mask (unchecked-add (bit-shift-left key 2)
+                                                             new-first-char-code)))]
+          (.set-key! fragment new-key)
+          (if-let [^Fragment cur-fragment (get tally fragment)]
+            (do
+              (.inc! cur-fragment)
+              (recur new-offset new-key tally fragment))
+            (do
+              (let [new-fragment (Fragment. (long 0) (int 1))]
+                (.put tally fragment fragment)
+                (recur new-offset new-key tally new-fragment)))))))))
+
+
+(defn ^:static getcnt ^long [^Fragment tc]
+  (.get-count tc))
+
+(defn ^:static tally-total [tally]
+  (loop [acc (long 0)
+         s (vals tally)]
+    (if-let [v (first s)]
+      (recur (+ acc (getcnt v)) (next s))
+      acc)))
+
+(defn all-tally-to-str [tally fn-key-to-str]
+  (with-out-str
+    (let [total (tally-total tally)
+          cmp-keys (fn [k1 k2]
+                     ;; Return negative integer if k1 should come earlier
+                     ;; in the sort order than k2, 0 if they are equal,
+                     ;; otherwise a positive integer.
+                     (let [cnt1 (int (getcnt (get tally k1)))
+                           cnt2 (int (getcnt (get tally k2)))]
+                       (if (not= cnt1 cnt2)
+                         (- cnt2 cnt1)
+                         (let [^String s1 (fn-key-to-str k1)
+                               ^String s2 (fn-key-to-str k2)]
+                           (.compareTo s1 s2)))))]
+      (doseq [k (sort cmp-keys (keys tally))]
+        (printf "%s %.3f\n" (fn-key-to-str k)
+                (double (* 100 (/ (getcnt (get tally k)) total))))))))
+
+
+(defn one-tally-to-str [dna-str tally]
+  (let [zerotc (Fragment. 0 0)
+        ^Fragment f (Fragment. (long (dna-str-to-key dna-str)) 0)]
+    (format "%d\t%s" (getcnt (get tally f zerotc))
+            dna-str)))
+
+
+(defn compute-one-part [dna-str part]
+  (let [len (count dna-str)]
+    [part
+     (condp = part
+       0 (all-tally-to-str (tally-dna-subs-with-len 1 dna-str 0 (- len 1))
+                           (fn [k] (key-to-dna-str k 1)))
+       1 (all-tally-to-str (tally-dna-subs-with-len 2 dna-str 0 (- len 2))
+                           (fn [k] (key-to-dna-str k 2)))
+       2 (one-tally-to-str "GGT"
+                           (tally-dna-subs-with-len 3 dna-str 0 (- len 3)))
+       3 (one-tally-to-str "GGTA"
+                           (tally-dna-subs-with-len 4 dna-str 0 (- len 4)))
+       4 (one-tally-to-str "GGTATT"
+                           (tally-dna-subs-with-len 6 dna-str 0 (- len 6)))
+       5 (one-tally-to-str "GGTATTTTAATT"
+                           (tally-dna-subs-with-len 12 dna-str 0 (- len 12)))
+       6 (one-tally-to-str "GGTATTTTAATTTATAGT"
+                           (tally-dna-subs-with-len 18 dna-str 0 (- len 18))))]))
+
+
+(defn run [br]  
+  (let [dna-str (fasta-dna-str-with-desc-beginning "THREE" (line-seq br))
+        ;; Due to the peculiarities of how pmap works, the amount of
+        ;; parallelism you achieve may not equal the number of
+        ;; processors you have.  In the future it would be better to
+        ;; use something more "eager" like medusa-pmap in the Medusa
+        ;; library.  http://github.com/amitrathore/medusa
+        results (map second
+                     (sort #(< (first %1) (first %2))
+                           (pmap
+                            #(compute-one-part dna-str %)
+;;                            '(0 5 6 1 2 3 4)
+                            '(0 1 4 5 6 2 3)
+                            )))]
+    (doseq [r results]
+      (println r)
+      (flush))))
+
+(defn -main [& args]
+  (with-open [br (java.io.BufferedReader. *in*)]
+    (run br))  
+  (shutdown-agents))
