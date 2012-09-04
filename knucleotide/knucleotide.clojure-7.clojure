@@ -352,24 +352,11 @@
         (mapcat #(break-work-into-pieces % dna-str)
                 [{:kind :tally-all :n-pieces 1 :substr-len 1}
                  {:kind :tally-all :n-pieces 1 :substr-len 2}
-                 ;; 26.3 elapsed, 134.9 user
-                 ;; 26.1 elapsed, 135.0 user
-                 ;; 26.2 elapsed, 135.2 user
-                 {:kind :tally-one :n-pieces 3 :substr "GGT"}
-                 {:kind :tally-one :n-pieces 4 :substr "GGTA"}
-                 {:kind :tally-one :n-pieces 6 :substr "GGTATT"}
-                 {:kind :tally-one :n-pieces 12 :substr "GGTATTTTAATT"}
-                 {:kind :tally-one :n-pieces 18 :substr "GGTATTTTAATTTATAGT"}
-
-                 ;; 30.7 elapsed, 156.4 user
-                 ;; 28.5 elapsed, 142.8 user
-                 ;; 27.8 elapsed, 133.0 user
-;;                 {:kind :tally-one :n-pieces 2 :substr "GGT"}
-;;                 {:kind :tally-one :n-pieces 2 :substr "GGTA"}
-;;                 {:kind :tally-one :n-pieces 3 :substr "GGTATT"}
-;;                 {:kind :tally-one :n-pieces 3 :substr "GGTATTTTAATT"}
-;;                 {:kind :tally-one :n-pieces 4 :substr "GGTATTTTAATTTATAGT"}
-                 ])
+                 {:kind :tally-one :n-pieces 2 :substr "GGT"}
+                 {:kind :tally-one :n-pieces 2 :substr "GGTA"}
+                 {:kind :tally-one :n-pieces 3 :substr "GGTATT"}
+                 {:kind :tally-one :n-pieces 3 :substr "GGTATTTTAATT"}
+                 {:kind :tally-one :n-pieces 4 :substr "GGTATTTTAATTTATAGT"}])
         work-pieces-done (medusa-pmap n-threads do-one-piece work-pieces-todo)
         grouped-results (partition-by :substr-len work-pieces-done)
         combined-results (pmap combine-pieces grouped-results)
