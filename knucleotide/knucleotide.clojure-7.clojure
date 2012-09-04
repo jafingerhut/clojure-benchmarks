@@ -4,6 +4,11 @@
 ;; contributed by Andy Fingerhut
 ;; modified by Marko Kocic
 ;; modified by Mike Anderson to make better use of primitive operations
+;; modified by Andy Fingerhut for lower CPU use and high parallelism
+
+;; Ideas for future enhancement: Better parallelism: Do completion of
+;; DNA string reading while beginning hash table creation in parallel.
+;; Lower memory use: Read DNA string as bytes instead of Java chars.
 
 (ns knucleotide
   (:import java.util.concurrent.ExecutorService
