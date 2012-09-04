@@ -300,16 +300,8 @@
 
 
 (defn do-one-piece [{:keys [substr-len dna-str start-offset end-offset] :as m}]
-  (binding [*out* *err*]
-    (println (format "begin start-one-piece %2d %6d %6d\n"
-                     substr-len start-offset end-offset)))
-  (let [v
-        (assoc m :tally-table (tally-dna-subs-with-len substr-len dna-str
-                                start-offset end-offset))]
-    (binding [*out* *err*]
-      (println (format "end   start-one-piece %2d %6d %6d\n"
-                       substr-len start-offset end-offset)))
-    v))
+  (assoc m :tally-table (tally-dna-subs-with-len substr-len dna-str
+                          start-offset end-offset)))
 
 ;; Like merge-with, except it only works for the HashMaps with
 ;; Fragments as key/value pairs.  It mutates the first HashMap given
