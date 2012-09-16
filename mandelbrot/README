@@ -1,3 +1,28 @@
+----------------------------------------------------------------------
+Fastest Clojure mandelbrot programs on the Alioth web site as of Sep
+16 2012:
+
+5 mandelbrot.clojure-5.clojure = mandelbrot.clj-9-seq.clj
+6 mandelbrot.clojure-6.clojure = mandelbrot.clj-9-par-1.3.clj
+2 mandelbrot.clojure-2.clojure
+1 mandelbrot.clojure
+
+    32-bit        64-bit
+  1c     4c     1c     4c
+
+   sec    sec    sec    sec
+j2  27 j2   7 j2  24 j2   7
+ 5  64  6  18  5  52  6  15
+ 6  67  2  28  6  53  1  25
+
+ 2  86  1  29  2  75  2  25
+ 1  89  5  56  1  76  5  51
+
+Recommendation: Keep 5 and 6.  Remove 1 and 2 from the site.
+
+----------------------------------------------------------------------
+Older results below:
+
 Results for different numbers of threads, the first parameter of the
 function modified-pmap in mandelbrot.clj-2.clj
 
