@@ -12,6 +12,6 @@ source ../env.sh
 "${RM}" -fr "${CLJ_OBJ_DIR}"
 mkdir -p "${CLJ_OBJ_DIR}"
 
-"${CP}" revcomp.clj-13.clj "${CLJ_OBJ_DIR}/revcomp.clj"
+"${CP}" revcomp.clj-15.clj "${CLJ_OBJ_DIR}/revcomp.clj"
 
 "${JAVA}" "-Dclojure.compile.path=${PS_CLJ_OBJ_DIR}" -classpath "${PS_FULL_CLJ_CLASSPATH}" clojure.lang.Compile revcomp
