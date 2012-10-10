@@ -92,7 +92,7 @@ do
     cd ..
 done
 
-for alpha in 1
+for alpha in 1 2 3 4 5 6
 do
     lein new clj-1.5.0-alpha${alpha}
     cd clj-1.5.0-alpha${alpha}
