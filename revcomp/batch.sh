@@ -11,7 +11,10 @@ BENCHMARK="revcomp"
 # /dev/stdin with :element-type '(unsigned-byte 8) for some reason.
 # SBCL 1.0.39 seems to work fine.
 
-ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+#ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+# Note that revcomp.clj-15.clj does not compile with Clojure versions
+# before 1.3-beta1, because of its use of *unchecked-math*
+ALL_LANGUAGES="java clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-alpha5 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -20,13 +23,18 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium|long) TESTS="$TESTS $1"
 	    ;;
 	*)
-	    1>&2 echo "Unrecognized command line parameter: $1"
-	    exit 1
+	    check_clojure_version_spec $1
+            if [ $? != 0 ]
+            then
+	        1>&2 echo "Unrecognized command line parameter: $1"
+	        exit 1
+            fi
+            LANGUAGES="$LANGUAGES clj-${CLJ_VERSION_STR}"
 	    ;;
     esac
     shift

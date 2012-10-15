@@ -26,6 +26,103 @@ then
     # command.
     OS=`uname -s 2>/dev/null`
 fi
+
+# Functions to help in converting multiple allowed ways of specifying
+# a Clojure version on the command line, into one standard version
+# string CLJ_VERSION_STR for internal use in the rest of the scripts.
+
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-alpha5 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6"
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-alpha6"
+
+show_known_clojure_versions()
+{
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-6] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-6]"
+}
+
+internal_check_clojure_version_spec()
+{
+    local spec="$1"
+    local ret_val=0
+    #echo "iccvs spec=:${spec}:"
+    case "${spec}" in
+    1.2 | 1.2.0)
+	CLJ_VERSION_STR="1.2.0"
+	;;
+    1.2.1)
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
+    1.3-alpha[56])
+        CLJ_VERSION_STR="1.3.0${spec/1.3/}"
+        ;;
+    1.3.0-alpha[56])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.3-beta[1-3])
+        CLJ_VERSION_STR="1.3.0${spec/1.3/}"
+        ;;
+    1.3.0-beta[1-3])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.3 | 1.3.0)
+        CLJ_VERSION_STR="1.3.0"
+        ;;
+
+    1.4-alpha[1-5])
+        CLJ_VERSION_STR="1.4.0${spec/1.4/}"
+        ;;
+    1.4.0-alpha[1-5])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.4-beta[1-7])
+        CLJ_VERSION_STR="1.4.0${spec/1.4/}"
+        ;;
+    1.4.0-beta[1-7])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.4 | 1.4.0)
+        CLJ_VERSION_STR="1.4.0"
+        ;;
+
+    1.5-alpha[1-6])
+        CLJ_VERSION_STR="1.5.0${spec/1.5/}"
+        ;;
+    1.5.0-alpha[1-6])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
+    *)
+        # Unknown Clojure version
+	ret_val=1
+	;;
+    esac
+    return ${ret_val}
+}
+
+check_clojure_version_spec()
+{
+    local spec="$1"
+    internal_check_clojure_version_spec "${spec}"
+    local exit_status=$?
+    if [ ${exit_status} == 0 ]
+    then
+	return 0
+    fi
+    internal_check_clojure_version_spec "${spec/clj-/}"
+    exit_status=$?
+    if [ ${exit_status} == 0 ]
+    then
+	return 0
+    fi
+    internal_check_clojure_version_spec "${spec/clojure-/}"
+    exit_status=$?
+    if [ ${exit_status} == 0 ]
+    then
+	return 0
+    fi
+    return 1
+}
+
 #echo "Debug OS=:${OS}:"
 if [ "$OS" == "Cygwin" ]
 then
@@ -52,119 +149,21 @@ then
     ######################################################################
 
     HOME_DIR=`cygpath -w "$HOME"`
-    if [ "${CLJ_VERSION:=clj-1.2}" == "clj-1.2" ]
+    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.3.0}"
+    if [ $? != 0 ]
     then
-        # Let default Clojure version be 1.2.0 if none is specified.
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/swank-clj-1.2.0/lib"`
-        CLOJURE_CLASSPATH_PART1=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.2.0.jar"`
-        CLOJURE_CLASSPATH_PART2=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-contrib-1.2.0.jar"`
-        CLOJURE_CLASSPATH="${CLOJURE_CLASSPATH_PART1};${CLOJURE_CLASSPATH_PART2}"
-    elif [ "$CLJ_VERSION" == "clj-1.2.1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.2.1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.2.1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha3" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha3/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha4" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha4/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha5" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha5/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha5.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha6" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-alpha6/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha6.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-beta1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-beta1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta2" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-beta2/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-beta2.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta3" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0-beta3/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0-beta3.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.3.0" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.3.0/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.3.0.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-alpha1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha2" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-alpha2/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha2.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha3" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-alpha3/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha3.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha4" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-alpha4/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha4.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha5" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-alpha5/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha5.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-beta1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0-beta1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-beta1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4-latest" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/clj/clojure"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0-master-SNAPSHOT.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.4.0" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.4.0/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.4.0.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha1" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha1/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha1.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha2" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha2/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha2.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha3" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha3/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha3.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha4" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha4/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha4.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha5" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha5/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha5.jar"`
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha6" ]
-    then
-        CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clj-1.5.0-alpha6/lib"`
-        CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha6.jar"`
-    else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.2.1 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3.0 clj-1.4.0-alpha1 clj-1.4.0-alpha2 clj-1.4.0-alpha3 clj-1.4.0-alpha4 clj-1.4.0-alpha5 clj-1.4.0-beta1 clj-1.4-latest clj-1.4.0 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6"
+        1>&2 echo -n "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: "
+	show_known_clojure_versions
+	1>&2 echo ""
         exit 1
     fi
-
+    CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clojure-${CLJ_VERSION_STR}/lib"`
+    CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-${CLJ_VERSION_STR}.jar"`
     # Platform-specific form of Clojure object file directory
-    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}${CLJ_VERSION}"
+    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}clojure-${CLJ_VERSION_STR}"
     PS_FULL_CLJ_CLASSPATH="${CLOJURE_CLASSPATH}${PSEP}${PS_CLJ_OBJ_DIR}"
     # Unix form, still useful in some places on Cygwin
-    CLJ_OBJ_DIR="./obj/${CLJ_VERSION}"
+    CLJ_OBJ_DIR="./obj/clojure-${CLJ_VERSION_STR}"
 
     ######################################################################
     # Windows+Cygwin SBCL
@@ -209,116 +208,20 @@ then
     # Linux/MacOS Clojure
     ######################################################################
 
-    if [ "${CLJ_VERSION:=clj-1.2}" == "clj-1.2" ]
+    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.3.0}"
+    if [ $? != 0 ]
     then
-        # Let default Clojure version be 1.2.0 if none is specified.
-        CLOJURE_JAR_DIR="${HOME}/lein/swank-clj-1.2.0/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.2.0.jar:${CLOJURE_JAR_DIR}/clojure-contrib-1.2.0.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.2.1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.2.1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.2.1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha3" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha3/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha3.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha4" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha4/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha4.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha5" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha5/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha5.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-alpha6" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-alpha6/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-alpha6.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-beta1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-beta1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta2" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-beta2/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-beta2.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3-beta3" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0-beta3/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0-beta3.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.3.0" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.3.0/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.3.0.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-alpha1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha2" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-alpha2/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha2.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha3" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-alpha3/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha3.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha4" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-alpha4/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha4.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-alpha5" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-alpha5/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-alpha5.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-beta1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0-beta1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-beta1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4-latest" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/clj/clojure"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0-master-SNAPSHOT.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.4.0" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.4.0/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.4.0.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha1" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha1/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha1.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha2" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha2/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha2.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha3" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha3/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha3.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha4" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha4/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha4.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha5" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha5/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha5.jar"
-    elif [ "$CLJ_VERSION" == "clj-1.5-alpha6" ]
-    then
-        CLOJURE_JAR_DIR="${HOME}/lein/clj-1.5.0-alpha6/lib"
-        CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-1.5.0-alpha6.jar"
-    else
-        1>&2 echo "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: clj-1.2 clj-1.2.1 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3.0 clj-1.4.0-alpha1 clj-1.4.0-alpha2 clj-1.4.0-alpha3 clj-1.4.0-alpha4 clj-1.4.0-alpha5 clj-1.4.0-beta1 clj-1.4-latest clj-1.4.0 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6"
+        1>&2 echo -n "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: "
+	show_known_clojure_versions
+	1>&2 echo ""
         exit 1
     fi
-
+    CLOJURE_JAR_DIR="${HOME}/lein/clojure-${CLJ_VERSION_STR}/lib"
+    CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-${CLJ_VERSION_STR}.jar"
     # Platform-specific form of Clojure object file directory
-    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}${CLJ_VERSION}"
+    PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}clojure-${CLJ_VERSION_STR}"
     PS_FULL_CLJ_CLASSPATH="${CLOJURE_CLASSPATH}${PSEP}${PS_CLJ_OBJ_DIR}"
-    CLJ_OBJ_DIR="./obj/${CLJ_VERSION}"
+    CLJ_OBJ_DIR="./obj/clojure-${CLJ_VERSION_STR}"
 
     ######################################################################
     # Linux/MacOS SBCL
@@ -389,8 +292,8 @@ MP_COMMON_ARGS=
 # use.
 
 #MP_ARGS_FOR_JVM_RUN="--jvm-info server --jvm-gc-stats ${JVM_TYPE}"
-MP_ARGS_FOR_JVM_RUN="--jvm-gc-stats ${JVM_TYPE}"
-#MP_ARGS_FOR_JVM_RUN=
+#MP_ARGS_FOR_JVM_RUN="--jvm-gc-stats ${JVM_TYPE}"
+MP_ARGS_FOR_JVM_RUN=
 
 
 JAVA_OBJ_DIR="./obj/java"
@@ -403,8 +306,8 @@ GCC_OBJ_DIR="./obj/gcc"
 #JAVA_PROFILING="-Xprof"
 #JAVA_PROFILING="-Xrunhprof"
 HPROF_OPTS="cpu=samples,depth=20,thread=y"
-JAVA_PROFILING="-agentlib:hprof=${HPROF_OPTS}"
-#JAVA_PROFILING=
+#JAVA_PROFILING="-agentlib:hprof=${HPROF_OPTS}"
+JAVA_PROFILING=
 
 
 ######################################################################

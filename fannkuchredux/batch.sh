@@ -10,7 +10,8 @@ BENCHMARK="fannkuch-redux"
 # No Clojure version created yet.
 
 #ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
-ALL_LANGUAGES="perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+#ALL_LANGUAGES="perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
+ALL_LANGUAGES="java ${ALL_CLOJURE_VERSIONS}"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
@@ -19,13 +20,18 @@ TESTS=""
 while [ $# -ge 1 ]
 do
     case $1 in
-	sbcl|perl|ghc|java|clj*) LANGUAGES="$LANGUAGES $1"
+	sbcl|perl|ghc|java) LANGUAGES="$LANGUAGES $1"
 	    ;;
 	quick|medium*|long) TESTS="$TESTS $1"
 	    ;;
 	*)
-	    1>&2 echo "Unrecognized command line parameter: $1"
-	    exit 1
+	    check_clojure_version_spec $1
+            if [ $? != 0 ]
+            then
+	        1>&2 echo "Unrecognized command line parameter: $1"
+	        exit 1
+            fi
+            LANGUAGES="$LANGUAGES clj-${CLJ_VERSION_STR}"
 	    ;;
     esac
     shift
