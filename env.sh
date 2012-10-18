@@ -31,12 +31,12 @@ fi
 # a Clojure version on the command line, into one standard version
 # string CLJ_VERSION_STR for internal use in the rest of the scripts.
 
-ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-alpha5 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6"
-ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-alpha6"
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-alpha5 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7"
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-alpha7"
 
 show_known_clojure_versions()
 {
-    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-6] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-6]"
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7]"
 }
 
 internal_check_clojure_version_spec()
@@ -52,10 +52,10 @@ internal_check_clojure_version_spec()
         CLJ_VERSION_STR="${spec}"
         ;;
 
-    1.3-alpha[56])
+    1.3-alpha[5-8])
         CLJ_VERSION_STR="1.3.0${spec/1.3/}"
         ;;
-    1.3.0-alpha[56])
+    1.3.0-alpha[5-8])
         CLJ_VERSION_STR="${spec}"
         ;;
     1.3-beta[1-3])
@@ -84,10 +84,10 @@ internal_check_clojure_version_spec()
         CLJ_VERSION_STR="1.4.0"
         ;;
 
-    1.5-alpha[1-6])
+    1.5-alpha[1-7])
         CLJ_VERSION_STR="1.5.0${spec/1.5/}"
         ;;
-    1.5.0-alpha[1-6])
+    1.5.0-alpha[1-7])
         CLJ_VERSION_STR="${spec}"
         ;;
 

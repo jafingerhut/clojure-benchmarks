@@ -31,8 +31,8 @@ cd ..
 
 # It appears that 1.3.0 alpha version 1, 3, and 4 are no longer
 # available from Maven repo.
-#for alpha in 1 3 4 5 6
-for alpha in 5 6
+#for alpha in 1 3 4 5 6 7 8
+for alpha in 5 6 7 8
 do
     lein new clojure-1.3.0-alpha${alpha}
     cd clojure-1.3.0-alpha${alpha}
@@ -95,7 +95,7 @@ do
     cd ..
 done
 
-for alpha in 1 2 3 4 5 6
+for alpha in 1 2 3 4 5 6 7
 do
     lein new clojure-1.5.0-alpha${alpha}
     cd clojure-1.5.0-alpha${alpha}
