@@ -293,7 +293,8 @@ MP_COMMON_ARGS=
 
 #MP_ARGS_FOR_JVM_RUN="--jvm-info server --jvm-gc-stats ${JVM_TYPE}"
 #MP_ARGS_FOR_JVM_RUN="--jvm-gc-stats ${JVM_TYPE}"
-MP_ARGS_FOR_JVM_RUN=
+MP_ARGS_FOR_JVM_RUN="--jvm-info server"
+#MP_ARGS_FOR_JVM_RUN=
 
 
 JAVA_OBJ_DIR="./obj/java"
