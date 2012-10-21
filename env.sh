@@ -123,6 +123,70 @@ check_clojure_version_spec()
     return 1
 }
 
+make_clojure_version_set()
+{
+    # str_list is a single string containing 'words' separated by
+    # white space.  This function and
+    # check_exact_string_in_string_set() only work for lists/sets of
+    # strings where each string contains no white space, and no colon
+    # characters.
+    local version_set=":"
+    for v in $*
+    do
+        #1>&2 echo "andy-debug $v"
+        check_clojure_version_spec "$v"
+        if [ $? != 0 ]
+        then
+            1>&2 echo "Bad Clojure version string found in version_list=${version_list}"
+            1>&2 echo -n "$0: v='${v}' must be one of: "
+	    show_known_clojure_versions
+	    1>&2 echo ""
+            exit 1
+        fi
+        version_set="${version_set}${CLJ_VERSION_STR}:"
+    done
+    echo "${version_set}"
+}
+
+check_exact_string_in_string_set()
+{
+    local str="$1"
+    # Note: The 'string set' is assumed to be a sequence of strings
+    # that do not contain colon (:) characters, separated by colon
+    # characters, and with a colon at the beginning and end.  For
+    # example, the set containing strings "a", "foo", and "gah" would
+    # be represented as ":a:foo:gah:"
+    local str_set="$2"
+    local t="${str_set/:${str}:/}"
+    if [ "${str_set}" == "${t}" ]
+    then
+	# str not in str_set, so return "bad" non-0 exit status
+	return 1
+    fi
+    # str in str_set, so return "good" 0 exit status
+    return 0
+}
+
+all_clojure_versions_except()
+{
+    local clojure_versions_to_exclude_set=`make_clojure_version_set $*`
+    local tmp
+    local ret_val=""
+    for v in ${ALL_CLOJURE_VERSIONS}
+    do
+        check_clojure_version_spec "${v}"
+        tmp="${CLJ_VERSION_STR}"
+        check_exact_string_in_string_set "${tmp}" "${clojure_versions_to_exclude_set}"
+        if [ $? != 0 ]
+        then
+            # The version is not in the list of versions to exclude,
+            # so add it to return value.
+	    ret_val="${ret_val} ${v}"
+        fi
+    done
+    echo "${ret_val}"
+}
+
 #echo "Debug OS=:${OS}:"
 if [ "$OS" == "Cygwin" ]
 then
