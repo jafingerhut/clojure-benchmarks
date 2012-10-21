@@ -115,6 +115,7 @@ fi
 make_expected_output_files binarytrees quick medium long
 make_expected_output_files fannkuch quick medium long
 make_expected_output_files fannkuchredux quick medium long
+make_expected_output_files hello long
 make_expected_output_files mandelbrot quick medium long
 make_expected_output_files nbody quick medium long
 make_expected_output_files pidigits quick medium long

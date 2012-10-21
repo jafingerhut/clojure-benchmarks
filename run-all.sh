@@ -13,9 +13,9 @@
 # chameneosredux and threadring have not yet been implemented in
 # Clojure.
 
-#for j in binarytrees fannkuch fannkuchredux fasta knucleotide mandelbrot meteor nbody pidigits regexdna revcomp spectralnorm
+#for j in binarytrees fannkuch fannkuchredux fasta hello knucleotide mandelbrot meteor nbody pidigits regexdna revcomp spectralnorm
 
-for j in binarytrees fannkuchredux fasta knucleotide mandelbrot nbody pidigits regexdna revcomp spectralnorm
+for j in binarytrees fannkuchredux fasta hello knucleotide mandelbrot nbody pidigits regexdna revcomp spectralnorm
 do
     cd $j
     ./batch.sh "$@"
