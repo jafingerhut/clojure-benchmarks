@@ -15,13 +15,13 @@ then
     do
 	d=`dirname $j`
 	f=`basename $j`
-        if [ "$d" == "hello" -a "$f" == "output" ]; then
-	    # Do nothing
-	    true
-	else
+#        if [ "$d" == "hello" -a "$f" == "output" ]; then
+#	    # Do nothing
+#	    true
+#	else
 	    mkdir -p "${TARGET}/$d"
 	    mv $j "${TARGET}/$d"
-	fi
+#	fi
     done
 elif [ $1 == "back" ]
 then
@@ -32,12 +32,12 @@ then
     do
 	d=`dirname $j`
 	f=`basename $j`
-        if [ "$d" == "hello" -a "$f" == "output" ]; then
-	    # Do nothing
-	    true
-	else
+#        if [ "$d" == "hello" -a "$f" == "output" ]; then
+#	    # Do nothing
+#	    true
+#	else
 	    mv $j "${TARGET}/$d"
-	fi
+#	fi
     done
 else
     1>&2 echo "usage: `basename $0` [ away | back ]"
