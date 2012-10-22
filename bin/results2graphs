@@ -1,0 +1,211 @@
+#! /usr/bin/env clj
+
+(ns results2graphs.core
+  (:require [clojure.xml :as xml]
+            [clojure.repl :as repl]
+            [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.java.shell :as sh]
+            [clojure.pprint :as p]))
+
+
+(defn- temporary-file-name []
+  (let [temp (java.io.File/createTempFile "clojure-benchmarks"
+                                          (str (System/nanoTime)))]
+    (assert (.delete temp))
+    temp))
+
+
+(def ^:dynamic *auto-flush* true)
+
+(defn printf-to-writer [w fmt-str & args]
+  (binding [*out* w]
+    (apply clojure.core/printf fmt-str args)
+    (when *auto-flush* (flush))))
+
+(defn iprintf [fmt-str-or-writer & args]
+  (if (instance? CharSequence fmt-str-or-writer)
+    (apply printf-to-writer *out* fmt-str-or-writer args)
+    (apply printf-to-writer fmt-str-or-writer args)))
+
+(defn die [fmt-str & args]
+  (apply iprintf *err* fmt-str args)
+  (System/exit 1))
+
+(defn basename
+  "If the string contains one or more / characters, return the part of
+  the string after the last /.  If it contains no / characters, return
+  the entire string."
+  [s]
+  (if-let [[_ base] (re-matches #".*/([^/]+)" s)]
+    base
+    s))
+
+
+(defn validate-parsed-xml
+  "Verify that the XML file has the basic structure of a
+  MeasurementList tag, with a content that is a sequence of
+  Measurement tags."
+  [parsed-xml]
+  (and (= (:tag parsed-xml) :MeasurementList)
+       (every? (fn [x] (= (:tag x) :Measurement))
+               (:content parsed-xml))))
+
+
+(defn validated-xml-to-xrel
+  "For a parsed XML file that has the basic structure validated by
+  validate-parsed-xml, create a sequence of maps with one map per
+  measurement.  Each map has keys equal to the keywords of the tags in
+  the measurement, and values equal to the contents of each tag in the
+  measurement.  Some tags have their contents converted to bigints or
+  doubles."
+  [validated-xml]
+  (for [measurement (:content validated-xml)]
+    (into {}
+          (for [measurement-detail (:content measurement)]
+            (let [tag (:tag measurement-detail)
+                  str-val (or (first (:content measurement-detail)) "")
+                  exp-format (case tag
+                               (:number_of_cpu_cores
+                                :exit_status
+                                :maximum_resident_set_size_kibibytes)
+                               :int
+                               
+                               (:elapsed_time_sec
+                                :user_cpu_time_sec
+                                :system_cpu_time_sec)
+                               :double
+                               
+                               :string)
+                  val (case exp-format
+                        :int (bigint str-val)
+                        :double (Double/parseDouble str-val)
+                        :string str-val)]
+              [tag val])))))
+
+
+(defn add-columns-problem-platform-language [data]
+  (for [{:keys [current_working_directory output_file jvm_os_name
+                jvm_os_version jvm_java_version jvm_sun_arch_data_model]
+         :as measurement} data]
+    (let [problem (basename current_working_directory)
+          lang (if-let [[_ size lang]
+                        (re-matches #".*output/([^-]+)-(\S+)-output.txt"
+                                    output_file)]
+                 lang
+                 nil)
+          lang (if (or (= lang "java")
+                       (re-find #"(alpha|beta)" lang))
+                 lang
+                 ;; Append "-final" to the Clojure version number so
+                 ;; that it sorts alphabetically after the alpha and
+                 ;; beta versions.
+                 (str lang "-final"))
+
+          platform (format "%s %s + JDK %s, %s-bit"
+                           jvm_os_name jvm_os_version
+                           jvm_java_version jvm_sun_arch_data_model)]
+      (assoc measurement :problem problem
+             :language lang
+             :platform platform))))
+
+
+(defn fastest-good-run [[problem-platform-lang measurements]]
+  (let [num-runs (count measurements)
+        good-runs (filter #(zero? (:exit_status %)) measurements)
+        num-good-runs (count good-runs)]
+    (if (zero? num-good-runs)
+      (assoc problem-platform-lang :num_runs num-runs
+             :good_runs 0 :elapsed_time_sec -1)
+      (let [fastest-run (apply min-key :elapsed_time_sec good-runs)
+            elapsed-times (sort (map :elapsed_time_sec good-runs))]
+        (assoc fastest-run :num_runs num-runs
+               :good_runs num-good-runs
+               :other_elapsed_time_sec elapsed-times)))))
+
+
+(defn compare-by-problem-platform-language-time [meas1 meas2]
+  (let [x (compare (:problem meas1) (:problem meas2))]
+    (if (not= x 0)
+      x
+      (let [x (compare (:platform meas1) (:platform meas2))]
+        (if (not= x 0)
+          x
+          (let [x (compare (:language meas1) (:language meas2))]
+            (if (not= x 0)
+              x
+              (compare (:elapsed_time_sec meas1) (:elapsed_time_sec meas2)))))))))
+
+
+(defn validated-xrel-from-file [xml-filename prog-name]
+  (let [p (try
+            (xml/parse xml-filename)
+            (catch Exception e
+              (iprintf *err* "%s: clojure.xml/parse got exception while attempting
+to read file '%s'\n"
+                       prog-name xml-filename)
+              (repl/pst e)
+              (die "Aborting.\n")))]
+    (when-not (validate-parsed-xml p)
+      (die "%s: XML file %s must be a MeasurementList
+consisting of one or more Measurement elements\n"
+           prog-name xml-filename))
+    ;; p is output of xml/parse.
+    ;; validated-xml-to-xrel produces a sequence of maps, each map
+    ;; containing details of one measurement.
+    (validated-xml-to-xrel p)))
+
+
+(def prog-name (basename *file*))
+
+(when (zero? (count *command-line-args*))
+  (die "usage: %s <results.xml> ...\n" prog-name))
+
+(let [data-xrel (mapcat #(validated-xrel-from-file % prog-name)
+                        *command-line-args*)
+      data (->> data-xrel
+                add-columns-problem-platform-language
+
+                ;; If there are multiple measurements for the same
+                ;; problem and language/Clojure version, group them
+                ;; together for later processing.
+                (group-by ;; (fn [meas] {:problem (:problem meas)
+                          ;;            :platform (:platform meas)
+                          ;;            :language (:language meas)})
+                          #(select-keys % [:problem :platform :language]))
+                
+                ;; Now that they are grouped, remove any in the group
+                ;; that failed (i.e. :exit_status is non-0).  Among
+                ;; those that succeeded, if any, keep the one with the
+                ;; smallest elapsed time.
+                (map fastest-good-run)
+                  
+                ;; For purposes of printing as a table, sort them by
+                ;; problem, and within each problem by platform, and
+                ;; within that by language.
+                (sort compare-by-problem-platform-language-time))]
+  
+  (p/print-table [:problem :platform :language :elapsed_time_sec
+                  ;; :other_elapsed_time_sec
+                  :good_runs]
+                 data)
+
+  ;; For each problem, create one chart with Clojure version on the X
+  ;; axis, and run time on the Y axis.  There should be a separate
+  ;; "curve" for each platform.
+
+;;  (doseq [[problem measurements] (group-by :problem data)]
+;;    (let [graph-data-rows (map-indexed (fn [idx meas]
+;;                                         [idx (:language meas) (:elapsed_time_sec meas)])
+;;                                       measurements)
+;;          temp-file-name (temporary-file-name)  ; tbd
+;;          outfile (io/file outdir (str problem ".png"))  ;; tbd: outdir
+;;          ]
+;;      (spit temp-file-name (str/join "\n"
+;;                                     (map #(str/join " " %) 
+;;                                          graph-data-rows)))
+;;      ))
+
+  )
+
+(iprintf "Done.\n")
