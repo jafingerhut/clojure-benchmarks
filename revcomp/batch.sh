@@ -12,9 +12,18 @@ BENCHMARK="revcomp"
 # SBCL 1.0.39 seems to work fine.
 
 #ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
-# Note that revcomp.clj-15.clj does not compile with Clojure versions
-# before 1.3-alpha7, because of its use of *unchecked-math*
-ALL_LANGUAGES="java `all_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6`"
+# + Note that revcomp.clj-15.clj does not compile with Clojure
+#   versions 1.2 or 1.2.1 because of its use of *unchecked-math*.
+# + It compiles but throws an exception with version 1.3-alpha5 and
+#   1.3-alpha6 because it attempts to set! *unchecked-math*.
+# + It compiles and runs correctly with 1.3-alpha6 through 1.4-alpha2,
+#   but is *very* slow due to reflection on line 108 when attempting
+#   to do = on (aget read-buf i) and gt, both of which should be of
+#   type byte.
+#
+# Thus I will only include Clojure versions 1.4-alpha3 and later for
+# this program.
+ALL_LANGUAGES="java `all_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6 1.3-alpha7 1.3-alpha8 1.3-beta1 1.3-beta2 1.3-beta3 1.3 1.4-alpha1 1.4-alpha2`"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
