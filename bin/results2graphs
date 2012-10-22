@@ -161,6 +161,10 @@ consisting of one or more Measurement elements\n"
 (when (zero? (count *command-line-args*))
   (die "usage: %s <results.xml> ...\n" prog-name))
 
+(doseq [fname *command-line-args*]
+  (when-not (.exists (io/file fname))
+    (die "%s: No file '%s'\n" prog-name fname)))
+
 (let [data-xrel (mapcat #(validated-xrel-from-file % prog-name)
                         *command-line-args*)
       data (->> data-xrel
@@ -169,10 +173,7 @@ consisting of one or more Measurement elements\n"
                 ;; If there are multiple measurements for the same
                 ;; problem and language/Clojure version, group them
                 ;; together for later processing.
-                (group-by ;; (fn [meas] {:problem (:problem meas)
-                          ;;            :platform (:platform meas)
-                          ;;            :language (:language meas)})
-                          #(select-keys % [:problem :platform :language]))
+                (group-by #(select-keys % [:problem :platform :language]))
                 
                 ;; Now that they are grouped, remove any in the group
                 ;; that failed (i.e. :exit_status is non-0).  Among
@@ -185,27 +186,72 @@ consisting of one or more Measurement elements\n"
                 ;; within that by language.
                 (sort compare-by-problem-platform-language-time))]
   
-  (p/print-table [:problem :platform :language :elapsed_time_sec
-                  ;; :other_elapsed_time_sec
-                  :good_runs]
-                 data)
+  ;; debug output
+;;  (p/print-table [:problem :platform :language :elapsed_time_sec
+;;                  ;; :other_elapsed_time_sec
+;;                  :good_runs]
+;;                 data)
 
-  ;; For each problem, create one chart with Clojure version on the X
-  ;; axis, and run time on the Y axis.  There should be a separate
-  ;; "curve" for each platform.
+  (doseq [[problem problem-measurements] (group-by :problem data)]
 
-;;  (doseq [[problem measurements] (group-by :problem data)]
-;;    (let [graph-data-rows (map-indexed (fn [idx meas]
-;;                                         [idx (:language meas) (:elapsed_time_sec meas)])
-;;                                       measurements)
-;;          temp-file-name (temporary-file-name)  ; tbd
-;;          outfile (io/file outdir (str problem ".png"))  ;; tbd: outdir
-;;          ]
-;;      (spit temp-file-name (str/join "\n"
-;;                                     (map #(str/join " " %) 
-;;                                          graph-data-rows)))
-;;      ))
+    ;; For each problem, create one chart with Clojure version on the
+    ;; X axis, and run time on the Y axis.  There should be a separate
+    ;; "curve" for each platform.
 
-  )
+    (let [platforms (sort (set (map :platform problem-measurements)))
+          tempfiles
+          (for [[plat plat-measurements] (group-by :platform
+                                                   problem-measurements)]
+            (let [graph-one-curve-data
+                  (map-indexed (fn [idx meas]
+                                 [idx (:language meas) (:elapsed_time_sec meas)])
+                               plat-measurements)
+                  tempfile (temporary-file-name)]
+              (spit tempfile (str/join "\n" (map #(str/join " " %) 
+                                                 graph-one-curve-data)))
+              [plat tempfile]))
 
+          outfile (io/file "." (str problem ".png"))
+          title problem
+          ylabel "secs"
+          plot-min 0.0
+          ;; It seems that plot-max "" causes gnuplot to automatically
+          ;; scale the Y axis for the longest run time.
+          plot-max ""
+          plotrange (str "[][" plot-min ":" plot-max "]")
+
+          plotlines
+          (for [[platform tempfile] tempfiles]
+            (str "\"" tempfile "\""
+                 " using 1:3:xtic(2) title '" platform "'"
+                 " with linespoints"))
+
+          plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
+          command (str
+                   "set title '" title "'\n"
+                   "set terminal png size 800,600\n"
+                   "set lmargin 8\n"
+                   "set bmargin 7\n"
+                   "set key outside\n"
+                   "set key center top\n"
+                   "set grid\n"
+                   "set xtics border in rotate by -90 offset character 0, -0.5, 0\n"
+                   "set ylabel \"" ylabel "\"\n"
+                   "set output \"" outfile "\"\n"
+                   plotline)
+          
+          notes (sh/sh "gnuplot" :in command)
+          err (str/trim-newline (:err notes))]
+
+      (when-not (empty? err)
+        (iprintf *err* "while generating plot " title "\n" err))
+
+      ;; debug output
+;;      (doseq [[plat temp-file-name] tempfiles]
+;;        (iprintf "problem %s platform %s temp-file-name %s\n"
+;;                 problem plat temp-file-name))
+
+      )))
+
+(shutdown-agents)
 (iprintf "Done.\n")
