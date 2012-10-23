@@ -68,7 +68,7 @@ do
     cd ..
 done
 
-for alpha in 1 2 3 4 5
+for alpha in 1 2 3 4
 do
     lein new clojure-1.4.0-alpha${alpha}
     cd clojure-1.4.0-alpha${alpha}
