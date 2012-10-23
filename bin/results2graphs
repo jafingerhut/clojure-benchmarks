@@ -6,6 +6,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :as sh]
+            ;;[clojure.tools.cli :as cli]
             [clojure.pprint :as p]))
 
 
@@ -118,10 +119,15 @@
       (assoc problem-platform-lang :num_runs num-runs
              :good_runs 0 :elapsed_time_sec -1)
       (let [fastest-run (apply min-key :elapsed_time_sec good-runs)
-            elapsed-times (sort (map :elapsed_time_sec good-runs))]
+            elapsed-times (sort (map :elapsed_time_sec good-runs))
+            max-over-min (/ (apply max elapsed-times)
+                            (apply min elapsed-times))
+            ;; Round max-over-min to fewer digits
+            max-over-min (format "%.2f" max-over-min)]
         (assoc fastest-run :num_runs num-runs
                :good_runs num-good-runs
-               :other_elapsed_time_sec elapsed-times)))))
+               :other_elapsed_time_sec elapsed-times
+               :time_var max-over-min)))))
 
 
 (defn compare-by-problem-platform-language-time [meas1 meas2]
@@ -158,100 +164,153 @@ consisting of one or more Measurement elements\n"
 
 (def prog-name (basename *file*))
 
-(when (zero? (count *command-line-args*))
-  (die "usage: %s <results.xml> ...\n" prog-name))
 
-(doseq [fname *command-line-args*]
-  (when-not (.exists (io/file fname))
-    (die "%s: No file '%s'\n" prog-name fname)))
+;; I'm not using clojure.tools.cli for option parsing due to the extra
+;; dependency, but I created this before I knew it would require the
+;; extra dependency.
+;;(def options-spec
+;;  [ ["-t" "--show-table" "Show table of results"]
+;;    ["-a" "--show-all-times" "In table, show all run times"]
+;;    ["-p" "--[no]-plots" :default true] ])
 
-(let [data-xrel (mapcat #(validated-xrel-from-file % prog-name)
-                        *command-line-args*)
-      data (->> data-xrel
-                add-columns-problem-platform-language
 
-                ;; If there are multiple measurements for the same
-                ;; problem and language/Clojure version, group them
-                ;; together for later processing.
-                (group-by #(select-keys % [:problem :platform :language]))
-                
-                ;; Now that they are grouped, remove any in the group
-                ;; that failed (i.e. :exit_status is non-0).  Among
-                ;; those that succeeded, if any, keep the one with the
-                ;; smallest elapsed time.
-                (map fastest-good-run)
+(defn show-usage [prog-name options-desc]
+  (die "usage: %s [ <opions> ] <results.xml> ...
+%s
+    -t Show a table of all results extracted from the XML files.
+       Without this option, no such table is shown.
+
+    -a Only useful if -t is specified.  If both -t and -a are given,
+       then in the table of results displayed, there will be a column
+       to show not only the fastest elapsed time for each
+       problem/platform/language combo, but also a list of all elapsed
+       times sorted in increasing order.
+
+    -p By default, use gnuplot to generate PNG format plots for each
+       problem.  With this option, skip the generation of plots.
+" prog-name options-desc))
+
+
+(defn parse-opts [args]
+  (loop [args args
+         opts {:show-table false
+               :show-all-times false
+               :plots true}]
+    (if-let [arg (first args)]
+      (if-let [opt (case arg
+                     "-t" {:show-table true}
+                     "-a" {:show-all-times true}
+                     "-p" {:plots false}
+                     nil)]
+        (recur (rest args) (merge opts opt))
+        [opts args ""])
+      [opts args ""])))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Start of 'main' code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(let [[opts filenames options-desc] (parse-opts *command-line-args*)]
+  (when (zero? (count filenames))
+    (show-usage prog-name options-desc))
+
+  (doseq [fname filenames]
+    (when-not (.exists (io/file fname))
+      (die "%s: No such file '%s'\n" prog-name fname)))
+
+  (let [data-xrel (mapcat #(validated-xrel-from-file % prog-name) filenames)
+        data (->> data-xrel
+                  add-columns-problem-platform-language
                   
-                ;; For purposes of printing as a table, sort them by
-                ;; problem, and within each problem by platform, and
-                ;; within that by language.
-                (sort compare-by-problem-platform-language-time))]
+                  ;; If there are multiple measurements for the same
+                  ;; problem and language/Clojure version, group them
+                  ;; together for later processing.
+                  (group-by #(select-keys % [:problem :platform :language]))
+                  
+                  ;; Now that they are grouped, remove any in the
+                  ;; group that failed (i.e. :exit_status is non-0).
+                  ;; Among those that succeeded, if any, keep the one
+                  ;; with the smallest elapsed time.
+                  (map fastest-good-run)
+                  
+                  ;; For purposes of printing as a table, sort them by
+                  ;; problem, and within each problem by platform, and
+                  ;; within that by language.
+                  (sort compare-by-problem-platform-language-time))]
   
-  ;; debug output
-;;  (p/print-table [:problem :platform :language :elapsed_time_sec
-;;                  ;; :other_elapsed_time_sec
-;;                  :good_runs]
-;;                 data)
+    ;; debug output
+    (when (:show-table opts)
+      (let [columns (concat [:problem :platform :language :elapsed_time_sec
+                             :time_var]
+                            (if (:show-all-times opts)
+                              [:other_elapsed_time_sec]
+                              [])
+                            [:good_runs])]
+        (p/print-table columns data)))
 
-  (doseq [[problem problem-measurements] (group-by :problem data)]
-
-    ;; For each problem, create one chart with Clojure version on the
-    ;; X axis, and run time on the Y axis.  There should be a separate
-    ;; "curve" for each platform.
-
-    (let [platforms (sort (set (map :platform problem-measurements)))
-          tempfiles
-          (for [[plat plat-measurements] (group-by :platform
-                                                   problem-measurements)]
-            (let [graph-one-curve-data
-                  (map-indexed (fn [idx meas]
-                                 [idx (:language meas) (:elapsed_time_sec meas)])
-                               plat-measurements)
-                  tempfile (temporary-file-name)]
-              (spit tempfile (str/join "\n" (map #(str/join " " %) 
-                                                 graph-one-curve-data)))
-              [plat tempfile]))
-
-          outfile (io/file "." (str problem ".png"))
-          title problem
-          ylabel "secs"
-          plot-min 0.0
-          ;; It seems that plot-max "" causes gnuplot to automatically
-          ;; scale the Y axis for the longest run time.
-          plot-max ""
-          plotrange (str "[][" plot-min ":" plot-max "]")
-
-          plotlines
-          (for [[platform tempfile] tempfiles]
-            (str "\"" tempfile "\""
-                 " using 1:3:xtic(2) title '" platform "'"
-                 " with linespoints"))
-
-          plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
-          command (str
-                   "set title '" title "'\n"
-                   "set terminal png size 800,600\n"
-                   "set lmargin 8\n"
-                   "set bmargin 7\n"
-                   "set key outside\n"
-                   "set key center top\n"
-                   "set grid\n"
-                   "set xtics border in rotate by -90 offset character 0, -0.5, 0\n"
-                   "set ylabel \"" ylabel "\"\n"
-                   "set output \"" outfile "\"\n"
-                   plotline)
+    (when (:plots opts)
+      (doseq [[problem problem-measurements] (group-by :problem data)]
+        
+        ;; For each problem, create one chart with Clojure version on
+        ;; the X axis, and run time on the Y axis.  There should be a
+        ;; separate "curve" for each platform.
+        
+        (let [platforms (sort (set (map :platform problem-measurements)))
+              tempfiles
+              (for [[plat plat-measurements] (group-by :platform
+                                                       problem-measurements)]
+                (let [graph-one-curve-data
+                      (map-indexed (fn [idx meas]
+                                     [idx (:language meas)
+                                      (:elapsed_time_sec meas)])
+                                   plat-measurements)
+                      tempfile (temporary-file-name)]
+                  (spit tempfile (str/join "\n" (map #(str/join " " %) 
+                                                     graph-one-curve-data)))
+                  [plat tempfile]))
+              
+              outfile (io/file "." (str problem ".png"))
+              title problem
+              ylabel "secs"
+              plot-min 0.0
+              ;; It seems that plot-max "" causes gnuplot to
+              ;; automatically scale the Y axis for the longest run
+              ;; time.
+              plot-max ""
+              plotrange (str "[][" plot-min ":" plot-max "]")
+            
+              plotlines
+              (for [[platform tempfile] tempfiles]
+                (str "\"" tempfile "\""
+                     " using 1:3:xtic(2) title '" platform "'"
+                     " with linespoints"))
+              
+              plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
+              command (str
+                       "set title '" title "'\n"
+                       "set terminal png size 800,600\n"
+                       "set lmargin 8\n"
+                       "set bmargin 7\n"
+                       "set key outside\n"
+                       "set key center top\n"
+                       "set grid\n"
+                       "set xtics border in rotate by -90 offset character 0, -0.5, 0\n"
+                       "set ylabel \"" ylabel "\"\n"
+                       "set output \"" outfile "\"\n"
+                       plotline)
+              
+              notes (sh/sh "gnuplot" :in command)
+              err (str/trim-newline (:err notes))]
           
-          notes (sh/sh "gnuplot" :in command)
-          err (str/trim-newline (:err notes))]
+          (when-not (empty? err)
+            (iprintf *err* "while generating plot " title "\n" err))
+          
+          ;; debug output
+;;          (doseq [[plat temp-file-name] tempfiles]
+;;            (iprintf "problem %s platform %s temp-file-name %s\n"
+;;                     problem plat temp-file-name))
 
-      (when-not (empty? err)
-        (iprintf *err* "while generating plot " title "\n" err))
-
-      ;; debug output
-;;      (doseq [[plat temp-file-name] tempfiles]
-;;        (iprintf "problem %s platform %s temp-file-name %s\n"
-;;                 problem plat temp-file-name))
-
-      )))
+          )))))
 
 (shutdown-agents)
 (iprintf "Done.\n")
