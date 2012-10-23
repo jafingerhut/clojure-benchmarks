@@ -8,7 +8,7 @@ mkdir -p $OUTPUT_DIR
 BENCHMARK="mandelbrot"
 
 #ALL_LANGUAGES="sbcl perl ghc java jruby clj-1.2 clj-1.3 clj-1.4 clj-1.5-alpha6"
-ALL_LANGUAGES="java ${ALL_CLOJURE_VERSIONS}"
+ALL_LANGUAGES="java ${ALL_BENCHMARK_CLOJURE_VERSIONS}"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

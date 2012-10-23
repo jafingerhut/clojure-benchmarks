@@ -12,7 +12,7 @@ BENCHMARK="spectralnorm"
 
 #ALL_LANGUAGES="sbcl perl ghc java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4 jruby scala"
 #ALL_LANGUAGES="java clj-1.2 jruby scala"
-ALL_LANGUAGES="java ${ALL_CLOJURE_VERSIONS}"
+ALL_LANGUAGES="java ${ALL_BENCHMARK_CLOJURE_VERSIONS}"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

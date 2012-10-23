@@ -103,3 +103,12 @@ do
     lein deps
     cd ..
 done
+
+for beta in 1
+do
+    lein new clojure-1.5.0-beta${beta}
+    cd clojure-1.5.0-beta${beta}
+    cp -p "../lein-files/project.clj-for-clojure-1.5.0-beta${beta}" project.clj
+    lein deps
+    cd ..
+done

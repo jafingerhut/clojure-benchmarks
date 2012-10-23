@@ -15,7 +15,7 @@ BENCHMARK="knucleotide"
 # enough more memory than later versions with this program that the
 # -Xmx command line argument currently used is not enough, and it runs
 # out of memory.  Leave those Clojure versions out for now.
-ALL_LANGUAGES="java `all_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6`"
+ALL_LANGUAGES="java `all_benchmark_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6`"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

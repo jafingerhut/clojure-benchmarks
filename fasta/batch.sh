@@ -8,7 +8,7 @@ mkdir -p $OUTPUT_DIR
 BENCHMARK="fasta"
 
 #ALL_LANGUAGES="sbcl perl ghc java jruby clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
-ALL_LANGUAGES="java ${ALL_CLOJURE_VERSIONS}"
+ALL_LANGUAGES="java ${ALL_BENCHMARK_CLOJURE_VERSIONS}"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

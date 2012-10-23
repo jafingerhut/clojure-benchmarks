@@ -23,7 +23,7 @@ BENCHMARK="revcomp"
 #
 # Thus I will only include Clojure versions 1.4-alpha3 and later for
 # this program.
-ALL_LANGUAGES="java `all_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6 1.3-alpha7 1.3-alpha8 1.3-beta1 1.3-beta2 1.3-beta3 1.3 1.4-alpha1 1.4-alpha2`"
+ALL_LANGUAGES="java `all_benchmark_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6 1.3-alpha7 1.3-alpha8 1.3-beta1 1.3-beta2 1.3-beta3 1.3 1.4-alpha1 1.4-alpha2`"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

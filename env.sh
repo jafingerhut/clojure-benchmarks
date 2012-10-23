@@ -35,12 +35,16 @@ fi
 # to the Clojure git log, it is identical to clj-1.4-beta1.  I kept
 # only clj-1.4-beta1.
 
-ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7"
-ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-alpha7"
+# See also below the definition of ALL_BENCHMARK_CLOJURE_VERSIONS,
+# which is a subset of ALL_CLOJURE_VERSIONS
+
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1"
+
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-beta1"
 
 show_known_clojure_versions()
 {
-    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7]"
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] clj-1.5-beta1"
 }
 
 internal_check_clojure_version_spec()
@@ -92,6 +96,13 @@ internal_check_clojure_version_spec()
         CLJ_VERSION_STR="1.5.0${spec/1.5/}"
         ;;
     1.5.0-alpha[1-7])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
+    1.5-beta1)
+        CLJ_VERSION_STR="1.5.0${spec/1.5/}"
+        ;;
+    1.5.0-beta1)
         CLJ_VERSION_STR="${spec}"
         ;;
 
@@ -177,6 +188,49 @@ all_clojure_versions_except()
     local tmp
     local ret_val=""
     for v in ${ALL_CLOJURE_VERSIONS}
+    do
+        check_clojure_version_spec "${v}"
+        tmp="${CLJ_VERSION_STR}"
+        check_exact_string_in_string_set "${tmp}" "${clojure_versions_to_exclude_set}"
+        if [ $? != 0 ]
+        then
+            # The version is not in the list of versions to exclude,
+            # so add it to return value.
+	    ret_val="${ret_val} ${v}"
+        fi
+    done
+    echo "${ret_val}"
+}
+
+# ALL_BENCHMARK_CLOJURE_VERSIONS is same as ALL_CLOJURE_VERSIONS,
+# except the following versions have been removed so that benchmarking
+# runs go faster:
+
+# 1.5-alpha7 is only 1 commit newer than 1.5-alpha6, and it is the
+# addition of 5 new macros that won't be used in any benchmarks
+# spanning many versions.
+
+# 1.5-alpha6 is only 1 commit newer than 1.5-alpha5, and it is a minor
+# bug fix in column metadata.
+
+# 1.4-beta7 is only 2 commits older than 1.4.0, and they are edits to
+# doc strings.
+
+# 1.4-beta5 is only 2 commits newer than 1.4-beta4, and they are a
+# change to the data readers implementation and addition of the
+# *compiler-options* Var.
+
+# 1.4-beta3 is only 1 commit newer than 1.4-beta2, and it is the
+# option to remove metadata during compilation.
+
+ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7`"
+
+all_benchmark_clojure_versions_except()
+{
+    local clojure_versions_to_exclude_set=`make_clojure_version_set $*`
+    local tmp
+    local ret_val=""
+    for v in ${ALL_BENCHMARK_CLOJURE_VERSIONS}
     do
         check_clojure_version_spec "${v}"
         tmp="${CLJ_VERSION_STR}"

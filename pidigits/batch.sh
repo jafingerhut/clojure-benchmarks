@@ -16,7 +16,7 @@ BENCHMARK="pidigits"
 # when they were small enough, and then later arithmetic with those
 # values can cause an exception when they overflow.  It was fixed in
 # clj-1.3.
-ALL_LANGUAGES="java `all_clojure_versions_except 1.3-beta2 1.3-beta3`"
+ALL_LANGUAGES="java `all_benchmark_clojure_versions_except 1.3-beta2 1.3-beta3`"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""

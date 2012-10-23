@@ -11,7 +11,7 @@ BENCHMARK="binarytrees"
 #ALL_LANGUAGES="java jruby clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3 clj-1.3-alpha4"
 # Note: Older versions than clj-1.3-alpha7 cannot compile the program
 # binarytrees.clojure-rh.clojure.
-ALL_LANGUAGES="java `all_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6`"
+ALL_LANGUAGES="java `all_benchmark_clojure_versions_except 1.2 1.2.1 1.3-alpha5 1.3-alpha6`"
 ALL_TESTS="quick medium long"
 
 LANGUAGES=""
