@@ -171,6 +171,7 @@ consisting of one or more Measurement elements\n"
 ;;(def options-spec
 ;;  [ ["-t" "--show-table" "Show table of results"]
 ;;    ["-a" "--show-all-times" "In table, show all run times"]
+;;    ["-l" "--show-platform" "In table, show platform"]
 ;;    ["-p" "--[no]-plots" :default true] ])
 
 
@@ -186,6 +187,8 @@ consisting of one or more Measurement elements\n"
        problem/platform/language combo, but also a list of all elapsed
        times sorted in increasing order.
 
+    -l Like -a, except adds a 'platform' column to the table.
+
     -p By default, use gnuplot to generate PNG format plots for each
        problem.  With this option, skip the generation of plots.
 " prog-name options-desc))
@@ -195,11 +198,13 @@ consisting of one or more Measurement elements\n"
   (loop [args args
          opts {:show-table false
                :show-all-times false
+               :show-platform false
                :plots true}]
     (if-let [arg (first args)]
       (if-let [opt (case arg
                      "-t" {:show-table true}
                      "-a" {:show-all-times true}
+                     "-l" {:show-platform true}
                      "-p" {:plots false}
                      nil)]
         (recur (rest args) (merge opts opt))
@@ -240,8 +245,11 @@ consisting of one or more Measurement elements\n"
   
     ;; debug output
     (when (:show-table opts)
-      (let [columns (concat [:problem :platform :language :elapsed_time_sec
-                             :time_var]
+      (let [columns (concat [:problem]
+                            (if (:show-platform opts)
+                              [:platform]
+                              [])
+                            [:language :elapsed_time_sec :time_var]
                             (if (:show-all-times opts)
                               [:other_elapsed_time_sec]
                               [])
