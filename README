@@ -120,6 +120,9 @@ in 10.5.  I've filed a bug on Apple's developer web site in January
 Install instructions specific to Ubuntu Linux 10.4
 ----------------------------------------------------------------------
 
+On Ubuntu 11.10 (and perhaps others), the package libxml-libxml-perl
+must be installed.  See below.
+
 If you want the Sun/Oracle JDK, not OpenJDK (which is the default on
 Ubuntu as of 10.4, or perhaps even earlier versions of Ubuntu), follow
 these steps:
@@ -134,6 +137,7 @@ graphical Synaptic Package Manager to add the sun-java6-jdk package.
 
 The following packages are also useful to add on Ubuntu Linux:
 
+libxml-libxml-perl - Required for measureproc to work.
 libgmp3-dev - If you want to run those pidigits programs that use the
     GNU MP library.
 git-core - optional, but useful for getting updated versions of
