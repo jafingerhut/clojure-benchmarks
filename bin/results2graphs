@@ -1,4 +1,5 @@
 #! /usr/bin/env clj
+;; -*- mode: Clojure -*-
 
 (ns results2graphs.core
   (:require [clojure.xml :as xml]
@@ -237,6 +238,14 @@ consisting of one or more Measurement elements\n"
                   ;; Among those that succeeded, if any, keep the one
                   ;; with the smallest elapsed time.
                   (map fastest-good-run)
+
+                  ;; Remove any older runs for Clojure versions that
+                  ;; are too similar to other versions.
+                  (remove (fn [meas]
+                            (#{"clj-1.4-alpha5" "clj-1.4-beta3"
+                               "clj-1.4-beta5" "clj-1.4-beta7"
+                               "clj-1.5-alpha6" "clj-1.5-alpha7"}
+                             (:language meas))))
                   
                   ;; For purposes of printing as a table, sort them by
                   ;; problem, and within each problem by platform, and
@@ -263,15 +272,25 @@ consisting of one or more Measurement elements\n"
         ;; the X axis, and run time on the Y axis.  There should be a
         ;; separate "curve" for each platform.
         
-        (let [platforms (sort (set (map :platform problem-measurements)))
+        ;; language->idx helps us correctly draw plots in the case
+        ;; where some platforms have results for languages where other
+        ;; platforms do not.  First create union of all language
+        ;; results we have, sort them by name, and assign them a
+        ;; numeric index in that order.
+        (let [language->idx (->> (map :language problem-measurements)
+                                set
+                                sort
+                                (map-indexed (fn [idx lang] [lang idx]))
+                                (into {}))
               tempfiles
               (for [[plat plat-measurements] (group-by :platform
                                                        problem-measurements)]
                 (let [graph-one-curve-data
-                      (map-indexed (fn [idx meas]
-                                     [idx (:language meas)
-                                      (:elapsed_time_sec meas)])
-                                   plat-measurements)
+                      (map (fn [meas]
+                             [(get language->idx (:language meas))
+                              (:language meas)
+                              (:elapsed_time_sec meas)])
+                           plat-measurements)
                       tempfile (temporary-file-name)]
                   (spit tempfile (str/join "\n" (map #(str/join " " %) 
                                                      graph-one-curve-data)))
