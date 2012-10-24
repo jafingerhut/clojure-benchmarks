@@ -22,7 +22,8 @@ then
     CFLAGS="-Wall -O3"
     LDFLAGS="-lgmp"
 else
-    CFLAGS="-pipe -Wall -O3 -fomit-frame-pointer -march=native -lgmp"
+    CFLAGS="-pipe -Wall -O3 -fomit-frame-pointer -march=native"
+    LDFLAGS="-lgmp"
 fi
 
 gcc $CFLAGS pidigits.gcc-4.c $LDFLAGS -o "${GCC_OBJ_DIR}/pidigits.gcc-4.gcc_run"
