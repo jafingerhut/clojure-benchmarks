@@ -162,6 +162,9 @@ perl (category Interpeters and Perl) and libxml2 (many categories,
 wget (in category Web) - needed if you use Leiningen
 git (category Devel) - optional, but useful for getting updated
     versions of clojure-contrib from github.com
+gcc - If you want to run the C version of the pidigits program.
+libgmp-devel - If you want to run those pidigits programs that use the
+    GNU MP library.
 
 Edit env.sh so that JAVA_BIN points at the directory where your java
 and javac commands are installed.  Examples are there already for the
