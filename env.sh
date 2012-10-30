@@ -111,6 +111,7 @@ internal_check_clojure_version_spec()
 	ret_val=1
 	;;
     esac
+    SHORT_CLJ_VERSION_STR="${CLJ_VERSION_STR/.0/}"
     return ${ret_val}
 }
 

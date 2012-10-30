@@ -36,7 +36,7 @@ do
 	        1>&2 echo "Unrecognized command line parameter: $1"
 	        exit 1
             fi
-            LANGUAGES="$LANGUAGES clj-${CLJ_VERSION_STR}"
+            LANGUAGES="$LANGUAGES clj-${SHORT_CLJ_VERSION_STR}"
 	    ;;
     esac
     shift
