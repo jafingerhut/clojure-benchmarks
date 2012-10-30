@@ -88,7 +88,8 @@
 
 (defn add-columns-problem-platform-language [data]
   (for [{:keys [current_working_directory output_file jvm_os_name
-                jvm_os_version jvm_java_version jvm_sun_arch_data_model]
+                jvm_os_version jvm_java_version jvm_sun_arch_data_model
+                user_cpu_time_sec system_cpu_time_sec elapsed_time_sec]
          :as measurement} data]
     (let [problem (basename current_working_directory)
           lang (if-let [[_ size lang]
@@ -106,10 +107,16 @@
 
           platform (format "%s %s + JDK %s, %s-bit"
                            jvm_os_name jvm_os_version
-                           jvm_java_version jvm_sun_arch_data_model)]
+                           jvm_java_version jvm_sun_arch_data_model)
+          total_cpu_time_sec (+ user_cpu_time_sec system_cpu_time_sec)
+          parallelism (/ total_cpu_time_sec elapsed_time_sec)
+          ;; Round parallelism to fewer digits
+          parallelism (format "%.2f" parallelism)]
       (assoc measurement :problem problem
              :language lang
-             :platform platform))))
+             :platform platform
+             :total_cpu_time_sec total_cpu_time_sec
+             :parallelism parallelism))))
 
 
 (defn fastest-good-run [[problem-platform-lang measurements]]
@@ -258,7 +265,7 @@ consisting of one or more Measurement elements\n"
                             (if (:show-platform opts)
                               [:platform]
                               [])
-                            [:language :elapsed_time_sec :time_var]
+                            [:language :elapsed_time_sec :time_var :parallelism]
                             (if (:show-all-times opts)
                               [:other_elapsed_time_sec]
                               [])
