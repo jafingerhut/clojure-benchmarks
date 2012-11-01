@@ -86,9 +86,33 @@
               [tag val])))))
 
 
+(def ^:const +temp-hack-jvm_java_vm_vendor-map+
+  {
+   ["Java HotSpot(TM) Server VM"
+    "Linux" "3.2.0-32-generic" "1.6.0_37" "32"] "Sun Microsystems Inc."
+   ["Java HotSpot(TM) 64-Bit Server VM"
+    "Linux" "3.2.0-32-generic" "1.6.0_37" "64"] "Sun Microsystems Inc."
+   ["Java HotSpot(TM) Server VM"
+    "Linux" "3.2.0-32-generic" "1.7.0_09" "32"] "Oracle Corporation"
+   ["Java HotSpot(TM) 64-Bit Server VM"
+    "Linux" "3.2.0-32-generic" "1.7.0_09" "64"] "Oracle Corporation"
+   ["IBM J9 VM"
+    "Linux" "3.2.0-32-generic" "1.6.0" "64"] "IBM Corporation"
+   ["Java HotSpot(TM) 64-Bit Server VM"
+    "Mac OS X" "10.6.8" "1.6.0_37" "64"] "Apple Inc."
+   ["Java HotSpot(TM) Server VM"
+    "Windows 7" "6.1" "1.7.0_09" "32"] "tbd"
+   })
+
+
+(defn first-word [s]
+  (first (str/split s #"\s+")))
+
+
 (defn add-columns-problem-platform-language [data]
-  (for [{:keys [current_working_directory output_file jvm_os_name
-                jvm_os_version jvm_java_version jvm_sun_arch_data_model
+  (for [{:keys [current_working_directory output_file
+                jvm_os_name jvm_os_version jvm_java_vm_name jvm_java_vm_vendor
+                jvm_java_version jvm_sun_arch_data_model
                 user_cpu_time_sec system_cpu_time_sec elapsed_time_sec]
          :as measurement} data]
     (let [problem (basename current_working_directory)
@@ -105,9 +129,28 @@
                  ;; beta versions.
                  (str lang "-final"))
 
-          platform (format "%s %s + JDK %s, %s-bit"
+          jvm_java_vm_vendor (if (nil? jvm_java_vm_vendor)
+                               ;; Temporary hack to fill in this
+                               ;; missing data for some existing XML
+                               ;; benchmark result files I still have,
+                               ;; without modifying those files.
+                               (if-let [vendor (+temp-hack-jvm_java_vm_vendor-map+
+                                                [jvm_java_vm_name
+                                                 jvm_os_name jvm_os_version
+                                                 jvm_java_version
+                                                 jvm_sun_arch_data_model])]
+                                 vendor
+                                 (do
+                                   (iprintf *err* "No vendor known for java_vm_name='%s' os_name='%s' os_version='%s' java_version='%s' sun_arch_data_model='%s'.  Consider finding out and adding it to +temp-hack-jvm_java_vm_vendor-map+.\n"
+                                            jvm_java_vm_name jvm_os_name jvm_os_version
+                                            jvm_java_version jvm_sun_arch_data_model)
+                                   "unknown_vendor"))
+                               jvm_java_vm_vendor)
+          jvm_java_vm_vendor (first-word jvm_java_vm_vendor)
+          
+          platform (format "%s %s + %s JDK %s, %s-bit"
                            jvm_os_name jvm_os_version
-                           jvm_java_version jvm_sun_arch_data_model)
+                           jvm_java_vm_vendor jvm_java_version jvm_sun_arch_data_model)
           total_cpu_time_sec (+ user_cpu_time_sec system_cpu_time_sec)
           parallelism (/ total_cpu_time_sec elapsed_time_sec)
           ;; Round parallelism to fewer digits
