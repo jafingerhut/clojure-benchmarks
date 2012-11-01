@@ -468,6 +468,7 @@ my $jvm_property_names = [
     'java.version',
     'java.specification.version',
     'java.vm.name',
+    'java.vm.vendor',
     'java.vm.version',
     'java.runtime.version',
     'sun.arch.data.model' ];
@@ -479,6 +480,7 @@ my $jvm_property_xml_tags = {
     'java.version' => 'jvm_java_version',
     'java.specification.version' => 'jvm_java_specification_version',
     'java.vm.name' => 'jvm_java_vm_name',
+    'java.vm.vendor' => 'jvm_java_vm_vendor',
     'java.vm.version' => 'jvm_java_vm_version',
     'java.runtime.version' => 'jvm_java_runtime_version',
     'sun.arch.data.model' => 'jvm_sun_arch_data_model'

@@ -20,6 +20,7 @@ public final class JVMInfo {
 	showProp("java.version");
 	showProp("java.specification.version");
 	showProp("java.vm.name");
+	showProp("java.vm.vendor");
 	showProp("java.vm.version");
 	showProp("java.runtime.version");
 	showProp("sun.arch.data.model");
