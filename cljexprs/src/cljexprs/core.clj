@@ -1,6 +1,7 @@
 (ns cljexprs.core
   (:require [criterium.core :as criterium]
             [clojure.string :as str]
+            [clojure.java.io :as io]
             [clojure.pprint :as pp]))
 
 (set! *warn-on-reflection* true)
@@ -45,34 +46,48 @@
   (first (str/split s #"\s+")))
 
 
+(defn platform-desc [results]
+  (let [os (:os-details results)
+        runtime (:runtime-details results)]
+    (format "Clojure %s / %s-bit %s JDK %s / %s %s"
+            (:clojure-version-string runtime)
+            (:sun-arch-data-model runtime)
+            (first-word (:vm-vendor runtime))
+            (:java-version runtime)
+            (:name os) (:version os))))
+
+
 (defmacro benchmark
   [bindings expr & opts]
   `(do
-;;     (iprintf *err* "\n")
-;;     (iprintf *err* "----------------------------------------\n")
      (iprintf *err* "Benchmarking %s %s ..." '~bindings '~expr)
-;;     (iprintf *err* "\n")
-
      ;(criterium/quick-bench ~expr ~@opts)
      ;(criterium/bench ~expr ~@opts)
      (let ~bindings
        (let [results#
-             (criterium/with-progress-reporting
-               (criterium/benchmark ~expr ~@opts))
-             os# (:os-details results#)
-             runtime# (:runtime-details results#)]
+;;             (criterium/with-progress-reporting
+               (criterium/benchmark ~expr ~@opts)
+;;               )
+             ]
          (pp/pprint {:bindings '~bindings
                      :expr '~expr
                      :opts '~opts
                      :results results#})
          (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
-         (iprintf *err* "    %s\n"
-                  (format "Clojure %s on %s-bit %s JDK %s on %s %s"
-                          (:clojure-version-string runtime#)
-                          (:sun-arch-data-model runtime#)
-                          (first-word (:vm-vendor runtime#)) (:java-version runtime#)
-                          (:name os#) (:version os#)))))
+         (iprintf *err* "    %s\n" (platform-desc results#))))
      (flush)))
+
+
+(defn report-from-benchmark-results-file [fname]
+  (with-open [rdr (java.io.PushbackReader. (io/reader fname))]
+    (loop [result (read rdr false :eof)]
+      (when-not (= result :eof)
+        (iprintf "\n\n")
+        (iprintf "Benchmark %s\n" (:bindings result))
+        (iprintf "    %s\n" (:expr result))
+        (iprintf "    using %s\n" (platform-desc (:results result)))
+        (criterium/report-result (:results result))
+        (recur (read rdr false :eof))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -96,33 +111,8 @@
 ;; End definitions used below for cljs-bench benchmarks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn -main [& args]
-  ;; Charts to add:
 
-  ;; + size in Mbytes of clojure.jar
-  ;; + time to build clojure.jar - "ant jar" elapsed time
-  ;; + time to run tests on clojure.jar - "ant" elapsed time minus
-  ;;   "ant jar" elapsed time (?)
-  
-  ;; Note: It seems that (set v) is significantly slower than (into
-  ;; #{} v) for the vec13 and vec10k cases.  This is reasonable given
-  ;; that (into #{} v) uses transients, whereas (set v) is not.
-
-  ;; (set v) is faster for the vec1 and vec3 cases, probably due to
-  ;; the constant time overheads the transient operations of (into #{}
-  ;; v).
-
-  ;; Is there a relatively simple way to rewrite (set v) so that for
-  ;; very short input sequences, say 5 or less, it works as it does
-  ;; today, but for longer ones it works the same as (into #{} v)?  If
-  ;; v is a collection from which we can get its count in O(1) time,
-  ;; that sounds reasonable, but what if it is a lazy sequence or
-  ;; other collection that count requires a linear scan on?  Probably
-  ;; need some more experimentation there, so that the tests to
-  ;; determine which method to use don't add much run time themselves.
-
-  ;; TBD: Do similar tests for other collection constructors, e.g. for
-  ;; vectors, maps, etc.
+(defn run-benchmarks-set1 []
   (benchmark [coll (list 1 2 3)] (first coll))
   (benchmark [coll (list 1 2 3)] (dotimes [i 1000000] (first coll)))
   (benchmark [coll (list 1 2 3)] (rest coll))
@@ -136,9 +126,10 @@
   (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
              (into #{} v13))
   (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
-             (dotimes [i 1000000] (into #{} v13)))
-  (System/exit 0)
+             (dotimes [i 1000000] (into #{} v13))))
 
+
+(defn run-benchmarks-cljs []
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Begin section that is a translation of cljs-bench benchmarks
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -307,15 +298,35 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; End section that is a translation of cljs-bench benchmarks
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  )
 
 
+;; Note: It seems that (set v) is significantly slower than (into #{}
+;; v) for the vec13 and vec10k cases.  This is reasonable given that
+;; (into #{} v) uses transients, whereas (set v) is not.
 
-  
-  
-  (System/exit 0)
+;; (set v) is faster for the vec1 and vec3 cases, probably due to the
+;; constant time overheads the transient operations of (into #{} v).
+
+;; Is there a relatively simple way to rewrite (set v) so that for
+;; very short input sequences, say 5 or less, it works as it does
+;; today, but for longer ones it works the same as (into #{} v)?  If v
+;; is a collection from which we can get its count in O(1) time, that
+;; sounds reasonable, but what if it is a lazy sequence or other
+;; collection that count requires a linear scan on?  Probably need
+;; some more experimentation there, so that the tests to determine
+;; which method to use don't add much run time themselves.
+
+;; TBD: Be careful of sorted sets, on which the underlying data
+;; structure has no corresponding transient version, so transient
+;; fails.
+
+;; TBD: Do similar tests for other collection constructors, e.g. for
+;; vectors, maps, etc.
+
+(defn run-benchmarks-into-vs-set []
   (benchmark [v1 ["a"]] (count (into #{} v1)))
   (benchmark [v1 ["a"]] (count (set v1)))
-  (System/exit 0)
   (benchmark [v3 ["a" "b" "c"]] (count (into #{} v3)))
   (benchmark [v3 ["a" "b" "c"]] (count (set v3)))
   (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
@@ -323,33 +334,26 @@
   (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
              (count (set v13)))
   (benchmark [v10k (vec (range 10000))] (count (into #{} v10k)))
-  (benchmark [v10k (vec (range 10000))] (count (set v10k)))
-  (System/exit 0)
+  (benchmark [v10k (vec (range 10000))] (count (set v10k))))
 
-  ;; TBD: Why is this version 6 times slower than the 2 versions
-  ;; below, each of which are the same speed?
-  (benchmark []
-             (let [n 500000]
-               (loop [i 0
-                      sum 0]
-                 (if (< i n)
-                   (recur (inc i) (+ sum i))
-                   sum))))
-  (System/exit 0)
 
-  (benchmark []
-             (let [n (long 500000)]
-               (loop [i (long 0)
-                      sum (long 0)]
-                 (if (< i n)
-                   (recur (unchecked-inc i) (unchecked-add sum i))
-                   sum))))
-  (benchmark []
-             (let [n 500000]
-               (loop [i 0
-                      sum 0]
-                 (if (< i n)
-                   (recur (unchecked-inc i) (unchecked-add sum i))
-                   sum))))
-  (System/exit 0)
+(defn run-benchmarks [select]
+  (case select
+    :set1 (run-benchmarks-set1)
+    :cljs (run-benchmarks-cljs)
+    :into-vs-set (run-benchmarks-into-vs-set)
+    ))
+
+
+;; TBD: Charts to add:
+
+;; + size in Mbytes of clojure.jar
+;; + time to build clojure.jar - "ant jar" elapsed time
+;; + time to run tests on clojure.jar - "ant" elapsed time minus
+;;   "ant jar" elapsed time (?)
+
+
+(defn -main [& args]
+  (run-benchmarks :set1)
+  ;;(report-from-benchmark-results-file (first args))
   )
