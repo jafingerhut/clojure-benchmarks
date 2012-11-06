@@ -33,13 +33,35 @@
     s))
 
 
+(defn num-digits-after-dec-point
+  [x n]
+  (loop [max-val (- 10.0 (/ 5.0 (apply * (repeat n 10.0))))
+         digits-after-dec-point (dec n)]
+    (if (or (zero? digits-after-dec-point)
+            (< x max-val))
+      digits-after-dec-point
+      (recur (* max-val 10.0) (dec digits-after-dec-point)))))
+
+
+(defn float-with-n-sig-figs
+  "Assumes x >= 1.0 and n >= 1.  Returns a string that represents the
+  value of x with at least n significant figures."
+  [x n]
+  (format (format "%%.%df" (num-digits-after-dec-point x n)) x))
+
+
 (defn time-with-scale [time-sec]
-  (cond (< time-sec 1.0e-12) (format "%e sec" time-sec)
-        (< time-sec 1.0e-9) (format "%.1f psec" (* 1e12 time-sec))
-        (< time-sec 1.0e-6) (format "%.1f nsec" (* 1e9 time-sec))
-        (< time-sec 1.0e-3) (format "%.1f usec" (* 1e6 time-sec))
-        (< time-sec 1.0) (format "%.1f msec" (* 1e3 time-sec))
-        :else (format "%.1f sec" time-sec)))
+  (let [[s units scale-fac]
+        (cond (< time-sec 999.5e-15) [(format "%.2e sec" time-sec)]
+              (< time-sec 999.5e-12) [nil "psec" 1e12]
+              (< time-sec 999.5e-9)  [nil "nsec" 1e9]
+              (< time-sec 999.5e-6)  [nil "usec" 1e6]
+              (< time-sec 999.5e-3)  [nil "msec" 1e3]
+              (< time-sec 999.5e+0)  [nil  "sec" 1  ]
+              :else [(format "%.0f sec" time-sec)])]
+    (if s
+      s
+      (str (float-with-n-sig-figs (* scale-fac time-sec) 3) " " units))))
 
 
 (defn first-word [s]
@@ -67,6 +89,7 @@
        (let [results#
 ;;             (criterium/with-progress-reporting
                (criterium/benchmark ~expr ~@opts)
+;;               (criterium/quick-benchmark ~expr ~@opts)
 ;;               )
              ]
          (pp/pprint {:bindings '~bindings
@@ -74,7 +97,8 @@
                      :opts '~opts
                      :results results#})
          (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
-         (iprintf *err* "    %s\n" (platform-desc results#))))
+;;         (iprintf *err* "    %s\n" (platform-desc results#))
+         ))
      (flush)))
 
 
@@ -138,9 +162,9 @@
   (benchmark [x 1] (identity x))
 
   ;;(simple-benchmark-data [coll (seq arr)] (ci-reduce coll + 0) 1)
-  (benchmark [arr (object-array (range 1000000))] (reduce arr + 0))
+  (benchmark [arr (object-array (range 1000000))] (reduce + 0 arr))
   ;;(simple-benchmark-data [coll (seq arr)] (ci-reduce coll sum 0) 1)
-  (benchmark [arr (object-array (range 1000000))] (reduce arr + 0N))
+  (benchmark [arr (object-array (range 1000000))] (reduce + 0N arr))
   ;;(simple-benchmark-data [coll arr] (array-reduce coll + 0) 1)
   (benchmark [arr (long-array (range 1000000))] (areduce arr i sum 0 (+ sum i)))
   ;;(simple-benchmark-data [coll arr] (array-reduce coll sum 0) 1)
@@ -293,7 +317,7 @@
   ;;(def r (ints-seq 1000000))
   ;; Copied above defn -main
   ;;(simple-benchmark-data [r r] (last r) 1)
-  (benchmark [r (ints-seq 1000000)] (last r) 1)
+  (benchmark [r (ints-seq 1000000)] (last r))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; End section that is a translation of cljs-bench benchmarks
@@ -354,6 +378,7 @@
 
 
 (defn -main [& args]
-  (run-benchmarks :set1)
+  ;;(run-benchmarks :set1)
+  (run-benchmarks :cljs)
   ;;(report-from-benchmark-results-file (first args))
   )
