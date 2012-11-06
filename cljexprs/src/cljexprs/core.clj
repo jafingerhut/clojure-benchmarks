@@ -222,6 +222,25 @@
   ;; large vector ops
   ;;(simple-benchmark-data [] (reduce conj [] (range 40000)) 10)
   (benchmark [] (reduce conj [] (range 40000)))
+  ;; TBD: The test below is actually slower than the previous one with
+  ;; Mac OS X 10.6.8 + Apple JDK 1.6.0_37 64-bit + Clojure 1.3.0 if I
+  ;; use -Xmx512m on the java command line (7.65 msec for above, 8.01
+  ;; msec for below).  With -Xmx1024m, the one below reduces to 5.54
+  ;; msec, but the one above stays the same.  Both of them frequently
+  ;; use 4 of my 8 cores on the Mac Pro.
+
+  ;; Why does the one below use so much more memory than the one
+  ;; above, and is slower unless given significantly more memory to
+  ;; work with?
+
+  ;; Why do they both use about 4 cores in parallel so much of the
+  ;; time?
+  ;;  clj       -Xmx    above      below
+  ;; -----     -----  ---------  ---------
+  ;; 1.3        512m  7.65 msec  8.01 msec
+  ;; 1.3        768m  7.71 msec  6.93 msec
+  ;; 1.3       1024m  7.65 msec  5.54 msec
+  ;; 1.5-beta1 1024m  7.73 msec  6.86 msec
   (benchmark [] (persistent! (reduce conj! (transient []) (range 40000))))
   ;;(simple-benchmark-data [coll (reduce conj [] (range (+ 32768 32)))] (conj coll :foo) 100000)
   (benchmark [coll (into [] (range (+ 32768 32)))] (conj coll :foo))

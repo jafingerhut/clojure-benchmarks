@@ -5,4 +5,5 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [criterium "0.3.0"]]
+  :jvm-opts ["-Xmx1024m"]   ; several benchmarks take significant memory
   :main cljexprs.core)
