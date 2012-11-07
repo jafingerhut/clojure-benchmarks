@@ -296,8 +296,10 @@ consisting of one or more Measurement elements\n"
 
   (let [data-xrel (mapcat #(validated-xrel-from-xml-file % prog-name) filenames)
         data (->> data-xrel
-                  xml-add-columns-benchmark-platform-language
-                  
+                  xml-add-columns-benchmark-platform-language)
+        benchmark-input-order (zipmap (distinct (map :benchmark data))
+                                      (iterate inc 1))
+        data (->> data
                   ;; If there are multiple measurements for the same
                   ;; benchmark and language/Clojure version, group them
                   ;; together for later processing.
@@ -339,8 +341,8 @@ consisting of one or more Measurement elements\n"
     ;; :benchmark :language :platform :elapsed_time_sec
     (when (:plots opts)
       (doseq [[idx [benchmark benchmark-measurements]]
-              (zipmap (iterate inc 1)
-                      (group-by :benchmark data))]
+              (zipmap (iterate inc 1) (sort-by #(get benchmark-input-order (key %))
+                                               (group-by :benchmark data)))]
         
         ;; For each benchmark, create one chart with language/Clojure
         ;; version on the X axis, and run time on the Y axis.  There
