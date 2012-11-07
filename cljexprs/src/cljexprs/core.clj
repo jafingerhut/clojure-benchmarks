@@ -6,6 +6,8 @@
 
 (set! *warn-on-reflection* true)
 
+(def ^:dynamic *sample-count* 30)
+
 
 (def ^:dynamic *auto-flush* true)
 
@@ -88,7 +90,7 @@
      (let ~bindings
        (let [results#
 ;;             (criterium/with-progress-reporting
-               (criterium/benchmark ~expr ~@opts)
+               (criterium/benchmark ~expr ~@opts :samples *sample-count*)
 ;;               (criterium/quick-benchmark ~expr ~@opts)
 ;;               )
              ]
@@ -361,12 +363,52 @@
   (benchmark [v10k (vec (range 10000))] (count (set v10k))))
 
 
-(defn run-benchmarks [select]
-  (case select
-    :set1 (run-benchmarks-set1)
-    :cljs (run-benchmarks-cljs)
-    :into-vs-set (run-benchmarks-into-vs-set)
-    ))
+(defn run-benchmarks-tiny []
+  (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
+             (into #{} v13))
+  (benchmark [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
+             (set v13)))
+
+
+(def benchmark-info
+  {"tiny" #(run-benchmarks-tiny)
+   "set1" #(run-benchmarks-set1)
+   "cljs" #(run-benchmarks-cljs)
+   "into-vs-set" #(run-benchmarks-into-vs-set)})
+
+
+(defn run-benchmarks [output-file bench-name]
+  (if-let [f (get benchmark-info bench-name)]
+    (with-open [wrtr (io/writer output-file)]
+      (binding [*out* wrtr]
+        (f)))
+    (do
+      (iprintf *err* "Unknown benchmark name '%s'.  Known benchmarks:\n"
+               bench-name)
+      (iprintf *err* "    %s\n"
+               (str/join "\n    " (sort (keys benchmark-info)))))))
+
+
+(defn replace-clojure-version [project-clj-fname new-clojure-version-str
+                               out-fname]
+  (let [f (io/file project-clj-fname)]
+    (if (.exists f)
+      (with-open [wrtr (io/writer out-fname)]
+        (let [s (slurp f)
+              proj (read-string s)
+              [before-deps [_ deps & after-deps]] (split-with
+                                                   #(not= % :dependencies)
+                                                   proj)
+              newdeps (vec (map (fn [[artifact vers]]
+                                  [artifact (if (= artifact 'org.clojure/clojure)
+                                              new-clojure-version-str
+                                              vers)])
+                                deps))]
+          (binding [*out* wrtr]
+            (pp/pprint (concat before-deps [:dependencies newdeps]
+                               after-deps)))))
+      (iprintf *err* "Could not open file '%s' for reading.\n"
+               project-clj-fname))))
 
 
 ;; TBD: Charts to add:
@@ -377,8 +419,46 @@
 ;;   "ant jar" elapsed time (?)
 
 
+(defn show-usage [prog-name]
+  (iprintf *err* "usage:
+    %s [ help | -h | --help ]
+    %s replace-leiningen-project-clojure-version <project.clj> <clj_version_str> <newproject.clj>
+    %s benchmark <output_file> <benchmark_set_name>
+" prog-name prog-name prog-name))
+
+(def prog-name "lein2 run")
+
+
 (defn -main [& args]
-  ;;(run-benchmarks :set1)
-  (run-benchmarks :cljs)
-  ;;(report-from-benchmark-results-file (first args))
-  )
+  (when (or (= 0 (count args))
+            (#{"-h" "--help" "-help" "help"} (first args)))
+    (show-usage prog-name)
+    (System/exit 0))
+  (let [[action & args] args]
+    (case action
+
+      "replace-leiningen-project-clojure-version"
+      (if (= 3 (count args))
+        (apply replace-clojure-version args)
+        (do (iprintf *err* "Wrong number of args for 'replace-leiningen-project-clojure-version' action\n")
+            (show-usage prog-name)
+            (System/exit 1)))
+
+      "benchmark"
+      (if (= 2 (count args))
+        (apply run-benchmarks args)
+        (do (iprintf *err* "Wrong number of args for 'benchmark' action\n")
+            (show-usage prog-name)
+            (System/exit 1)))
+
+      "report"
+      (if (= 0 (count args))
+        (do (iprintf *err* "Action 'report' needs 1 or more results files.\n")
+            (System/exit 1))
+        (doseq [fname args]
+          (report-from-benchmark-results-file fname)))
+
+      ;; default case
+      (do (iprintf *err* "Urecognized first arg '%s'\n" action)
+          (show-usage prog-name)
+          (System/exit 1)))))
