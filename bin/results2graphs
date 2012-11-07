@@ -114,13 +114,13 @@
   (first (str/split s #"\s+")))
 
 
-(defn add-columns-problem-platform-language [data]
+(defn add-columns-benchmark-platform-language [data]
   (for [{:keys [current_working_directory output_file
                 jvm_os_name jvm_os_version jvm_java_vm_name jvm_java_vm_vendor
                 jvm_java_version jvm_sun_arch_data_model
                 user_cpu_time_sec system_cpu_time_sec elapsed_time_sec]
          :as measurement} data]
-    (let [problem (basename current_working_directory)
+    (let [benchmark (basename current_working_directory)
           lang (if-let [[_ size lang]
                         (re-matches #".*output/([^-]+)-(\S+)-output.txt"
                                     output_file)]
@@ -160,19 +160,19 @@
           parallelism (/ total_cpu_time_sec elapsed_time_sec)
           ;; Round parallelism to fewer digits
           parallelism (format "%.2f" parallelism)]
-      (assoc measurement :problem problem
+      (assoc measurement :benchmark benchmark
              :language lang
              :platform platform
              :total_cpu_time_sec total_cpu_time_sec
              :parallelism parallelism))))
 
 
-(defn fastest-good-run [[problem-platform-lang measurements]]
+(defn fastest-good-run [[benchmark-platform-lang measurements]]
   (let [num-runs (count measurements)
         good-runs (filter #(zero? (:exit_status %)) measurements)
         num-good-runs (count good-runs)]
     (if (zero? num-good-runs)
-      (assoc problem-platform-lang :num_runs num-runs
+      (assoc benchmark-platform-lang :num_runs num-runs
              :good_runs 0 :elapsed_time_sec -1)
       (let [fastest-run (apply min-key :elapsed_time_sec good-runs)
             elapsed-times (sort (map :elapsed_time_sec good-runs))
@@ -186,8 +186,8 @@
                :time_var max-over-min)))))
 
 
-(defn compare-by-problem-platform-language-time [meas1 meas2]
-  (let [x (compare (:problem meas1) (:problem meas2))]
+(defn compare-by-benchmark-platform-language-time [meas1 meas2]
+  (let [x (compare (:benchmark meas1) (:benchmark meas2))]
     (if (not= x 0)
       x
       (let [x (compare (:platform meas1) (:platform meas2))]
@@ -240,13 +240,13 @@ consisting of one or more Measurement elements\n"
     -a Only useful if -t is specified.  If both -t and -a are given,
        then in the table of results displayed, there will be a column
        to show not only the fastest elapsed time for each
-       problem/platform/language combo, but also a list of all elapsed
+       benchmark/platform/language combo, but also a list of all elapsed
        times sorted in increasing order.
 
     -l Like -a, except adds a 'platform' column to the table.
 
     -p By default, use gnuplot to generate PNG format plots for each
-       problem.  With this option, skip the generation of plots.
+       benchmark.  With this option, skip the generation of plots.
 " prog-name options-desc))
 
 
@@ -281,12 +281,12 @@ consisting of one or more Measurement elements\n"
 
   (let [data-xrel (mapcat #(validated-xrel-from-file % prog-name) filenames)
         data (->> data-xrel
-                  add-columns-problem-platform-language
+                  add-columns-benchmark-platform-language
                   
                   ;; If there are multiple measurements for the same
-                  ;; problem and language/Clojure version, group them
+                  ;; benchmark and language/Clojure version, group them
                   ;; together for later processing.
-                  (group-by #(select-keys % [:problem :platform :language]))
+                  (group-by #(select-keys % [:benchmark :platform :language]))
                   
                   ;; Now that they are grouped, remove any in the
                   ;; group that failed (i.e. :exit_status is non-0).
@@ -303,13 +303,13 @@ consisting of one or more Measurement elements\n"
                              (:language meas))))
                   
                   ;; For purposes of printing as a table, sort them by
-                  ;; problem, and within each problem by platform, and
-                  ;; within that by language.
-                  (sort compare-by-problem-platform-language-time))]
+                  ;; benchmark, and within each benchmark by platform,
+                  ;; and within that by language.
+                  (sort compare-by-benchmark-platform-language-time))]
   
     ;; debug output
     (when (:show-table opts)
-      (let [columns (concat [:problem]
+      (let [columns (concat [:benchmark]
                             (if (:show-platform opts)
                               [:platform]
                               [])
@@ -321,9 +321,9 @@ consisting of one or more Measurement elements\n"
         (p/print-table columns data)))
 
     (when (:plots opts)
-      (doseq [[problem problem-measurements] (group-by :problem data)]
+      (doseq [[benchmark benchmark-measurements] (group-by :benchmark data)]
         
-        ;; For each problem, create one chart with Clojure version on
+        ;; For each benchmark, create one chart with Clojure version on
         ;; the X axis, and run time on the Y axis.  There should be a
         ;; separate "curve" for each platform.
         
@@ -332,14 +332,14 @@ consisting of one or more Measurement elements\n"
         ;; platforms do not.  First create union of all language
         ;; results we have, sort them by name, and assign them a
         ;; numeric index in that order.
-        (let [language->idx (->> (map :language problem-measurements)
+        (let [language->idx (->> (map :language benchmark-measurements)
                                 set
                                 sort
                                 (map-indexed (fn [idx lang] [lang idx]))
                                 (into {}))
               tempfiles
               (for [[plat plat-measurements] (group-by :platform
-                                                       problem-measurements)]
+                                                       benchmark-measurements)]
                 (let [graph-one-curve-data
                       (map (fn [meas]
                              [(get language->idx (:language meas))
@@ -351,8 +351,8 @@ consisting of one or more Measurement elements\n"
                                                      graph-one-curve-data)))
                   [plat tempfile]))
               
-              outfile (io/file "." (str problem ".png"))
-              title problem
+              outfile (io/file "." (str benchmark ".png"))
+              title benchmark
               ylabel "secs"
               plot-min 0.0
               ;; It seems that plot-max "" causes gnuplot to
@@ -389,8 +389,8 @@ consisting of one or more Measurement elements\n"
           
           ;; debug output
 ;;          (doseq [[plat temp-file-name] tempfiles]
-;;            (iprintf "problem %s platform %s temp-file-name %s\n"
-;;                     problem plat temp-file-name))
+;;            (iprintf "benchmark %s platform %s temp-file-name %s\n"
+;;                     benchmark plat temp-file-name))
 
           )))))
 
