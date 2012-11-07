@@ -1,5 +1,12 @@
 #! /bin/bash
 
+if [ $# -lt 1 ]
+then
+    1>&2 echo "usage: $0 <benchmark_name>"
+    exit 1
+fi
+BENCH_NAMES=$*
+
 # Aids in testing script changes
 #ECHO="echo"
 ECHO=""
@@ -32,6 +39,7 @@ do
     echo ""
     echo "     ============= ${CLJ_VERSION_STR} ============="
     echo ""
+    echo ${LEIN} run replace-leiningen-project-clojure-version project.orig.clj ${CLJ_VERSION_STR} project.clj
     ${ECHO} ${LEIN} run replace-leiningen-project-clojure-version project.orig.clj ${CLJ_VERSION_STR} project.clj
     exit_status=$?
     if [ $exit_status != 0 ]
@@ -41,8 +49,8 @@ do
     fi
     echo ${LEIN} clean
     ${ECHO} ${LEIN} clean
-    echo ${LEIN} run benchmark results/cljexprs-${CLJ_VERSION_STR}.txt tiny
-    ${ECHO} ${LEIN} run benchmark results/cljexprs-${CLJ_VERSION_STR}.txt tiny
+    echo ${LEIN} run benchmark results/cljexprs-${CLJ_VERSION_STR}.txt ${BENCH_NAMES}
+    ${ECHO} ${LEIN} run benchmark results/cljexprs-${CLJ_VERSION_STR}.txt ${BENCH_NAMES}
 done
 
 ${ECHO} cp -pf project.orig.clj project.clj
