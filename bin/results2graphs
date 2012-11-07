@@ -114,7 +114,7 @@
   (first (str/split s #"\s+")))
 
 
-(defn add-columns-benchmark-platform-language [data]
+(defn xml-add-columns-benchmark-platform-language [data]
   (for [{:keys [current_working_directory output_file
                 jvm_os_name jvm_os_version jvm_java_vm_name jvm_java_vm_vendor
                 jvm_java_version jvm_sun_arch_data_model
@@ -199,7 +199,7 @@
               (compare (:elapsed_time_sec meas1) (:elapsed_time_sec meas2)))))))))
 
 
-(defn validated-xrel-from-file [xml-filename prog-name]
+(defn validated-xrel-from-xml-file [xml-filename prog-name]
   (let [p (try
             (xml/parse xml-filename)
             (catch Exception e
@@ -216,6 +216,21 @@ consisting of one or more Measurement elements\n"
     ;; validated-xml-to-xrel produces a sequence of maps, each map
     ;; containing details of one measurement.
     (validated-xml-to-xrel p)))
+
+
+;; Scale the measurements of very fast benchmarks to more
+;; human-readable units.
+
+(defn scale-elapsed-time-units [measurements k]
+  (let [max-time-sec (apply max (map #(get % k) measurements))
+        [time-unit-name scale-factor]
+        (cond (< max-time-sec 1.0e-9) [ "picosec" 1.0e12]
+              (< max-time-sec 1.0e-6) [ "nanosec" 1.0e9]
+              (< max-time-sec 1.0e-3) ["microsec" 1.0e6]
+              (< max-time-sec 1.0e+0) ["millisec" 1.0e3]
+              :else                   [     "sec" 1.0e0])]
+    [(map #(update-in % [k] (fn [t] (* t scale-factor))) measurements)
+     time-unit-name]))
 
 
 (def prog-name (basename *file*))
@@ -279,9 +294,9 @@ consisting of one or more Measurement elements\n"
     (when-not (.exists (io/file fname))
       (die "%s: No such file '%s'\n" prog-name fname)))
 
-  (let [data-xrel (mapcat #(validated-xrel-from-file % prog-name) filenames)
+  (let [data-xrel (mapcat #(validated-xrel-from-xml-file % prog-name) filenames)
         data (->> data-xrel
-                  add-columns-benchmark-platform-language
+                  xml-add-columns-benchmark-platform-language
                   
                   ;; If there are multiple measurements for the same
                   ;; benchmark and language/Clojure version, group them
@@ -303,8 +318,8 @@ consisting of one or more Measurement elements\n"
                              (:language meas))))
                   
                   ;; For purposes of printing as a table, sort them by
-                  ;; benchmark, and within each benchmark by platform,
-                  ;; and within that by language.
+                  ;; benchmark, and within each benchmark by platform, and
+                  ;; within that by language.
                   (sort compare-by-benchmark-platform-language-time))]
   
     ;; debug output
@@ -320,19 +335,24 @@ consisting of one or more Measurement elements\n"
                             [:good_runs])]
         (p/print-table columns data)))
 
+    ;; Keys used by plots below:
+    ;; :benchmark :language :platform :elapsed_time_sec
     (when (:plots opts)
       (doseq [[benchmark benchmark-measurements] (group-by :benchmark data)]
         
-        ;; For each benchmark, create one chart with Clojure version on
-        ;; the X axis, and run time on the Y axis.  There should be a
-        ;; separate "curve" for each platform.
+        ;; For each benchmark, create one chart with language/Clojure
+        ;; version on the X axis, and run time on the Y axis.  There
+        ;; should be a separate "curve" for each platform.
         
         ;; language->idx helps us correctly draw plots in the case
         ;; where some platforms have results for languages where other
         ;; platforms do not.  First create union of all language
         ;; results we have, sort them by name, and assign them a
         ;; numeric index in that order.
-        (let [language->idx (->> (map :language benchmark-measurements)
+        (let [[benchmark-measurements time-unit-name] (scale-elapsed-time-units
+                                                       benchmark-measurements
+                                                       :elapsed_time_sec)
+              language->idx (->> (map :language benchmark-measurements)
                                 set
                                 sort
                                 (map-indexed (fn [idx lang] [lang idx]))
@@ -353,7 +373,7 @@ consisting of one or more Measurement elements\n"
               
               outfile (io/file "." (str benchmark ".png"))
               title benchmark
-              ylabel "secs"
+              ylabel time-unit-name
               plot-min 0.0
               ;; It seems that plot-max "" causes gnuplot to
               ;; automatically scale the Y axis for the longest run
