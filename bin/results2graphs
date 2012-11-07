@@ -338,7 +338,9 @@ consisting of one or more Measurement elements\n"
     ;; Keys used by plots below:
     ;; :benchmark :language :platform :elapsed_time_sec
     (when (:plots opts)
-      (doseq [[benchmark benchmark-measurements] (group-by :benchmark data)]
+      (doseq [[idx [benchmark benchmark-measurements]]
+              (zipmap (iterate inc 1)
+                      (group-by :benchmark data))]
         
         ;; For each benchmark, create one chart with language/Clojure
         ;; version on the X axis, and run time on the Y axis.  There
@@ -371,7 +373,7 @@ consisting of one or more Measurement elements\n"
                                                      graph-one-curve-data)))
                   [plat tempfile]))
               
-              outfile (io/file "." (str benchmark ".png"))
+              outfile (io/file "." (str idx ".png"))
               title benchmark
               ylabel time-unit-name
               plot-min 0.0
