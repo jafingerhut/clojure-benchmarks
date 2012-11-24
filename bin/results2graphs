@@ -260,6 +260,9 @@ consisting of one or more Measurement elements\n"
 
     -l Like -a, except adds a 'platform' column to the table.
 
+    -b Print a numbered list of benchmark names as HTML links to the
+       PNG graphs.
+
     -p By default, use gnuplot to generate PNG format plots for each
        benchmark.  With this option, skip the generation of plots.
 " prog-name options-desc))
@@ -270,12 +273,14 @@ consisting of one or more Measurement elements\n"
          opts {:show-table false
                :show-all-times false
                :show-platform false
+               :print-benchmark-names false
                :plots true}]
     (if-let [arg (first args)]
       (if-let [opt (case arg
                      "-t" {:show-table true}
                      "-a" {:show-all-times true}
                      "-l" {:show-platform true}
+                     "-b" {:print-benchmark-names true}
                      "-p" {:plots false}
                      nil)]
         (recur (rest args) (merge opts opt))
@@ -341,8 +346,10 @@ consisting of one or more Measurement elements\n"
     ;; :benchmark :language :platform :elapsed_time_sec
     (when (:plots opts)
       (doseq [[idx [benchmark benchmark-measurements]]
-              (zipmap (iterate inc 1) (sort-by #(get benchmark-input-order (key %))
-                                               (group-by :benchmark data)))]
+              (map (fn [i d] [i d])
+                   (iterate inc 1)
+                   (sort-by #(get benchmark-input-order (key %))
+                            (group-by :benchmark data)))]
         
         ;; For each benchmark, create one chart with language/Clojure
         ;; version on the X axis, and run time on the Y axis.  There
@@ -410,6 +417,8 @@ consisting of one or more Measurement elements\n"
           
           (when-not (empty? err)
             (iprintf *err* "while generating plot " title "\n" err))
+          (when (:print-benchmark-names opts)
+            (iprintf "<a href=\"%s\">%s</a>\n" outfile benchmark))
           
           ;; debug output
 ;;          (doseq [[plat temp-file-name] tempfiles]
