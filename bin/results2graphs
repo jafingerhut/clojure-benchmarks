@@ -260,11 +260,14 @@ consisting of one or more Measurement elements\n"
 
     -l Like -a, except adds a 'platform' column to the table.
 
-    -b Print a numbered list of benchmark names as HTML links to the
-       PNG graphs.
-
     -p By default, use gnuplot to generate PNG format plots for each
        benchmark.  With this option, skip the generation of plots.
+
+    -h Print HTML with a list of links to images of graphs.  Only
+       effective if -p option is also given.
+
+    -b Print a numbered list of benchmark names as HTML links to the
+       PNG graphs.  Only effective if -p option is also given.
 " prog-name options-desc))
 
 
@@ -274,6 +277,7 @@ consisting of one or more Measurement elements\n"
                :show-all-times false
                :show-platform false
                :print-benchmark-names false
+               :print-html false
                :plots true}]
     (if-let [arg (first args)]
       (if-let [opt (case arg
@@ -281,6 +285,7 @@ consisting of one or more Measurement elements\n"
                      "-a" {:show-all-times true}
                      "-l" {:show-platform true}
                      "-b" {:print-benchmark-names true}
+                     "-h" {:print-html true}
                      "-p" {:plots false}
                      nil)]
         (recur (rest args) (merge opts opt))
@@ -418,14 +423,29 @@ consisting of one or more Measurement elements\n"
           (when-not (empty? err)
             (iprintf *err* "while generating plot " title "\n" err))
           (when (:print-benchmark-names opts)
-            (iprintf "<a href=\"%s\">%s</a>\n" outfile benchmark))
+            (iprintf "%s %s\n" outfile benchmark))
           
           ;; debug output
 ;;          (doseq [[plat temp-file-name] tempfiles]
 ;;            (iprintf "benchmark %s platform %s temp-file-name %s\n"
 ;;                     benchmark plat temp-file-name))
 
-          )))))
+          ))
+
+      (when (:print-html opts)
+        (let [b (map (fn [i d] [i d])
+                     (iterate inc 1)
+                     (sort-by #(get benchmark-input-order (key %))
+                              (group-by :benchmark data)))]
+          (iprintf "<ul>\n")
+          (doseq [[idx [benchmark benchmark-measurements]] b]
+            (iprintf "<li><a href=\"#bench-%d\">%s\n" idx benchmark)
+            (iprintf "</a></li>\n"))
+          (iprintf "</ul>\n\n")
+          (doseq [[idx [benchmark benchmark-measurements]] b]
+            (iprintf "<p>\n<a id=\"bench-%d\">\n<img src=\"%s\">\n"
+                     idx (str (io/file "." (str idx ".png")))))))
+      )))
 
 (shutdown-agents)
 (iprintf "Done.\n")
