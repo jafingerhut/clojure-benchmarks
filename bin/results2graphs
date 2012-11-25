@@ -406,7 +406,7 @@ consisting of one or more Measurement elements\n"
               plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
               command (str
                        "set title '" title "'\n"
-                       "set terminal png size 800,800\n"
+                       "set terminal png size 800,600\n"
                        "set lmargin 8\n"
                        "set bmargin 7\n"
                        "set key outside\n"
