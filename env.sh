@@ -434,9 +434,11 @@ HPROF_OPTS="cpu=samples,depth=20,thread=y"
 JAVA_PROFILING=
 
 
-# Choose whether you want -server or -client JVM
-#JAVA_OPTS="-server"
-JAVA_OPTS="-client"
+# Options to give on java command line for all Clojure and Java programs
+JAVA_OPTS="-server -Xmixed"
+#JAVA_OPTS="-server -Xint"
+#JAVA_OPTS="-client -Xmixed"
+#JAVA_OPTS="-client -Xint"
 
 
 ######################################################################
