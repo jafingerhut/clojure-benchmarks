@@ -13,4 +13,4 @@ source ../env.sh
 OUTP="$1"
 shift
 
-../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -classpath "${PS_FULL_CLJ_CLASSPATH}" binarytrees "$@"
+../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} ${JAVA_OPTS} -classpath "${PS_FULL_CLJ_CLASSPATH}" binarytrees "$@"

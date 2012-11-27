@@ -434,6 +434,11 @@ HPROF_OPTS="cpu=samples,depth=20,thread=y"
 JAVA_PROFILING=
 
 
+# Choose whether you want -server or -client JVM
+#JAVA_OPTS="-server"
+JAVA_OPTS="-client"
+
+
 ######################################################################
 # Miscellaneous scripting commands
 ######################################################################

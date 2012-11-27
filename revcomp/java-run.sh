@@ -13,4 +13,4 @@ shift
 OUTP="$1"
 shift
 
-../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} -server -XX:+TieredCompilation -XX:+AggressiveOpts -classpath "${JAVA_OBJ_DIR}" revcomp "$@"
+../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} ${JAVA_OPTS} -XX:+TieredCompilation -XX:+AggressiveOpts -classpath "${JAVA_OBJ_DIR}" revcomp "$@"

@@ -6,7 +6,21 @@
 
 (set! *warn-on-reflection* true)
 
-(def ^:dynamic *sample-count* 30)
+(def ^:dynamic *sample-count* 60)
+
+;; time units for values below are nanosec
+(def s-to-ns (* 1000 1000 1000))
+
+;; No warmup except the code that estimates the number of executions
+;; of the expression needed to take about *target-execution-time*
+(def ^:dynamic *warmup-jit-period* (long (*  0 s-to-ns)))
+;; criterium default = 10 sec
+;;(def ^:dynamic *warmup-jit-period* (long (* 10 s-to-ns)))
+
+;; 100 msec
+(def ^:dynamic *target-execution-time* (long (* 0.1 s-to-ns)))
+;; criterium default = 1 sec
+;;(def ^:dynamic *target-execution-time* (long (* 1.0 s-to-ns)))
 
 
 (def ^:dynamic *auto-flush* true)
@@ -90,7 +104,10 @@
      (let ~bindings
        (let [results#
 ;;             (criterium/with-progress-reporting
-               (criterium/benchmark ~expr ~@opts :samples *sample-count*)
+               (criterium/benchmark ~expr ~@opts
+                                    :samples *sample-count*
+                                    :warmup-jit-period *warmup-jit-period*
+                                    :target-execution-time *target-execution-time*)
 ;;               (criterium/quick-benchmark ~expr ~@opts)
 ;;               )
              ]
@@ -100,6 +117,57 @@
                      :results results#})
          (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
 ;;         (iprintf *err* "    %s\n" (platform-desc results#))
+         ))
+     (flush)))
+
+
+(defmacro benchmark-round-robin
+  [& bindings-expr-pairs]
+  (when (odd? (count bindings-expr-pairs))
+    (throw (IllegalArgumentException.
+            "benchmark-round-robin should have even number of args")))
+  `(do
+     ;; TBD: Note that right now this simply takes all of the binding
+     ;; vectors and concatenates them together into one big vector.
+     ;; It would be better to do things like the following, to catch
+     ;; mistakes:
+
+     ;; (1) verify each vector has an even number of elements
+
+     ;; (2) verify that for any names being bound (including
+     ;; destructuring expression), if the names bound are the same,
+     ;; then the expressions bound are the same, too.  That won't
+     ;; catch mistakes involving expressions with side effects, but it
+     ;; will catch common mistakes of using the same name to mean two
+     ;; different things.
+
+     ;; (2b) More difficult would be to try to peek inside
+     ;; destructuring expressions and look for duplicate names within
+     ;; them.  For now perhaps simply disallow destructuring
+     ;; expressions?
+
+     ;; (3) If two sets of names/destructuring expressions and
+     ;; expressions to bind to them are the same, only put them in the
+     ;; final list of bindings once, not multiple times.
+
+     (let ~(vec (mapcat first (partition 2 bindings-expr-pairs)))
+       (let [results#
+;;             (criterium/with-progress-reporting
+               (criterium/benchmark-round-robin
+                ~(map second (partition 2 bindings-expr-pairs))
+                {:samples *sample-count*
+                 :warmup-jit-period *warmup-jit-period*
+                 :target-execution-time *target-execution-time*
+                 })
+;;               )
+             ]
+         (doseq [[[bindings# expr#] results#]
+                 (map vector '~(partition 2 bindings-expr-pairs) results#)]
+           (pp/pprint {:bindings bindings#
+                       :expr expr#
+                       :opts nil
+                       :results results#}))
+;;         (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
          ))
      (flush)))
 
@@ -346,6 +414,197 @@
   )
 
 
+(defn run-benchmarks-cljs-round-robin []
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Begin section that is a translation of cljs-bench benchmarks
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (benchmark-round-robin
+   ;;(simple-benchmark-data [x 1] (identity x) 1000000)
+   [x 1] (identity x)
+  
+   ;;(simple-benchmark-data [coll (seq arr)] (ci-reduce coll + 0) 1)
+   [obj-arr-1m (object-array (range 1000000))] (reduce + 0 obj-arr-1m)
+   ;;(simple-benchmark-data [coll (seq arr)] (ci-reduce coll sum 0) 1)
+   [obj-arr-1m (object-array (range 1000000))] (reduce + 0N obj-arr-1m)
+   ;;(simple-benchmark-data [coll arr] (array-reduce coll + 0) 1)
+   [long-arr-1m (long-array (range 1000000))] (areduce long-arr-1m i sum 0 (+ sum i))
+   ;;(simple-benchmark-data [coll arr] (array-reduce coll sum 0) 1)
+   [long-arr-1m (long-array (range 1000000))] (areduce long-arr-1m i sum 0N (+ sum i))
+   ;;(simple-benchmark-data [coll []] (instance? PersistentVector coll) 1000000)
+   [empty-vec []] (instance? clojure.lang.IPersistentVector empty-vec)
+
+   ;;(simple-benchmark-data [coll (list 1 2 3)] (satisfies? ISeq coll) 1000000)
+   [list3 (list 1 2 3)] (instance? clojure.lang.ISeq list3)
+   ;;(simple-benchmark-data [coll [1 2 3]] (satisfies? ISeq coll) 1000000)
+   [vec3 [1 2 3]] (instance? clojure.lang.ISeq vec3)
+
+   ;;(simple-benchmark-data [coll (list 1 2 3)] (first coll) 1000000)
+   [list3 (list 1 2 3)] (first list3)
+   ;;(simple-benchmark-data [coll (list 1 2 3)] (-first coll) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll (list 1 2 3)] (rest coll) 1000000)
+   [list3 (list 1 2 3)] (rest list3)
+   ;;(simple-benchmark-data [coll (list 1 2 3)] (-rest coll) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [] (list) 1000000)
+   [] (list)
+   ;;(simple-benchmark-data [] (list 1 2 3) 1000000)
+   [] (list 1 2 3)
+
+
+   ;; vector ops
+   ;;(simple-benchmark-data [] [] 1000000)
+   [] []
+   ;;(simple-benchmark-data [] [1 2 3] 1000000)
+   [] [1 2 3]
+   ;;(simple-benchmark-data [coll [1 2 3]] (transient coll) 100000)
+   [vec3 [1 2 3]] (transient vec3)
+   ;;(simple-benchmark-data [coll [1 2 3]] (nth coll 0) 1000000)
+   [vec3 [1 2 3]] (nth vec3 0)
+   ;;(simple-benchmark-data [coll [1 2 3]] (-nth coll 0) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll [1 2 3]] (conj coll 4) 1000000)
+   [vec3 [1 2 3]] (conj vec3 4)
+   ;;(simple-benchmark-data [coll [1 2 3]] (-conj coll 4) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll [1 2 3]] (seq coll) 1000000)
+   [vec3 [1 2 3]] (seq vec3)
+   ;;(simple-benchmark-data [coll (seq [1 2 3])] (first coll) 1000000)
+   [seq-vec3 (seq [1 2 3])] (first seq-vec3)
+   ;;(simple-benchmark-data [coll (seq [1 2 3])] (-first coll) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll (seq [1 2 3])] (rest coll) 1000000)
+   [seq-vec3 (seq [1 2 3])] (rest seq-vec3)
+   ;;(simple-benchmark-data [coll (seq [1 2 3])] (-rest coll) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll (seq [1 2 3])] (next coll) 1000000)
+   [seq-vec3 (seq [1 2 3])] (next seq-vec3)
+
+   ;; large vector ops
+   ;;(simple-benchmark-data [] (reduce conj [] (range 40000)) 10)
+   [] (reduce conj [] (range 40000))
+   ;; TBD: The test below is actually slower than the previous one
+   ;; with Mac OS X 10.6.8 + Apple JDK 1.6.0_37 64-bit + Clojure 1.3.0
+   ;; if I use -Xmx512m on the java command line (7.65 msec for above,
+   ;; 8.01 msec for below).  With -Xmx1024m, the one below reduces to
+   ;; 5.54 msec, but the one above stays the same.  Both of them
+   ;; frequently use 4 of my 8 cores on the Mac Pro.
+   
+   ;; Why does the one below use so much more memory than the one
+   ;; above, and is slower unless given significantly more memory to
+   ;; work with?
+
+   ;; Why do they both use about 4 cores in parallel so much of the
+   ;; time?
+   ;;  clj       -Xmx    above      below
+   ;; -----     -----  ---------  ---------
+   ;; 1.3        512m  7.65 msec  8.01 msec
+   ;; 1.3        768m  7.71 msec  6.93 msec
+   ;; 1.3       1024m  7.65 msec  5.54 msec
+   ;; 1.5-beta1 1024m  7.73 msec  6.86 msec
+   [] (persistent! (reduce conj! (transient []) (range 40000)))
+   ;;(simple-benchmark-data [coll (reduce conj [] (range (+ 32768 32)))] (conj coll :foo) 100000)
+   [vec-32k+32 (into [] (range (+ 32768 32)))] (conj vec-32k+32 :foo)
+   ;;(simple-benchmark-data [coll (reduce conj [] (range 40000))] (assoc coll 123 :foo) 100000)
+   [vec-40k (into [] (range 40000))] (assoc vec-40k 123 :foo)
+   ;;(simple-benchmark-data [coll (reduce conj [] (range (+ 32768 33)))] (pop coll) 100000)
+   [vec-32k+33 (into [] (range (+ 32768 33)))] (pop vec-32k+33)
+
+   ;; lazy seq reduce
+   ;;(simple-benchmark-data [coll (take 100000 (iterate inc 0))] (reduce + 0 coll) 1)
+   [lazy-seq-100k (take 100000 (iterate inc 0))] (reduce + 0 lazy-seq-100k)
+   ;;(simple-benchmark-data [coll (range 1000000)] (reduce + 0 coll) 1)
+   [range-1m (range 1000000)] (reduce + 0 range-1m)
+   ;;(simple-benchmark-data [coll (into [] (range 1000000))] (reduce + 0 coll) 1)
+   [vec-1m (into [] (range 1000000))] (reduce + 0 vec-1m)
+
+   ;; apply
+   ;;(simple-benchmark-data [coll (into [] (range 1000000))] (apply + coll) 1)
+   [vec-1m (into [] (range 1000000))] (apply + vec-1m)
+
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}] (get coll :foo) 1000000)
+   [map-2 {:foo 1 :bar 2}] (get map-2 :foo)
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}] (-lookup coll :foo nil) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}] (:foo coll) 1000000)
+   [map-2 {:foo 1 :bar 2}] (:foo map-2)
+   ;;(defrecord Foo [bar baz])
+   ;; Copied above defn -main
+   ;;(simple-benchmark-data [coll (Foo. 1 2)] (:bar coll) 1000000)
+   [rec-2 (Foo. 1 2)] (:bar rec-2)
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}] (assoc coll :baz 3) 100000)
+   [map-2 {:foo 1 :bar 2}] (assoc map-2 :baz 3)
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}] (assoc coll :foo 2) 100000)
+   [map-2 {:foo 1 :bar 2}] (assoc map-2 :foo 2)
+
+   ;;(simple-benchmark-data [key :f0] (hash key) 100000)
+   [key :f0] (hash key)
+   ;;(simple-benchmark-data [coll {:foo 1 :bar 2}]
+   ;;  (loop [i 0 m coll]
+   ;;    (if (< i 100000)
+   ;;      (recur (inc i) (assoc m :foo 2))
+   ;;      m))
+   ;;  1)
+   [map-2 {:foo 1 :bar 2}] (loop [i 0 m map-2]
+                             (if (< i 100000)
+                               (recur (inc i) (assoc m :foo 2))
+                               m))
+   
+   ;;(def pmap (into cljs.core.PersistentHashMap/EMPTY
+   ;;                [[:a 0] [:b 1] [:c 2] [:d 3] [:e 4] [:f 5] [:g 6] [:h 7]
+   ;;                 [:i 8] [:j 9] [:k 10] [:l 11] [:m 12] [:n 13] [:o 14] [:p 15]
+   ;;                 [:q 16] [:r 17] [:s 18] [:t 19] [:u 20] [:v 21] [:w 22] [:x 23]
+   ;;                 [:y 24] [:z 25] [:a0 26] [:b0 27] [:c0 28] [:d0 29] [:e0 30] [:f0 31]]))
+   ;; Copied above defn -main, except renamed map1 to avoid conflict with clojure.core/pmap
+   
+   ;;(simple-benchmark-data [coll pmap] (:f0 coll) 1000000)
+   [map-32-keyword-keys map1] (:f0 map-32-keyword-keys)
+   ;;(simple-benchmark-data [coll pmap] (get coll :f0) 1000000)
+   [map-32-keyword-keys map1] (get map-32-keyword-keys :f0)
+   ;;(simple-benchmark-data [coll pmap] (-lookup coll :f0 nil) 1000000)
+   ;; TBD: Any Clojure/JVM equivalent?
+   ;;(simple-benchmark-data [coll pmap] (assoc coll :g0 32) 1000000)
+   [map-32-keyword-keys map1] (assoc map-32-keyword-keys :g0 32)
+   ;;(simple-benchmark-data [coll cljs.core.PersistentHashMap/EMPTY] (assoc coll :f0 1) 1000000)
+   [empty-map {}] (assoc empty-map :f0 1)
+
+   ;;(simple-benchmark-data [] #{} 100000)
+   [] #{}
+   ;;(simple-benchmark-data [] #{1 2 3} 100000)
+   [] #{1 2 3}
+   ;;(simple-benchmark-data [coll #{1 2 3}] (conj coll 4) 100000)
+   [set3 #{1 2 3}] (conj set3 4)
+
+   ;;(simple-benchmark-data [coll (range 500000)] (reduce + coll) 1)
+   [range-500k (range 500000)] (reduce + range-500k)
+
+   ;;(simple-benchmark-data [s "{:foo [1 2 3]}"] (reader/read-string s) 1000)
+   [str1 "{:foo [1 2 3]}"] (read-string str1)
+
+   ;;(simple-benchmark-data [m {:foo [1 2 {:bar {3 :a 4 #{:b :c :d :e}}}]}] (pr-str m) 1000)
+   [map-nested {:foo [1 2 {:bar {3 :a 4 #{:b :c :d :e}}}]}] (pr-str map-nested)
+
+   ;;(simple-benchmark-data [r (range 1000000)] (last r) 1)
+   [range-1m (range 1000000)] (last range-1m)
+   
+   ;;(defn ints-seq
+   ;;  ([n] (ints-seq 0 n))
+   ;;  ([i n]
+   ;;     (when (< i n)
+   ;;       (lazy-seq
+   ;;        (cons i (ints-seq (inc i) n))))))
+   ;;(def r (ints-seq 1000000))
+   ;; Copied above defn -main
+   ;;(simple-benchmark-data [r r] (last r) 1)
+   [lazy-seq-1m (ints-seq 1000000)] (last lazy-seq-1m)
+   
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; End section that is a translation of cljs-bench benchmarks
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ))
+
+
 ;; Note: It seems that (set v) is significantly slower than (into #{}
 ;; v) for the vec13 and vec10k cases.  This is reasonable given that
 ;; (into #{} v) uses transients, whereas (set v) is not.
@@ -389,10 +648,20 @@
              (set v13)))
 
 
+(defn run-benchmarks-tiny-round-robin []
+  (benchmark-round-robin
+   [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
+   (into #{} v13)
+   [v13 ["a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"]]
+   (set v13)))
+
+
 (def benchmark-info
   {"tiny" #(run-benchmarks-tiny)
+   "tiny-rr" #(run-benchmarks-tiny-round-robin)
    "set1" #(run-benchmarks-set1)
    "cljs" #(run-benchmarks-cljs)
+   "cljs-rr" #(run-benchmarks-cljs-round-robin)
    "into-vs-set" #(run-benchmarks-into-vs-set)})
 
 

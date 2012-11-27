@@ -16,4 +16,4 @@ shift
 # library from.  Try running the GCC version of the program instead,
 # if you wish to create an expected output file.
 
-../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --output "${OUTP}" "${JAVA}" -Djava.library.path=../include ${JAVA_PROFILING} -server -classpath "${JAVA_OBJ_DIR}" pidigits "$@"
+../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --output "${OUTP}" "${JAVA}" -Djava.library.path=../include ${JAVA_PROFILING} ${JAVA_OPTS} -classpath "${JAVA_OBJ_DIR}" pidigits "$@"

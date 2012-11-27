@@ -20,7 +20,8 @@ source ../env.sh
 
 # criterium 
 
-ALL_CLOJURE_VERSIONS_HERE=`all_benchmark_clojure_versions_except 1.2 1.2.1`
+#ALL_CLOJURE_VERSIONS_HERE=`all_benchmark_clojure_versions_except 1.2 1.2.1`
+ALL_CLOJURE_VERSIONS_HERE="1.3 1.4 1.5-beta1"
 echo ${ALL_CLOJURE_VERSIONS_HERE}
 
 ${ECHO} ${LEIN} clean

@@ -2,8 +2,7 @@
 
 source ../env.sh
 
-OPTS="-server"
-#OPTS="-client"
+OPTS="${JAVA_OPTS}"
 
 
 #HPROF_OPTS="cpu=samples,depth=20,thread=y"
