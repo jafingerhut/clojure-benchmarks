@@ -6,21 +6,21 @@
 
 (set! *warn-on-reflection* true)
 
-(def ^:dynamic *sample-count* 60)
+(def ^:dynamic *sample-count* 30)
 
 ;; time units for values below are nanosec
 (def s-to-ns (* 1000 1000 1000))
 
 ;; No warmup except the code that estimates the number of executions
 ;; of the expression needed to take about *target-execution-time*
-(def ^:dynamic *warmup-jit-period* (long (*  0 s-to-ns)))
+;;(def ^:dynamic *warmup-jit-period* (long (*  0 s-to-ns)))
 ;; criterium default = 10 sec
-;;(def ^:dynamic *warmup-jit-period* (long (* 10 s-to-ns)))
+(def ^:dynamic *warmup-jit-period* (long (* 10 s-to-ns)))
 
 ;; 100 msec
-(def ^:dynamic *target-execution-time* (long (* 0.1 s-to-ns)))
+;;(def ^:dynamic *target-execution-time* (long (* 0.1 s-to-ns)))
 ;; criterium default = 1 sec
-;;(def ^:dynamic *target-execution-time* (long (* 1.0 s-to-ns)))
+(def ^:dynamic *target-execution-time* (long (* 1.0 s-to-ns)))
 
 
 (def ^:dynamic *auto-flush* true)
