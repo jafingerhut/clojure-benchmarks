@@ -14,16 +14,6 @@ cp -pr "${LEIN_FILES}"/* "${HOME}/lein/lein-files/"
 
 cd "${HOME}/lein"
 
-for RC in 1 2 3
-do
-    lein new clojure-1.5.0-rc${RC}
-    cd clojure-1.5.0-rc${RC}
-    cp -p "../lein-files/project.clj-for-clojure-1.5.0-RC${RC}" project.clj
-    lein deps
-    cd ..
-done
-exit 0
-
 for clj_1_2_point_release in 0 1
 do
     lein new clojure-1.2.${clj_1_2_point_release}
