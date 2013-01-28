@@ -38,13 +38,13 @@ fi
 # See also below the definition of ALL_BENCHMARK_CLOJURE_VERSIONS,
 # which is a subset of ALL_CLOJURE_VERSIONS
 
-ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1"
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1 clj-1.5-beta2 clj-1.5-RC1 clj-1.5-RC2 clj-1.5-RC3"
 
-ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-beta1"
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5-RC3"
 
 show_known_clojure_versions()
 {
-    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] clj-1.5-beta1"
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] clj-1.5-beta[1-2] clj-1.5-RC[1-3]"
 }
 
 internal_check_clojure_version_spec()
@@ -99,10 +99,17 @@ internal_check_clojure_version_spec()
         CLJ_VERSION_STR="${spec}"
         ;;
 
-    1.5-beta1)
+    1.5-beta[1-2])
         CLJ_VERSION_STR="1.5.0${spec/1.5/}"
         ;;
-    1.5.0-beta1)
+    1.5.0-beta[1-2])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
+    1.5-RC[1-3])
+        CLJ_VERSION_STR="1.5.0${spec/1.5/}"
+        ;;
+    1.5.0-RC[1-3])
         CLJ_VERSION_STR="${spec}"
         ;;
 
@@ -207,6 +214,11 @@ all_clojure_versions_except()
 # except the following versions have been removed so that benchmarking
 # runs go faster:
 
+# 1.5-RC2 is identical to 1.5-RC1, except for the changes.md file.
+
+# 1.5-RC1 is only 1 commit older than 1.5-RC3.  Keep 1.5-RC3 with its
+# 1 extra comit in preference to 1.5-RC1.
+
 # 1.5-alpha7 is only 1 commit newer than 1.5-alpha6, and it is the
 # addition of 5 new macros that won't be used in any benchmarks
 # spanning many versions.
@@ -224,7 +236,7 @@ all_clojure_versions_except()
 # 1.4-beta3 is only 1 commit newer than 1.4-beta2, and it is the
 # option to remove metadata during compilation.
 
-ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7`"
+ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2`"
 
 all_benchmark_clojure_versions_except()
 {
