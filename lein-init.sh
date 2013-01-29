@@ -113,7 +113,7 @@ do
     cd ..
 done
 
-for RC in 1 2 3
+for RC in 1 2 3 4
 do
     lein new clojure-1.5.0-rc${RC}
     cd clojure-1.5.0-rc${RC}
