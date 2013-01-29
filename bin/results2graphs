@@ -276,7 +276,7 @@ consisting of one or more Measurement elements\n"
 
     -b Print a numbered list of benchmark names as HTML links to the
        PNG graphs.  Only effective if plots are generated (i.e. -p
-       option is also given).
+       option is not given).
 " prog-name options-desc))
 
 
