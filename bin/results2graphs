@@ -114,6 +114,20 @@
   (first (str/split s #"\s+")))
 
 
+(defn lang-for-sorting [lang]
+  (printf "andy-debug: lang='%s' re-find=%s\n"
+          lang
+          (re-find #"-RC\d+" lang))
+  (cond
+   (re-find #"-RC\d+" lang) (str/lower-case lang)
+   (or (= lang "java")
+       (re-find #"(alpha|beta)" lang))
+   lang
+   ;; Append "-zfinal" to the Clojure version number so that it sorts
+   ;; alphabetically after the alpha, beta, and rc versions.
+   :else (str lang "-zfinal")))
+
+
 (defn xml-add-columns-benchmark-platform-language [data]
   (for [{:keys [current_working_directory output_file
                 jvm_os_name jvm_os_version jvm_java_vm_name jvm_java_vm_vendor
@@ -126,13 +140,7 @@
                                     output_file)]
                  lang
                  nil)
-          lang (if (or (= lang "java")
-                       (re-find #"(alpha|beta)" lang))
-                 lang
-                 ;; Append "-final" to the Clojure version number so
-                 ;; that it sorts alphabetically after the alpha and
-                 ;; beta versions.
-                 (str lang "-final"))
+          lang (lang-for-sorting lang)
 
           jvm_java_vm_vendor (if (nil? jvm_java_vm_vendor)
                                ;; Temporary hack to fill in this
@@ -247,7 +255,7 @@ consisting of one or more Measurement elements\n"
 
 
 (defn show-usage [prog-name options-desc]
-  (die "usage: %s [ <opions> ] <results.xml> ...
+  (die "usage: %s [ <options> ] <results.xml> ...
 %s
     -t Show a table of all results extracted from the XML files.
        Without this option, no such table is shown.
@@ -264,10 +272,11 @@ consisting of one or more Measurement elements\n"
        benchmark.  With this option, skip the generation of plots.
 
     -h Print HTML with a list of links to images of graphs.  Only
-       effective if -p option is also given.
+       effective if plots are generated (i.e. -p option is not given).
 
     -b Print a numbered list of benchmark names as HTML links to the
-       PNG graphs.  Only effective if -p option is also given.
+       PNG graphs.  Only effective if plots are generated (i.e. -p
+       option is also given).
 " prog-name options-desc))
 
 
@@ -369,10 +378,10 @@ consisting of one or more Measurement elements\n"
                                                        benchmark-measurements
                                                        :elapsed_time_sec)
               language->idx (->> (map :language benchmark-measurements)
-                                set
-                                sort
-                                (map-indexed (fn [idx lang] [lang idx]))
-                                (into {}))
+                                 set
+                                 sort
+                                 (map-indexed (fn [idx lang] [lang idx]))
+                                 (into {}))
               tempfiles
               (for [[plat plat-measurements] (group-by :platform
                                                        benchmark-measurements)]
