@@ -3,16 +3,19 @@ these do if you are curious):
 
     (1) Check below for install instructions specific to your OS.
 
-    Either: (2a) Install Leiningen and run lein-init.sh, which creates
-    directories 'lein' and '.m2' in your home directory (takes about 2
-    mins on my system after Leiningen is installed), or (2b) edit
+    Either: (2a) Install Leiningen (see next paragraph), or (2b) edit
     env.sh to specify the location of your Clojure JAR files.  Look
     for the CLOJURE_CLASSPATH variable settings.
 
-    (2a) Leiningen installation instructions:
+    (2a) Leiningen version 1.7.1 installation instructions (Leiningen
+    1.7.1 is the "old version" now, but it installs JAR files in a
+    place expected by some of this code, and the current Leiningen
+    version 2 puts them somewhere else):
     http://github.com/technomancy/leiningen
-    Then use Leiningen to install multiple Clojure JAR files in
-    $HOME/lein directory.
+
+    Save Leiningen 1.7.1 as 'lein1' somewhere in your command path.
+    Then use the following script to install multiple Clojure JAR
+    files in your $HOME/lein directory.
 
     % ./lein-init.sh
 
@@ -25,18 +28,18 @@ these do if you are curious):
     Time required on some of my systems: 6-7 mins, or 18 mins on a
     Windows + Cygwin running in a VM.
 
-    (4) Run Clojure 1.2 versions of all of the benchmark programs:
+    (4) Run Clojure 1.3 versions of all of the benchmark programs:
 
-    % ./run-all.sh clj-1.2
+    % ./run-all.sh clj-1.3
 
     Time required on some of my systems: 25 - 35 mins (about half the
     time was spent running the long fannkuch benchmark, and about 1/4
     on the long knucleotide benchmmark.)
 
-    Another example: Run Java, Clojure 1.2, Clojure 1.3 alpha1, and
-    Clojure 1.3 alpha3 versions of all of the benchmark programs.
+    Another example: Run Java, Clojure 1.3, Clojure 1.4 alpha1, and
+    Clojure 1.4 alpha3 versions of all of the benchmark programs.
 
-    % ./run-all.sh long java clj-1.2 clj-1.3-alpha1 clj-1.3-alpha3
+    % ./run-all.sh long java clj-1.3 clj-1.4-alpha1 clj-1.4-alpha3
 
     (5) If you want all results recorded to an XML file, look in
     env.sh for MP_COMMON_ARGS and the comments before it on how to
@@ -49,9 +52,10 @@ these do if you are curious):
 
 Systems on which this has been tested:
 Mac OS X 10.5.8
-Mac OS X 10.6.6, both with and without MacPorts installed
-Ubuntu 10.4 LTS, 32-bit and 64-bit
-Windows XP SP3 + Cygwin 1.7.7
+Mac OS X 10.6.8, both with and without MacPorts installed
+Mac OS X 10.7
+Ubuntu 10.4 LTS, 32-bit and 64-bit (also Ubuntu 11.10 and 12.04)
+Windows XP SP3/Vista/7 + Cygwin
 
 You need a Java Development Kit installed.  A Java Virtual Machine
 with no Java compiler (javac) is not enough.  You need a compiler for
@@ -59,8 +63,8 @@ Java source files that are used in the "./init.sh output" step above
 to create the input files.  You also need a JVM to run Leiningen, if
 you use that.
 
-Tested with recent Java 1.6.0.X HotSpot JVMs from Sun, and JRockit
-from Oracle on Windows XP.
+Tested with recent Java 1.6.0.X and 1.7.0.X HotSpot JVMs from Sun, and
+JRockit from Oracle on Windows XP and Vista.
 
 ----------------------------------------------------------------------
 Install instruction specific to Mac OS X
@@ -117,7 +121,7 @@ in 10.5.  I've filed a bug on Apple's developer web site in January
 2011, but this behavior change may be intentional for all I know.
 
 ----------------------------------------------------------------------
-Install instructions specific to Ubuntu Linux 10.4
+Install instructions specific to Ubuntu Linux
 ----------------------------------------------------------------------
 
 On Ubuntu 11.10 (and perhaps others), the package libxml-libxml-perl
@@ -238,7 +242,7 @@ thread-ring            -         yes         -
 
 I have hacked up some shell scripts to automate the compilation and
 running of some of these programs.  They have been tested on Mac OS X
-10.5.8 and 10.6.4 with recent versions of the Glasgow Haskell Compiler
+10.5.8 and 10.6.8 with recent versions of the Glasgow Haskell Compiler
 ghc, SBCL Common Lisp, Perl, several versions of Sun's Java VM (for
 Windows XP, Linux, and Mac), Oracle's JRockit JVM for Windows, and
 Clojure 1.2.0 and 1.3.0 alpha1 (and earlier 1.0.0 or shortly before
