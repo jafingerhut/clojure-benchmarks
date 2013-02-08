@@ -220,8 +220,11 @@ all_clojure_versions_except()
 # except the following versions have been removed so that benchmarking
 # runs go faster:
 
-# 1.5-beta10 is only 2 commits older than 1.5-beta11.  Keep 1.5-beta11
-# in preference to 1.5-beta10.
+# At least for now, don't use 1.5-RC4 in benchmarks, because my
+# cljexprs graph genration stuff would sort it after all of the
+# beta's, and the time order of releases has betas after RCs due to
+# weirdness of time when read vulnerability was addressed before
+# release of 1.5.0.
 
 # 1.5-RC1, RC2, and RC3 are only 3, 3, and 1 commits older
 # (respectively) than 1.5-RC4.  Keep 1.5-RC4 in preference to any of
@@ -244,7 +247,7 @@ all_clojure_versions_except()
 # 1.4-beta3 is only 1 commit newer than 1.4-beta2, and it is the
 # option to remove metadata during compilation.
 
-ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9 1.5-beta10`"
+ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC4 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9`"
 
 all_benchmark_clojure_versions_except()
 {
