@@ -105,7 +105,7 @@ do
     cd ..
 done
 
-for beta in 1 2 7 8 9 10 11
+for beta in 1 2 7 8 9 10 11 12 13
 do
     v="1.5.0-beta${beta}"
     lein1 new clojure-${v}
@@ -115,7 +115,7 @@ do
     cd ..
 done
 
-for RC in 1 2 3 4 5 6
+for RC in 1 2 3 4 5 6 14 15
 do
     lc_v="1.5.0-rc${RC}"
     v="1.5.0-RC${RC}"
