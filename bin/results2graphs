@@ -115,9 +115,9 @@
 
 
 (defn lang-for-sorting [lang]
-  (printf "andy-debug: lang='%s' re-find=%s\n"
-          lang
-          (re-find #"-RC\d+" lang))
+;;  (printf "andy-debug: lang='%s' re-find=%s\n"
+;;          lang
+;;          (re-find #"-RC\d+" lang))
   (cond
    (re-find #"-RC\d+" lang) (str/lower-case lang)
    (or (= lang "java")
@@ -301,6 +301,26 @@ consisting of one or more Measurement elements\n"
         [opts args ""])
       [opts args ""])))
 
+
+(defn lang-sort-key
+  "Take lang-str, a string specifying a language, and convert it into
+  a vector of 4 values that can be used to sort the language relative
+  to others by using 'compare' on these values.
+
+  Examples:
+
+  (lang-sort-key \"clj-1.5-beta11\")
+  ;=> [\"clj\" \"1.5\" \"beta\" 11]
+
+  (lang-sort-key \"clj-1.5-beta2\")
+  ;=> [\"clj\" \"1.5\" \"beta\" 2]"
+  [lang-str]
+  (if-let [matches (re-find #"^(clj)-([^-]+)-(alpha|beta|rc|zfinal)(\d+)?$" lang-str)]
+    (let [[_ clj vers alp-bet-rc-final num-str] matches]
+      [clj vers alp-bet-rc-final (if num-str (Long/parseLong num-str))])
+    [lang-str nil nil nil]))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start of 'main' code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -379,7 +399,7 @@ consisting of one or more Measurement elements\n"
                                                        :elapsed_time_sec)
               language->idx (->> (map :language benchmark-measurements)
                                  set
-                                 sort
+                                 (sort-by lang-sort-key)
                                  (map-indexed (fn [idx lang] [lang idx]))
                                  (into {}))
               tempfiles
@@ -391,6 +411,7 @@ consisting of one or more Measurement elements\n"
                               (:language meas)
                               (:elapsed_time_sec meas)])
                            plat-measurements)
+                      graph-one-curve-data (sort graph-one-curve-data)
                       tempfile (temporary-file-name)]
                   (spit tempfile (str/join "\n" (map #(str/join " " %) 
                                                      graph-one-curve-data)))
