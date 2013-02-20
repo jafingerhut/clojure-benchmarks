@@ -52,6 +52,8 @@ internal_check_clojure_version_spec()
     local spec="$1"
     local ret_val=0
     #echo "iccvs spec=:${spec}:"
+    # Replace "rc" with "RC" if it occurs in the spec
+    spec="${spec/rc/RC}"
     case "${spec}" in
     1.2 | 1.2.0)
 	CLJ_VERSION_STR="1.2.0"

@@ -117,10 +117,9 @@ done
 
 for RC in 1 2 3 4 5 6 14 15
 do
-    lc_v="1.5.0-rc${RC}"
     v="1.5.0-RC${RC}"
-    lein1 new clojure-${lc_v}
-    cd clojure-${lc_v}
+    lein1 new clojure-${v}
+    cd clojure-${v}
     make_project_clj_file ${v} project.clj
     lein1 deps
     cd ..
