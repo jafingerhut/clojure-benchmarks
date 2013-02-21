@@ -23,4 +23,4 @@ shift
 # much.
 MAX_HEAP_MB=384
 
-../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} ${JAVA_OPTS} -XX:+TieredCompilation -XX:+AggressiveOpts -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" revcomp "$@"
+../bin/measureproc ${MP_COMMON_ARGS} ${MP_ARGS_FOR_JVM_RUN} --input "${INP}" --output "${OUTP}" "${JAVA}" ${JAVA_PROFILING} ${JAVA_OPTS} -Xmx${MAX_HEAP_MB}m -classpath "${PS_FULL_CLJ_CLASSPATH}" revcomp "$@"
