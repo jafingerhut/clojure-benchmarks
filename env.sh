@@ -469,10 +469,10 @@ JAVA_PROFILING=
 
 
 # Options to give on java command line for all Clojure and Java programs
-JAVA_OPTS="-server -Xmixed"
-#JAVA_OPTS="-server -Xint"
-#JAVA_OPTS="-client -Xmixed"
-#JAVA_OPTS="-client -Xint"
+JAVA_OPTS="-server -Xmixed -XX:+TieredCompilation -XX:+AggressiveOpts"
+#JAVA_OPTS="-server -Xint -XX:+TieredCompilation -XX:+AggressiveOpts"
+#JAVA_OPTS="-client -Xmixed -XX:+TieredCompilation -XX:+AggressiveOpts"
+#JAVA_OPTS="-client -Xint -XX:+TieredCompilation -XX:+AggressiveOpts"
 
 
 ######################################################################
