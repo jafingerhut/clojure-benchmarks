@@ -1,3 +1,11 @@
+----------------------------------------------------------------------
+As of Feb 21 2013 the fastest Clojure and Java programs on the 64-bit
+4 core machine on the Computer Language Benchmarks Game web site were:
+
+binarytrees.clojure = my binarytrees.clojure-rh.clojure except for white space and comments
+binarytrees.java = my binarytrees.java-1.java except for white space and comments
+
+----------------------------------------------------------------------
 As of Sep 15 2012, here are the fastest Clojure programs for the
 binarytrees problem, in order from fastest to slowest.  The order is
 different on the 4 benchmark machines:
