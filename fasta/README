@@ -7,3 +7,21 @@ them both.
 
 I also got a little faster results using byte-based output (clj-6)
 rather than char/String-based output (clj-1 through clj-5, and clj-7).
+
+
+On Feb 20 2013, the fastest Clojure program for the 4-core 64-bit
+machine was fasta.clojure-5.clojure, which is identical to my
+fasta.clj-8.clj except for the URL in the second comment line.
+
+The fastest Java program was fasta.java-4.java
+
+
+The fastest Clojure program for the fasta-redux problem was
+fasta.clojure-4.clojure, which is very similar to my fasta.clj-11.clj,
+but there are many small differences.  I didn't notice any changes
+that should account for changes in speed, but it wasn't obvious.
+
+The fastest Java program for the fasta-redux problem was
+fastaredux.java-3.java, which is identical to the file I copied and
+called fasta.java-3.java except for the class name and comment line
+with URL.
