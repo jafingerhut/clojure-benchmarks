@@ -769,7 +769,8 @@ if (($os eq 'GNU/Linux') || ($os eq 'Cygwin')) {
 					    $per_cpu_stats_end->[$i]{idle},
 					    $per_cpu_stats_start->[$i]{total},
 					    $per_cpu_stats_end->[$i]{total});
-       if ($cpu_busy_percent ne $cpu_busy_percent_without_bigints) {
+       my $delta = $cpu_busy_percent - $cpu_busy_percent_without_bigints;
+       if (($delta < -1) || ($delta > 1)) {
 	   die sprintf "For idle times %s %s and total times %s %s cpu_busy_percent() returned %s but cpu_busy_percent_without_bigints() returned %s\n",
 	       $per_cpu_stats_start->[$i]{idle},
 	       $per_cpu_stats_end->[$i]{idle},
