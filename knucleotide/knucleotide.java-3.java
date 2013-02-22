@@ -1,171 +1,139 @@
 /* The Computer Language Benchmarks Game
-   http://shootout.alioth.debian.org/
+ http://benchmarksgame.alioth.debian.org/
 
-   contributed by Matthieu Bentot
-   based on the original by The Anh Tran
+ contributed by James McIlree
+ ByteString code thanks to Matthieu Bentot and The Anh Tran
+ modified by Andy Fingerhut 
  */
 
 import java.util.*;
 import java.io.*;
-import java.util.concurrent.atomic.*;
+import java.util.concurrent.*;
 
-public final class knucleotide {
-
-    public static void main (String[] args) {
-      try {
-         byte source[]=readInput();
-
-           String result[]=new String[7];
-           AtomicInteger job=new AtomicInteger(6);
-
-           Thread pool[]=new Thread[Runtime.getRuntime().availableProcessors()];
-           for(int i=0;i<pool.length;i++) {
-               pool[i]=new ProcessingThread(source, job, result);
-               pool[i].start();
-           }
-
-           for(Thread t: pool) t.join();
-
-           for(String s: result) System.out.println(s);
-      } catch (Exception e) {
-         e.printStackTrace();
-         System.exit(-1);
-      }
+public class knucleotide {
+    static ArrayList<Callable< Map<ByteString, ByteString> > > createFragmentTasks(final byte[] sequence, int[] fragmentLengths) {
+	ArrayList<Callable<Map<ByteString, ByteString>>> tasks = new ArrayList<Callable<Map<ByteString, ByteString>>>();
+	for (int fragmentLength : fragmentLengths) {
+	    for (int index=0; index<fragmentLength; index++) {
+		final int offset = index;
+		final int finalFragmentLength = fragmentLength;
+		tasks.add(new Callable<Map<ByteString, ByteString>>() {
+		    public Map<ByteString, ByteString> call() {
+			return createFragmentMap(sequence, offset, finalFragmentLength);
+		    }
+		});
+	    }
+	}
+	return tasks;
     }
 
-    private static byte[] readInput() throws IOException {
-        BufferedReader reader=new BufferedReader(new InputStreamReader(System.in, "US-ASCII"));
+    static Map<ByteString, ByteString> createFragmentMap(byte[] sequence, int offset, int fragmentLength) {
+	HashMap<ByteString, ByteString> map = new HashMap<ByteString, ByteString>();
+	int lastIndex = sequence.length - fragmentLength + 1;
+	ByteString key = new ByteString(fragmentLength);
+	for (int index=offset; index<lastIndex; index+=fragmentLength) {
+	    key.calculateHash(sequence, index);
+	    ByteString fragment = map.get(key);
+	    if (fragment != null) {
+		fragment.count++;
+	    } else {
+		map.put(key, key);
+		key = new ByteString(fragmentLength);
+	    }
+	}
 
-        String s;
-
-        while((s=reader.readLine()) != null) {
-            if (s.startsWith(">THREE")) break;
-        }
-
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        byte line[]=new byte[100];
-
-        while((s=reader.readLine()) != null) {
-           if (s.length()>line.length) line=new byte[s.length()];
-           int i;
-           for(i=0;i<s.length();i++) line[i]=(byte)s.charAt(i);
-            baos.write(line, 0, i);
-        }
-
-        return baos.toByteArray();
+	return map;
     }
 
-    private static final class ProcessingThread extends Thread {
+    // Destructive!
+    static Map<ByteString, ByteString> sumTwoMaps(Map<ByteString, ByteString> map1, Map<ByteString, ByteString> map2) {
+	for (Map.Entry<ByteString, ByteString> entry : map2.entrySet()) {
+	    ByteString sum = map1.get(entry.getKey());
+	    if (sum != null)
+		sum.count += entry.getValue().count;
+	    else
+		map1.put(entry.getKey(), entry.getValue());
+	}
+	return map1;
+    }
 
-      private final byte input[];
+    static String writeFrequencies(float totalCount, Map<ByteString, ByteString> frequencies) {
+	SortedSet<ByteString> list = new TreeSet<ByteString>(frequencies.values());
+	StringBuilder sb = new StringBuilder();
+	for (ByteString k : list)
+	    sb.append(String.format("%s %.3f\n", k.toString().toUpperCase(), (float)(k.count) * 100.0f / totalCount));
 
-      private final AtomicInteger job;
+	return sb.append('\n').toString();
+    }
 
-      private final String result[];
+    static String writeCount(List<Future<Map<ByteString, ByteString>>> futures, String nucleotideFragment) throws Exception {
+	ByteString key = new ByteString(nucleotideFragment.length());
+	key.calculateHash(nucleotideFragment.getBytes(), 0);
 
-      private ProcessingThread(byte source[], AtomicInteger job, String result[]) {
-         this.input=source;
-         this.job=job;
-         this.result=result;
-      }
+	int count = 0;
+	for (Future<Map<ByteString, ByteString>> future : futures) {
+	    ByteString temp = future.get().get(key);
+	    if (temp != null) count += temp.count;
+	}
 
-      public void run() {
-          int j;
-          while((j=job.getAndDecrement()) >= 0) {
-              switch (j) {
-                  case 0:
-                      result[j]=writeFreq(1);
-                      break;
-                  case 1:
-                      result[j]=writeFreq(2);
-                      break;
-                  case 2:
-                      result[j]=writeFreq("ggt");
-                      break;
-                  case 3:
-                      result[j]=writeFreq("ggta");
-                      break;
-                  case 4:
-                      result[j]=writeFreq("ggtatt");
-                      break;
-                  case 5:
-                      result[j]=writeFreq("ggtattttaatt");
-                      break;
-                  case 6:
-                      result[j]=writeFreq("ggtattttaatttatagt");
-                      break;
-                  default:
-                      throw new RuntimeException("Invalid task");
-              }
-          }
-      }
+	return count + "\t" + nucleotideFragment.toUpperCase() + '\n';
+    }
 
-       private String writeFreq(int frameSize) {
-           ArrayList<Key> result=new ArrayList<Key>(calculateFreq(input, frameSize).keySet());
-           Collections.sort(result);
+    public static void main (String[] args) throws Exception {
+	String line;
+	BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+	while ((line = in.readLine()) != null) {
+	    if (line.startsWith(">THREE")) break;
+	}
 
-           float totalchar=input.length-frameSize+1;
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte bytes[] = new byte[100];
+        while((line = in.readLine()) != null) {
+	    if (line.length() > bytes.length)
+		bytes = new byte[line.length()];
 
-           StringBuilder sb=new StringBuilder();
+	    int i;
+	    for(i=0; i<line.length(); i++)
+		bytes[i] = (byte)line.charAt(i);
+	    baos.write(bytes, 0, i);
+        }
 
-           for(Key k: result) {
-              for(int i=0;i<k.key.length;i++) sb.append(Character.toUpperCase((char)k.key[i]));
-               sb.append(String.format(" %.3f\n", (float)(k.count) * 100.0f / totalchar));
-           }
+	byte[] sequence = baos.toByteArray();
 
-           return sb.toString();
-       }
+	ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	int[] fragmentLengths = { 1, 2, 3, 4, 6, 12, 18 };
+	List<Future<Map<ByteString, ByteString>>> futures = pool.invokeAll(createFragmentTasks(sequence, fragmentLengths));
+	pool.shutdown();
 
-       private String writeFreq(String specific) {
-           Key k=new Key(specific.length());
-           k.reHash(specific.getBytes(), 0);
+	StringBuilder sb = new StringBuilder();
 
-           int count=calculateFreq(input, specific.length()).get(k).count;
+	sb.append(writeFrequencies(sequence.length, futures.get(0).get()));
+	sb.append(writeFrequencies(sequence.length - 1, sumTwoMaps(futures.get(1).get(), futures.get(2).get())));
 
-           return String.format("%d\t%s", count, specific.toUpperCase());
-       }
+	String[] nucleotideFragments = { "ggt", "ggta", "ggtatt", "ggtattttaatt", "ggtattttaatttatagt" };
+	for (String nucleotideFragment : nucleotideFragments) {
+	    sb.append(writeCount(futures, nucleotideFragment));
+	}
 
-       private static HashMap<Key, Key> calculateFreq(byte input[], int frameSize) {
-          HashMap<Key, Key> htb=new HashMap<Key, Key>();
+	System.out.print(sb.toString());
+    }
 
-           int end=input.length-frameSize+1;
-           Key k=new Key(frameSize);
-
-           for(int i=0;i<end;i++) {
-               k.reHash(input, i);
-
-               Key existing=htb.get(k);
-               if (existing!=null) {
-                  existing.count++;
-               } else {
-                   htb.put(k, k);
-                   k=new Key(frameSize);
-               }
-           }
-
-           return htb;
-       }
-
-   }
-
-   static final class Key implements Comparable<Key> {
-
+    static final class ByteString implements Comparable<ByteString> {
         public int hash, count=1;
+        public final byte bytes[];
 
-        public final byte key[];
-
-        public Key(int frame) {
-            key=new byte[frame];
+        public ByteString(int size) {
+            bytes = new byte[size];
         }
 
-        public void reHash(byte k[], int offset) {
-           int hash=0;
-            for (int i=0;i<key.length;i++) {
-               byte b=k[offset+i];
-                key[i]=b;
-                hash=hash*31+b;
+        public void calculateHash(byte k[], int offset) {
+	    int temp = 0;
+            for (int i=0; i<bytes.length; i++) {
+		byte b = k[offset+i];
+                bytes[i] = b;
+                temp = temp * 31 + b;
             }
-            this.hash=hash;
+	    hash = temp;
         }
 
         public int hashCode() {
@@ -173,13 +141,25 @@ public final class knucleotide {
         }
 
         public boolean equals(Object obj) {
-            return hash==((Key)obj).hash;
+	    return Arrays.equals(bytes, ((ByteString)obj).bytes);
         }
 
-        public int compareTo(Key o) {
-            return o.count-count;
+        public int compareTo(ByteString other) {
+	    if (other.count != count) {
+		return other.count - count;
+	    } else {
+		// Without this case, if there are two or more strings
+		// with exactly the same count in a Map, then the
+		// TreeSet constructor called in writeFrequencies will
+		// only add the first one, and the rest will not
+		// appear in the output.  Also this is required to
+		// satisfy the rules of the k-nucleotide problem.
+		return toString().compareTo(other.toString());
+	    }
         }
 
+	public String toString() {
+	    return new String(bytes);
+	}
     }
-
 }
