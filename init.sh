@@ -85,10 +85,10 @@ ${LINK_OR_COPY} ../../fasta/output/medium-expected-output.txt medium-input.txt
 ${LINK_OR_COPY} ../../fasta/output/long-expected-output.txt long-input.txt
 cd ../..
 
-# revlines isn't one of the benchmarks from the shootout web site.  I
-# created it as a simplified version of reverse-complement, to try to
-# figure out why Clojure was using so much memory for one of my
-# earlier solution attempts.  I'm keeping it around for future
+# revlines isn't one of the benchmarks from the Benchmarks Game web
+# site.  I created it as a simplified version of reverse-complement,
+# to try to figure out why Clojure was using so much memory for one of
+# my earlier solution attempts.  I'm keeping it around for future
 # reference.
 cd revlines
 mkdir ./input

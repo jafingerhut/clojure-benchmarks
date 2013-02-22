@@ -25,8 +25,8 @@ fasta.clojure-2.clojure (identical to my fasta.clj-6.clj, except it has (. Syste
 fasta.clojure-3.clojure (almost same as fasta.clj-8.clj, except only compiles with Clojure 1.2)
 fasta.clojure-5.clojure (identical to my fasta.clj-8.clj)
 
-My recommendation is to keep at least the last one on the Alioth web
-site, and if it is desired to keep the fastest 2, also keep
+My recommendation is to keep at least the last one on the Benchmarks
+Game web site, and if it is desired to keep the fastest 2, also keep
 fasta.clojure-2.clojure.
 
 Remove these two:

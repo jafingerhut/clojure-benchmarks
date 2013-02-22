@@ -205,7 +205,7 @@ benchmark programs require additional libraries on top of that
 The non-Clojure versions of these benchmark programs have been
 downloaded from this web site:
 
-http://shootout.alioth.debian.org
+http://benchmarksgame.alioth.debian.org
 
 See the file COPYING for the licenses under which these files are
 distributed.
@@ -222,7 +222,7 @@ binarytrees           yes        yes        yes
 chameneos-redux        -         yes         -
 ------------------- ---------- ----------- ----------
 fannkuch              yes        yes        yes
-   (^^^ deprecated on shootout web site)
+   (^^^ deprecated on benchmarks web site)
 fannkuchredux         yes        yes        yes
 fasta                 yes         no         no
 ------------------- ---------- ----------- ----------
@@ -311,10 +311,11 @@ will run the long benchmark for Java and Clojure 1.2 in all of the
 subdirectories mentioned in the 'for' line you can see for yourself in
 the run-all.sh script.
 
-Note that all of the shootout web site results are for what are called
-the 'long' benchmarks in this package.  The short and medium tests are
-primarily for quicker cycling through the edit-compile-run-debug loop,
-when you are developing a benchmark program yourself.
+Note that all of the benchmarks game web site results are for what are
+called the 'long' benchmarks in this package.  The short and medium
+tests are primarily for quicker cycling through the
+edit-compile-run-debug loop, when you are developing a benchmark
+program yourself.
 
 If you find any improvements to the Clojure versions, I'd love to hear
 about them.
@@ -472,10 +473,10 @@ in benchmarks, to avoid pitfalls, and (2) so I can make a list of
 pitfalls mentioned in there, and for each Clojure program describe
 whether I believe it has fallen into that pitfall.
 
-Are the shootout benchmark programs microbenchmarks?  Dr. Click gives
-his definition on p. 8, and several examples throughout his talk.  The
-shootout benchmark programs are relatively small, and in some cases
-the datasets are "large" (i.e. hundreds of megabytes, but none are a
+Are the benchmarks game programs microbenchmarks?  Dr. Click gives his
+definition on p. 8, and several examples throughout his talk.  The
+benchmarks game programs are relatively small, and in some cases the
+datasets are "large" (i.e. hundreds of megabytes, but none are a
 gigabyte).  However, there is a significant difference between these
 benchmarks vs. the examples in Dr. Click's slides: the goal with these
 benchmarks is to measure the entire run time of the whole program, not
@@ -495,9 +496,9 @@ v-dt!, which in turn calls the 4-line v+!, for a total of 27 lines of
 "hot code" in a 252-line file.
 
 One piece of advice from Dr. Click's slides that is most relevant is
-"Know what you test" (title of p. 32).  These shootout benchmark
-programs are not intended to discover some particular fact, and remove
-all other variables, _unless_ your goal is to discover how well this
+"Know what you test" (title of p. 32).  These benchmarks game programs
+are not intended to discover some particular fact, and remove all
+other variables, _unless_ your goal is to discover how well this
 particular program performs on the task at hand.  For example, the
 knucleotide benchmark programs do not measure only the performance of
 the hash table implementation (because there is at least some work in

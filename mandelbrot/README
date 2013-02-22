@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
-Fastest Clojure mandelbrot programs on the Alioth web site as of Sep
-16 2012:
+Fastest Clojure mandelbrot programs on the Benchmarks Game web site as
+of Sep 16 2012:
 
 5 mandelbrot.clojure-5.clojure = mandelbrot.clj-9-seq.clj
 6 mandelbrot.clojure-6.clojure = mandelbrot.clj-9-par-1.3.clj

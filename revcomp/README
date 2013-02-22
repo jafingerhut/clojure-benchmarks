@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
-On Feb 21 2013 the fastest Java and Clojure versions on the Alioth web
-site were:
+On Feb 21 2013 the fastest Java and Clojure versions on the Benchmarks
+Game web site were:
 
 64-bit 4 core
 revcomp.clojure = my revcomp.clj-15.clj except for one comment line
