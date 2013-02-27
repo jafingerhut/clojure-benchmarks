@@ -144,6 +144,7 @@ The following packages are also useful to add on Ubuntu Linux:
 libxml-libxml-perl - Required for measureproc to work.
 libgmp3-dev - If you want to run those pidigits programs that use the
     GNU MP library.
+gcc - To compile the C pidigits program.
 git-core - optional, but useful for getting updated versions of
     clojure-contrib from github.com
 
