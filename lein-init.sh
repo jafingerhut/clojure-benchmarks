@@ -115,7 +115,7 @@ do
     cd ..
 done
 
-for RC in 1 2 3 4 5 6 14 15
+for RC in 1 2 3 4 5 6 14 15 16 17
 do
     v="1.5.0-RC${RC}"
     lein1 new clojure-${v}
