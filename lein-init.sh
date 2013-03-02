@@ -115,9 +115,19 @@ do
     cd ..
 done
 
-for RC in 1 2 3 4 5 6 14 15 16 17
+for RC in 1 2 3 4 5 6 14 15 16
 do
     v="1.5.0-RC${RC}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+for clj_1_5_point_release in 0
+do
+    v="1.5.${clj_1_5_point_release}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
