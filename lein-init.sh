@@ -125,7 +125,7 @@ do
     cd ..
 done
 
-for clj_1_5_point_release in 0
+for clj_1_5_point_release in 0 1
 do
     v="1.5.${clj_1_5_point_release}"
     lein1 new clojure-${v}
