@@ -18,7 +18,7 @@ JVM_OPTS="-server -Xmx1024m"
 
 for TYPE in newdoubleC
 do
-    for THREADS in 1 2
+    for THREADS in 1 2 4 8
     do
 	JOB_SIZE=1000000000
 	echo
@@ -29,8 +29,8 @@ do
 	HPROF_OUT=output/ParallelTest-${TYPE}-${THREADS}-hprof.txt
 	uname -a > $OUT
 	"${JAVA}" -version >> $OUT
-	echo "( $TIME ${JAVA} $JVM_OPTS $JAVA_PROFILING_OPTS -classpath ${JAVA_OBJ_DIR} ParallelTest $TYPE $THREADS $JOB_SIZE ) 2>&1 | tee -a $OUT"
-	      ( $TIME "${JAVA}" $JVM_OPTS $JAVA_PROFILING_OPTS -classpath "${JAVA_OBJ_DIR}" ParallelTest $TYPE $THREADS $JOB_SIZE) 2>&1 | tee -a $OUT
+	echo "( $TIME  ${JAVA}  $JVM_OPTS $JAVA_PROFILING_OPTS -classpath  ${JAVA_OBJ_DIR}  ParallelTest $TYPE $JOB_SIZE $THREADS ) 2>&1 | tee -a $OUT"
+	      ( $TIME "${JAVA}" $JVM_OPTS $JAVA_PROFILING_OPTS -classpath "${JAVA_OBJ_DIR}" ParallelTest $TYPE $JOB_SIZE $THREADS ) 2>&1 | tee -a $OUT
 	/bin/mv -f java.hprof.txt $HPROF_OUT
     done
 done

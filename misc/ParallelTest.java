@@ -292,10 +292,14 @@ public class ParallelTest {
 
     static void doTest(String taskFnSpecifier, int numThreads,
 		       long jobSizePerThread) {
+	final int NWARMUPS = 2;
 	final int NTRIALS = 10;
-	long[] runTime = new long[NTRIALS];
+	long[] runTime = new long[NWARMUPS + NTRIALS];
 
-	for (int trial = 0; trial < NTRIALS; trial++) {
+	System.out.println("Task Specifier: " + taskFnSpecifier);
+	System.out.println("Number of Threads: " + numThreads);
+	System.out.println("Job size per thread: " + jobSizePerThread);
+	for (int trial = 0; trial < (NWARMUPS + NTRIALS); trial++) {
 	    try {
 		Thread[] tarray = new Thread[numThreads];
 		for (int i = 0; i < numThreads; i++) {
@@ -314,10 +318,19 @@ public class ParallelTest {
 	long minTime = Long.MAX_VALUE;
 	long maxTime = 0;
 	long totalTime = 0;
-	for (int trial = 1; trial < NTRIALS; trial++) {  // Note: skip first one
-	    minTime = Math.min(minTime, runTime[trial]);
-	    maxTime = Math.max(maxTime, runTime[trial]);
-	    totalTime += runTime[trial];
+	long n = 0;
+	System.out.println("Elapsed times in msec of all trials (warmup not included in final stats below):");
+	for (int trial = 0; trial < (NWARMUPS + NTRIALS); trial++) {
+	    System.out.format("Trial %2d: %.3f%s\n",
+			      trial,
+			      ((double) runTime[trial]) / 1000000.0,
+			      (trial < NWARMUPS) ? " (warmup)" : "");
+	    if (trial >= NWARMUPS) {
+		minTime = Math.min(minTime, runTime[trial]);
+		maxTime = Math.max(maxTime, runTime[trial]);
+		totalTime += runTime[trial];
+		++n;
+	    }
 	}
 
 	System.out.println();
@@ -326,7 +339,7 @@ public class ParallelTest {
 	System.out.format(" ELAPSED Times (msec): min=%.3f  max=%.3f  avg=%.3f\n",
 			  ((double) minTime) / 1000000.0,
 			  ((double) maxTime) / 1000000.0,
-			  (((double) totalTime) / (NTRIALS-1)) / 1000000.0);
+			  (((double) totalTime) / n) / 1000000.0);
     }
 
     static long defaultJobSize = 1000000000L;
@@ -394,7 +407,6 @@ public class ParallelTest {
 	    if (jobSizePerThread == 0) {
 		jobSizePerThread = 1;
 	    }
-	    System.out.println("Number of Threads: " + numThreads);
 	    doTest(taskFnSpecifier, numThreads, jobSizePerThread);
 	    System.exit(0);
 	}
