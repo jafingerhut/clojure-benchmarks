@@ -105,9 +105,9 @@
        (let [results#
 ;;             (criterium/with-progress-reporting
                (criterium/benchmark ~expr ~@opts
-                                    :samples *sample-count*
-                                    :warmup-jit-period *warmup-jit-period*
-                                    :target-execution-time *target-execution-time*)
+                                    {:samples *sample-count*
+                                     :warmup-jit-period *warmup-jit-period*
+                                     :target-execution-time *target-execution-time*})
 ;;               (criterium/quick-benchmark ~expr ~@opts)
 ;;               )
              ]
