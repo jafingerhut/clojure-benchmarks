@@ -11,7 +11,7 @@ BENCH_NAMES=$*
 #ECHO="echo"
 ECHO=""
 
-LEIN="lein2"
+LEIN="lein"
 
 source ../env.sh
 
