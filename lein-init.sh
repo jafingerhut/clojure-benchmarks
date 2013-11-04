@@ -134,3 +134,13 @@ do
     lein1 deps
     cd ..
 done
+
+for alpha in 1
+do
+    v="1.6.0-alpha${alpha}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done

@@ -38,13 +38,13 @@ fi
 # See also below the definition of ALL_BENCHMARK_CLOJURE_VERSIONS,
 # which is a subset of ALL_CLOJURE_VERSIONS
 
-ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1 clj-1.5-beta2 clj-1.5-RC1 clj-1.5-RC2 clj-1.5-RC3 clj-1.5-RC4 clj-1.5-RC5 clj-1.5-RC6 clj-1.5-beta7 clj-1.5-beta8 clj-1.5-beta9 clj-1.5-beta10 clj-1.5-beta11 clj-1.5-beta12 clj-1.5-beta13 clj-1.5-RC14 clj-1.5-RC15 clj-1.5-RC16 clj-1.5 clj-1.5.1"
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1 clj-1.5-beta2 clj-1.5-RC1 clj-1.5-RC2 clj-1.5-RC3 clj-1.5-RC4 clj-1.5-RC5 clj-1.5-RC6 clj-1.5-beta7 clj-1.5-beta8 clj-1.5-beta9 clj-1.5-beta10 clj-1.5-beta11 clj-1.5-beta12 clj-1.5-beta13 clj-1.5-RC14 clj-1.5-RC15 clj-1.5-RC16 clj-1.5 clj-1.5.1 clj-1.6-alpha1"
 
-ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5.1"
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5.1 clj-1.6-alpha1"
 
 show_known_clojure_versions()
 {
-    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] 1.5-beta[1-2] 1.5-RC[1-6] 1.5-beta[7-13] 1.5-RC[14-16] 1.5 1.5.1"
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] 1.5-beta[1-2] 1.5-RC[1-6] 1.5-beta[7-13] 1.5-RC[14-16] 1.5 1.5.1 1.6-alpha1"
 }
 
 internal_check_clojure_version_spec()
@@ -130,6 +130,13 @@ internal_check_clojure_version_spec()
 	CLJ_VERSION_STR="1.5.0"
 	;;
     1.5.1)
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
+    1.6-alpha[1-1])
+        CLJ_VERSION_STR="1.6.0${spec/1.6/}"
+        ;;
+    1.6.0-alpha[1-1])
         CLJ_VERSION_STR="${spec}"
         ;;
 
