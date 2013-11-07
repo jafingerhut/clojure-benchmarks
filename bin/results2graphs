@@ -7,6 +7,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :as sh]
+            [clojure.edn :as edn]
             ;;[clojure.tools.cli :as cli]
             [clojure.pprint :as p]))
 
@@ -86,7 +87,7 @@
               [tag val])))))
 
 
-(def ^:const +temp-hack-jvm_java_vm_vendor-map+
+(def ^:const temp-hack-jvm_java_vm_vendor-map
   {
    ["Java HotSpot(TM) Server VM"
     "Linux" "3.2.0-29-generic" "1.6.0_37" "32"] "Sun Microsystems Inc."
@@ -128,51 +129,100 @@
    :else (str lang "-zfinal")))
 
 
-(defn xml-add-columns-benchmark-platform-language [data]
-  (for [{:keys [current_working_directory output_file
+(defn lang-for-display [lang]
+  ;; Remove any "-zfinal" at the end before showing in the graph
+  (str/replace-first lang #"-zfinal$" ""))
+
+
+(defn platform-str [java_vm_vendor java_vm_name os_name os_version
+                    java_version sun_arch_data_model]
+  (let [java_vm_vendor (if (nil? java_vm_vendor)
+                             ;; Temporary hack to fill in this
+                             ;; missing data for some existing XML
+                             ;; benchmark result files I still have,
+                             ;; without modifying those files.
+                             (if-let [vendor (temp-hack-jvm_java_vm_vendor-map
+                                              [java_vm_name
+                                               os_name os_version
+                                               java_version
+                                               sun_arch_data_model])]
+                               vendor
+                               (do
+                                 (iprintf *err* "No vendor known for java_vm_name='%s' os_name='%s' os_version='%s' java_version='%s' sun_arch_data_model='%s'.  Consider finding out and adding it to temp-hack-jvm_java_vm_vendor-map.\n"
+                                          java_vm_name os_name os_version
+                                          java_version sun_arch_data_model)
+                                 "unknown_vendor"))
+                             java_vm_vendor)
+        java_vm_vendor (first-word java_vm_vendor)]
+    (format "%s-bit %s JDK %s on %s %s"
+            sun_arch_data_model
+            java_vm_vendor java_version
+            os_name os_version)))
+
+
+(defn add-keys-to-xml-result-map [measurement-map]
+  (let [{:keys [current_working_directory output_file
                 jvm_os_name jvm_os_version jvm_java_vm_name jvm_java_vm_vendor
                 jvm_java_version jvm_sun_arch_data_model
-                user_cpu_time_sec system_cpu_time_sec elapsed_time_sec]
-         :as measurement} data]
-    (let [benchmark (basename current_working_directory)
-          lang (if-let [[_ size lang]
-                        (re-matches #".*output/([^-]+)-(\S+)-output.txt"
-                                    output_file)]
-                 lang
-                 nil)
-          lang (lang-for-sorting lang)
+                user_cpu_time_sec system_cpu_time_sec elapsed_time_sec]}
+        measurement-map
 
-          jvm_java_vm_vendor (if (nil? jvm_java_vm_vendor)
-                               ;; Temporary hack to fill in this
-                               ;; missing data for some existing XML
-                               ;; benchmark result files I still have,
-                               ;; without modifying those files.
-                               (if-let [vendor (+temp-hack-jvm_java_vm_vendor-map+
-                                                [jvm_java_vm_name
-                                                 jvm_os_name jvm_os_version
-                                                 jvm_java_version
-                                                 jvm_sun_arch_data_model])]
-                                 vendor
-                                 (do
-                                   (iprintf *err* "No vendor known for java_vm_name='%s' os_name='%s' os_version='%s' java_version='%s' sun_arch_data_model='%s'.  Consider finding out and adding it to +temp-hack-jvm_java_vm_vendor-map+.\n"
-                                            jvm_java_vm_name jvm_os_name jvm_os_version
-                                            jvm_java_version jvm_sun_arch_data_model)
-                                   "unknown_vendor"))
-                               jvm_java_vm_vendor)
-          jvm_java_vm_vendor (first-word jvm_java_vm_vendor)
-          platform (format "%s-bit %s JDK %s on %s %s"
-                           jvm_sun_arch_data_model
-                           jvm_java_vm_vendor jvm_java_version
-                           jvm_os_name jvm_os_version)
-          total_cpu_time_sec (+ user_cpu_time_sec system_cpu_time_sec)
-          parallelism (/ total_cpu_time_sec elapsed_time_sec)
-          ;; Round parallelism to fewer digits
-          parallelism (format "%.2f" parallelism)]
-      (assoc measurement :benchmark benchmark
-             :language lang
-             :platform platform
-             :total_cpu_time_sec total_cpu_time_sec
-             :parallelism parallelism))))
+        benchmark (basename current_working_directory)
+        lang (if-let [[_ size lang]
+                      (re-matches #".*output/([^-]+)-(\S+)-output.txt"
+                                  output_file)]
+               lang
+               nil)
+        lang (lang-for-sorting lang)
+        platform (platform-str jvm_java_vm_vendor jvm_java_vm_name
+                               jvm_os_name jvm_os_version
+                               jvm_java_version jvm_sun_arch_data_model)
+        total_cpu_time_sec (+ user_cpu_time_sec system_cpu_time_sec)
+        parallelism (/ total_cpu_time_sec elapsed_time_sec)
+        ;; Round parallelism to fewer digits
+        parallelism (format "%.2f" parallelism)]
+    (assoc measurement-map :benchmark benchmark
+           :language lang
+           :platform platform
+           :total_cpu_time_sec total_cpu_time_sec
+           :parallelism parallelism)))
+
+
+(defn replace-keys-of-cljexprs-result-map
+  "Returns a new smaller map with only the keys needed later, because
+otherwise the memory requirements can grow inconveniently large."
+  [measurement-map]
+  (let [{:keys [bindings expr]} measurement-map
+        runtime-details (get-in measurement-map [:results :runtime-details])
+        os-details (get-in measurement-map [:results :os-details])
+
+        benchmark (str bindings " " expr)
+        vers (get-in measurement-map [:results :runtime-details
+                                      :clojure-version])
+        lang (str "clj-" (:major vers) "." (:minor vers)
+                  (if (zero? (:incremental vers))
+                    ""
+                    (str "." (:incremental vers)))
+                  (if (nil? (:qualifier vers))
+                    ""
+                    (str "-" (:qualifier vers))))
+        lang (lang-for-sorting lang)
+
+        platform (platform-str (:vm-vendor runtime-details)
+                               (:vm-name runtime-details)
+                               (:name os-details)
+                               (:version os-details)
+                               (:java-version runtime-details)
+                               (:sun-arch-data-model runtime-details))
+        mean-run-time-sec (first (get-in measurement-map [:results :mean]))
+        parallelism "1.00"]
+    {:benchmark benchmark
+     :language lang
+     :platform platform
+     :total_cpu_time_sec mean-run-time-sec
+     :parallelism parallelism
+     :exit_status 0
+     :elapsed_time_sec mean-run-time-sec}))
 
 
 (defn fastest-good-run [[benchmark-platform-lang measurements]]
@@ -224,6 +274,24 @@ consisting of one or more Measurement elements\n"
     ;; validated-xml-to-xrel produces a sequence of maps, each map
     ;; containing details of one measurement.
     (validated-xml-to-xrel p)))
+
+
+(defn do-read [rdr eof-sentinel]
+  ;; Some forms in :results key for cljexprs benchmarks look like
+  ;; this, and are not readable via edn reader or even the regular
+  ;; Clojure reader:
+  ;; #<TransientVector clojure.lang.PersistentVector$TransientVector@191f1340>
+  ;; For now I am removing these using a Perl program on the output
+  ;; file before processing with results2graphs.
+  ;;(read rdr false eof-sentinel)
+  (edn/read {:eof eof-sentinel} rdr))
+
+
+(defn xrel-from-cljexprs-results-file [cljexprs-results-filename prog-name]
+  (with-open [r (java.io.PushbackReader. (io/reader cljexprs-results-filename))]
+    (let [eof-sentinel (Object.)]
+      (doall (take-while #(not= % eof-sentinel)
+                         (repeatedly #(do-read r eof-sentinel)))))))
 
 
 ;; Scale the measurements of very fast benchmarks to more
@@ -333,9 +401,23 @@ consisting of one or more Measurement elements\n"
     (when-not (.exists (io/file fname))
       (die "%s: No such file '%s'\n" prog-name fname)))
 
-  (let [data-xrel (mapcat #(validated-xrel-from-xml-file % prog-name) filenames)
-        data (->> data-xrel
-                  xml-add-columns-benchmark-platform-language)
+  ;; TBD: input-type should be either auto-detected, or specified via
+  ;; a cmd line arg.
+  (let [input-type :cljexprs-results
+        data (case input-type
+               :xml-results
+               (->> filenames
+                    (mapcat #(validated-xrel-from-xml-file % prog-name))
+                    (map add-keys-to-xml-result-map))
+               :cljexprs-results
+               (->> filenames
+                    (mapcat #(xrel-from-cljexprs-results-file % prog-name))
+                    (map replace-keys-of-cljexprs-result-map)))
+        ;; Things required of 'data' below: It is a sequence of maps.
+        ;; Each map contains the following keys: :benchmark :platform
+        ;; :language (all strings) :exit_status (integer, 0 for
+        ;; successful run) :elapsed_time_sec (number)
+
         benchmark-input-order (zipmap (distinct (map :benchmark data))
                                       (iterate inc 1))
         data (->> data
@@ -348,6 +430,9 @@ consisting of one or more Measurement elements\n"
                   ;; group that failed (i.e. :exit_status is non-0).
                   ;; Among those that succeeded, if any, keep the one
                   ;; with the smallest elapsed time.
+                  ;; fastest-good-run reads keys: :exit_status :elapsed_time_sec
+                  ;; Adds these keys to all maps: :num_runs :good_runs
+                  ;; Adds these keys to maps if there are good runs: :other_elapsed_time_sec :time_var
                   (map fastest-good-run)
 
                   ;; Remove any older runs for Clojure versions that
@@ -408,7 +493,7 @@ consisting of one or more Measurement elements\n"
                 (let [graph-one-curve-data
                       (map (fn [meas]
                              [(get language->idx (:language meas))
-                              (:language meas)
+                              (lang-for-display (:language meas))
                               (:elapsed_time_sec meas)])
                            plat-measurements)
                       graph-one-curve-data (sort graph-one-curve-data)
