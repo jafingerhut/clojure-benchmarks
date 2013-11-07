@@ -95,6 +95,18 @@
             (:name os) (:version os))))
 
 
+(defn replace-results-with-hashes
+  "An earlier version of criterium returned only the .hashCode values
+of the resutls of the benchmark expressions.  With criterium 0.4.2 it
+returns the actual values.  Some of these are much larger than I want
+to record in my output files, so replace them with the hash values."
+  [results]
+  (let [rs (:results results)]
+    (-> results
+        (dissoc :results)
+        (assoc :result-hashes (map hash rs)))))
+
+
 (defmacro benchmark
   [bindings expr & opts]
   `(do
@@ -114,7 +126,7 @@
          (pp/pprint {:bindings '~bindings
                      :expr '~expr
                      :opts '~opts
-                     :results results#})
+                     :results (replace-results-with-hashes results#)})
          (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
 ;;         (iprintf *err* "    %s\n" (platform-desc results#))
          ))
@@ -166,7 +178,7 @@
            (pp/pprint {:bindings bindings#
                        :expr expr#
                        :opts nil
-                       :results results#}))
+                       :results (replace-results-with-hashes results#)}))
 ;;         (iprintf *err* " %s\n" (time-with-scale (first (:mean results#))))
          ))
      (flush)))
@@ -712,9 +724,10 @@
     %s [ help | -h | --help ]
     %s replace-leiningen-project-clojure-version <project.clj> <clj_version_str> <newproject.clj>
     %s benchmark <output_file> <benchmark_set_name>
-" prog-name prog-name prog-name))
+    %s report <output_file> ...
+" prog-name prog-name prog-name prog-name))
 
-(def prog-name "lein2 run")
+(def prog-name "lein run")
 
 
 (defn -main [& args]
