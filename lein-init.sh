@@ -22,9 +22,9 @@ LEIN_FILES="`dirname $0`/lein-files"
 mkdir -p "${HOME}/lein"
 cd "${HOME}/lein"
 
-for clj_1_2_point_release in 0 1
+for alpha in 2 1
 do
-    v="1.2.${clj_1_2_point_release}"
+    v="1.6.0-alpha${alpha}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -32,12 +32,11 @@ do
     cd ..
 done
 
-# It appears that 1.3.0 alpha version 1, 3, and 4 are no longer
-# available from Maven repo.
-#for alpha in 1 3 4 5 6 7 8
-for alpha in 5 6 7 8
+exit 0
+
+for clj_1_5_point_release in 1 0
 do
-    v="1.3.0-alpha${alpha}"
+    v="1.5.${clj_1_5_point_release}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -45,9 +44,9 @@ do
     cd ..
 done
 
-for beta in 1 2 3
+for RC in 16 15 14 6 5 4 3 2 1
 do
-    v="1.3.0-beta${beta}"
+    v="1.5.0-RC${RC}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -55,9 +54,9 @@ do
     cd ..
 done
 
-for clj_1_3_point_release in 0
+for beta in 13 12 11 10 9 8 7 2 1
 do
-    v="1.3.${clj_1_3_point_release}"
+    v="1.5.0-beta${beta}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -65,19 +64,9 @@ do
     cd ..
 done
 
-for alpha in 1 2 3 4
+for alpha in 7 6 5 4 3 2 1
 do
-    v="1.4.0-alpha${alpha}"
-    lein1 new clojure-${v}
-    cd clojure-${v}
-    make_project_clj_file ${v} project.clj
-    lein1 deps
-    cd ..
-done
-
-for beta in 1 2 3 4 5 6 7
-do
-    v="1.4.0-beta${beta}"
+    v="1.5.0-alpha${alpha}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -95,9 +84,9 @@ do
     cd ..
 done
 
-for alpha in 1 2 3 4 5 6 7
+for beta in 7 6 5 4 3 2 1
 do
-    v="1.5.0-alpha${alpha}"
+    v="1.4.0-beta${beta}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -105,9 +94,9 @@ do
     cd ..
 done
 
-for beta in 1 2 7 8 9 10 11 12 13
+for alpha in 4 3 2 1
 do
-    v="1.5.0-beta${beta}"
+    v="1.4.0-alpha${alpha}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -115,9 +104,9 @@ do
     cd ..
 done
 
-for RC in 1 2 3 4 5 6 14 15 16
+for clj_1_3_point_release in 0
 do
-    v="1.5.0-RC${RC}"
+    v="1.3.${clj_1_3_point_release}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -125,9 +114,9 @@ do
     cd ..
 done
 
-for clj_1_5_point_release in 0 1
+for beta in 3 2 1
 do
-    v="1.5.${clj_1_5_point_release}"
+    v="1.3.0-beta${beta}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
@@ -135,9 +124,22 @@ do
     cd ..
 done
 
-for alpha in 1
+# It appears that 1.3.0 alpha version 1, 3, and 4 are no longer
+# available from Maven repo.
+#for alpha in 8 7 6 5 4 3 1
+for alpha in 8 7 6 5
 do
-    v="1.6.0-alpha${alpha}"
+    v="1.3.0-alpha${alpha}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+for clj_1_2_point_release in 1 0
+do
+    v="1.2.${clj_1_2_point_release}"
     lein1 new clojure-${v}
     cd clojure-${v}
     make_project_clj_file ${v} project.clj
