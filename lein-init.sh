@@ -32,8 +32,6 @@ do
     cd ..
 done
 
-exit 0
-
 for clj_1_5_point_release in 1 0
 do
     v="1.5.${clj_1_5_point_release}"
