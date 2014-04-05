@@ -22,7 +22,35 @@ LEIN_FILES="`dirname $0`/lein-files"
 mkdir -p "${HOME}/lein"
 cd "${HOME}/lein"
 
-for alpha in 2 1
+for clj_1_6_point_release in 0
+do
+    v="1.6.${clj_1_6_point_release}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+for RC in 4 3 2 1
+do
+    v="1.6.0-RC${RC}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for beta in 2 1
+do
+    v="1.6.0-beta${beta}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for alpha in 3 2 1
 do
     v="1.6.0-alpha${alpha}"
     lein1 new clojure-${v}
