@@ -20,9 +20,9 @@ source ../env.sh
 
 # criterium 
 
-#ALL_CLOJURE_VERSIONS_HERE=`all_benchmark_clojure_versions_except 1.2 1.2.1`
+ALL_CLOJURE_VERSIONS_HERE=`all_benchmark_clojure_versions_except 1.2 1.2.1`
 #ALL_CLOJURE_VERSIONS_HERE="1.3 1.4 1.5-beta1"
-ALL_CLOJURE_VERSIONS_HERE="1.6-alpha3 1.6-beta1 1.6-beta2 1.6-RC1 1.6-RC2 1.6-RC3 1.6"
+#ALL_CLOJURE_VERSIONS_HERE="1.6-alpha3 1.6-beta1 1.6-beta2 1.6-RC1 1.6-RC2 1.6-RC3 1.6"
 echo "ALL_CLOJURE_VERSIONS_HERE=${ALL_CLOJURE_VERSIONS_HERE}"
 
 #echo "ALL_CLOJURE_VERSIONS=${ALL_CLOJURE_VERSIONS}"
