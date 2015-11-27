@@ -38,13 +38,13 @@ fi
 # See also below the definition of ALL_BENCHMARK_CLOJURE_VERSIONS,
 # which is a subset of ALL_CLOJURE_VERSIONS
 
-ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1 clj-1.5-beta2 clj-1.5-RC1 clj-1.5-RC2 clj-1.5-RC3 clj-1.5-RC4 clj-1.5-RC5 clj-1.5-RC6 clj-1.5-beta7 clj-1.5-beta8 clj-1.5-beta9 clj-1.5-beta10 clj-1.5-beta11 clj-1.5-beta12 clj-1.5-beta13 clj-1.5-RC14 clj-1.5-RC15 clj-1.5-RC16 clj-1.5 clj-1.5.1 clj-1.6-alpha1 clj-1.6-alpha2 clj-1.6-alpha3 clj-1.6-beta1 clj-1.6-beta2 clj-1.6-RC1 clj-1.6-RC2 clj-1.6-RC3 clj-1.6-RC4 clj-1.6"
+ALL_CLOJURE_VERSIONS="clj-1.2 clj-1.2.1 clj-1.3-alpha5 clj-1.3-alpha6 clj-1.3-alpha7 clj-1.3-alpha8 clj-1.3-beta1 clj-1.3-beta2 clj-1.3-beta3 clj-1.3 clj-1.4-alpha1 clj-1.4-alpha2 clj-1.4-alpha3 clj-1.4-alpha4 clj-1.4-beta1 clj-1.4-beta2 clj-1.4-beta3 clj-1.4-beta4 clj-1.4-beta5 clj-1.4-beta6 clj-1.4-beta7 clj-1.4 clj-1.5-alpha1 clj-1.5-alpha2 clj-1.5-alpha3 clj-1.5-alpha4 clj-1.5-alpha5 clj-1.5-alpha6 clj-1.5-alpha7 clj-1.5-beta1 clj-1.5-beta2 clj-1.5-RC1 clj-1.5-RC2 clj-1.5-RC3 clj-1.5-RC4 clj-1.5-RC5 clj-1.5-RC6 clj-1.5-beta7 clj-1.5-beta8 clj-1.5-beta9 clj-1.5-beta10 clj-1.5-beta11 clj-1.5-beta12 clj-1.5-beta13 clj-1.5-RC14 clj-1.5-RC15 clj-1.5-RC16 clj-1.5 clj-1.5.1 clj-1.6-alpha1 clj-1.6-alpha2 clj-1.6-alpha3 clj-1.6-beta1 clj-1.6-beta2 clj-1.6-RC1 clj-1.6-RC2 clj-1.6-RC3 clj-1.6-RC4 clj-1.6 clj-1.7-alpha1 clj-1.7-alpha2 clj-1.7-alpha3 clj-1.7-alpha4 clj-1.7-alpha5 clj-1.7-alpha6 clj-1.7-beta1 clj-1.7-beta2 clj-1.7-RC1 clj-1.7-RC2 clj-1.7 clj-1.8-alpha1 clj-1.8-alpha2 clj-1.8-alpha3 clj-1.8-alpha4 clj-1.8-alpha4 clj-1.8-beta1 clj-1.8-beta2 clj-1.8-RC1 clj-1.8-RC2"
 
-ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5.1 clj-1.6"
+ALL_MAJOR_CLOJURE_VERSIONS="clj-1.2.1 clj-1.3 clj-1.4 clj-1.5.1 clj-1.6 clj-1.7"
 
 show_known_clojure_versions()
 {
-    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] 1.5-beta[1-2] 1.5-RC[1-6] 1.5-beta[7-13] 1.5-RC[14-16] 1.5 1.5.1 1.6-alpha[1-3] 1.6-beta[1-2] 1.6-RC[1-4] 1.6"
+    1>&2 echo -n "1.2 1.2.1 1.3-alpha[5-8] 1.3-beta[1-3] 1.3 1.4-alpha[1-5] 1.4-beta[1-7] 1.4.0 1.5-alpha[1-7] 1.5-beta[1-2] 1.5-RC[1-6] 1.5-beta[7-13] 1.5-RC[14-16] 1.5 1.5.1 1.6-alpha[1-3] 1.6-beta[1-2] 1.6-RC[1-4] 1.6 1.7-alpha[1-6] 1.7-beta[1-3] 1.7-RC[1-2] 1.7 1.8-alpha[1-5] 1.8-beta[1-2] 1.8-RC[1-2]"
 }
 
 internal_check_clojure_version_spec()
@@ -154,6 +154,47 @@ internal_check_clojure_version_spec()
     1.6 | 1.6.0)
 	CLJ_VERSION_STR="1.6.0"
 	;;
+
+    1.7-alpha[1-6])
+        CLJ_VERSION_STR="1.7.0${spec/1.7/}"
+        ;;
+    1.7.0-alpha[1-6])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.7-beta[1-3])
+        CLJ_VERSION_STR="1.7.0${spec/1.7/}"
+        ;;
+    1.7.0-beta[1-3])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.7-RC[1-2])
+        CLJ_VERSION_STR="1.7.0${spec/1.7/}"
+        ;;
+    1.7.0-RC[1-2])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.7 | 1.7.0)
+	CLJ_VERSION_STR="1.7.0"
+	;;
+
+    1.8-alpha[1-5])
+        CLJ_VERSION_STR="1.8.0${spec/1.8/}"
+        ;;
+    1.8.0-alpha[1-5])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.8-beta[1-2])
+        CLJ_VERSION_STR="1.8.0${spec/1.8/}"
+        ;;
+    1.8.0-beta[1-2])
+        CLJ_VERSION_STR="${spec}"
+        ;;
+    1.8-RC[1-2])
+        CLJ_VERSION_STR="1.8.0${spec/1.8/}"
+        ;;
+    1.8.0-RC[1-2])
+        CLJ_VERSION_STR="${spec}"
+        ;;
 
     *)
         # Unknown Clojure version
@@ -265,7 +306,7 @@ all_clojure_versions_except()
 # weirdness of time when read vulnerability was addressed before
 # release of 1.5.0.
 
-ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC4 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9 1.5-beta11 1.5-beta13 1.5-RC15 1.5-RC16 1.5 1.6-RC4`"
+ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC4 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9 1.5-beta11 1.5-beta13 1.5-RC15 1.5-RC16 1.5 1.6-RC4 1.7-alpha1 1.7-beta3 1.8-alpha1 1.8-beta2`"
 #echo "ALL_BENCHMARK_CLOJURE_VERSIONS=${ALL_BENCHMARK_CLOJURE_VERSIONS}"
 #exit 0
 
@@ -315,7 +356,7 @@ then
     ######################################################################
 
     HOME_DIR=`cygpath -w "$HOME"`
-    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.3.0}"
+    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.7.0}"
     if [ $? != 0 ]
     then
         1>&2 echo -n "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: "
@@ -374,7 +415,7 @@ then
     # Linux/MacOS Clojure
     ######################################################################
 
-    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.3.0}"
+    check_clojure_version_spec "${CLJ_VERSION:=clojure-1.7.0}"
     if [ $? != 0 ]
     then
         1>&2 echo -n "$0: CLJ_VERSION='${CLJ_VERSION}' must be one of: "

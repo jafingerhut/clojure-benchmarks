@@ -22,6 +22,88 @@ LEIN_FILES="`dirname $0`/lein-files"
 mkdir -p "${HOME}/lein"
 cd "${HOME}/lein"
 
+########################################
+
+#for clj_1_8_point_release in 0
+#do
+#    v="1.8.${clj_1_8_point_release}"
+#    lein1 new clojure-${v}
+#    cd clojure-${v}
+#    make_project_clj_file ${v} project.clj
+#    lein1 deps
+#    cd ..
+#done
+
+for RC in 2 1
+do
+    v="1.8.0-RC${RC}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for beta in 2 1
+do
+    v="1.8.0-beta${beta}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for alpha in 5 4 3 2 1
+do
+    v="1.8.0-alpha${alpha}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+########################################
+
+for clj_1_7_point_release in 0
+do
+    v="1.7.${clj_1_7_point_release}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+for RC in 2 1
+do
+    v="1.7.0-RC${RC}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for beta in 3 2 1
+do
+    v="1.7.0-beta${beta}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+for alpha in 6 5 4 3 2 1
+do
+    v="1.7.0-alpha${alpha}"
+    lein1 new clojure-${v}
+    cd clojure-${v}
+    make_project_clj_file ${v} project.clj
+    lein1 deps
+    cd ..
+done
+
+########################################
+
 for clj_1_6_point_release in 0
 do
     v="1.6.${clj_1_6_point_release}"
@@ -59,6 +141,8 @@ do
     lein1 deps
     cd ..
 done
+
+########################################
 
 for clj_1_5_point_release in 1 0
 do
@@ -100,6 +184,8 @@ do
     cd ..
 done
 
+########################################
+
 for clj_1_4_point_release in 0
 do
     v="1.4.${clj_1_4_point_release}"
@@ -129,6 +215,8 @@ do
     lein1 deps
     cd ..
 done
+
+########################################
 
 for clj_1_3_point_release in 0
 do
