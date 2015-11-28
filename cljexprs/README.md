@@ -28,6 +28,19 @@ File lein-init.sh:
 * Copy and edit new for loops to retrieve the desired versions of
   Clojure.
 
+Look at scripts/runseveral.sh to see if it has the OS/JDK combinations
+that you want to run on a particular machine, and the right `source`
+commands to set up for a particular JDK version you want to test.
+Edit as desired.
+
+When ready, make sure nothing unnecessary is running on the test
+machine, and that will be true for as long as the benchmarks will run.
+Then do:
+
+```bash
+% ./scripts/runseveral.sh
+```
+
 
 How long does it take to run a full set of Clojure expression
 benchmarks?
