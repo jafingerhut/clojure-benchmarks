@@ -41,6 +41,9 @@ Then do:
 % ./scripts/runseveral.sh
 ```
 
+TBD: What to do with the result data files to produce the updated web
+page of graphs.
+
 
 How long does it take to run a full set of Clojure expression
 benchmarks?
