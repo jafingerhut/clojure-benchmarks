@@ -389,6 +389,12 @@ consisting of one or more Measurement elements\n"
     [lang-str nil nil nil]))
 
 
+(defn fixup-title [title-str]
+  ;; It seems that _ characters in a title that are not escaped with \
+  ;; cause the following character to be treated as a subscript.
+  (str/replace title-str "_" "\\_"))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Start of 'main' code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -515,13 +521,13 @@ consisting of one or more Measurement elements\n"
               plotlines
               (for [[platform tempfile] tempfiles]
                 (str "\"" tempfile "\""
-                     " using 1:3:xtic(2) title '" platform "'"
+                     " using 1:3:xtic(2) title '" (fixup-title platform) "'"
                      " with linespoints"))
               
               plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
               command (str
                        "set title '" title "'\n"
-                       "set terminal png size 800,600\n"
+                       "set terminal png size 1200,600\n"
                        "set lmargin 8\n"
                        "set bmargin 7\n"
                        "set key outside\n"
@@ -531,6 +537,9 @@ consisting of one or more Measurement elements\n"
                        "set ylabel \"" ylabel "\"\n"
                        "set output \"" outfile "\"\n"
                        plotline)
+
+              ;; Useful for debugging input to gnuplot
+;;              _ (spit (str idx ".gnuplot") command)
               
               notes (sh/sh "gnuplot" :in command)
               err (str/trim-newline (:err notes))]
