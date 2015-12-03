@@ -390,9 +390,12 @@ consisting of one or more Measurement elements\n"
 
 
 (defn fixup-title [title-str]
-  ;; It seems that _ characters in a title that are not escaped with \
-  ;; cause the following character to be treated as a subscript.
-  (str/replace title-str "_" "\\_"))
+  ;; Several characters in title strings need to be escaped to avoid
+  ;; being interpreted specially by gnuplot.  There are probably more,
+  ;; but these are all I need for now.
+  (str/escape title-str {\_ "\\_",
+                         \{ "\\{",
+                         \} "\\}"}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -526,7 +529,7 @@ consisting of one or more Measurement elements\n"
               
               plotline (str "plot " plotrange (str/join ", " plotlines) "\n")
               command (str
-                       "set title '" title "'\n"
+                       "set title '" (fixup-title title) "'\n"
                        "set terminal png size 1200,600\n"
                        "set lmargin 8\n"
                        "set bmargin 7\n"
