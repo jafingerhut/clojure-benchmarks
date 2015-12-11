@@ -34,7 +34,7 @@ cd "${HOME}/lein"
 #    cd ..
 #done
 
-for RC in 2 1
+for RC in 3 2 1
 do
     v="1.8.0-RC${RC}"
     lein1 new clojure-${v}
