@@ -7,13 +7,10 @@ these do if you are curious):
     env.sh to specify the location of your Clojure JAR files.  Look
     for the CLOJURE_CLASSPATH variable settings.
 
-    (2a) Leiningen version 1.7.1 installation instructions (Leiningen
-    1.7.1 is the "old version" now, but it installs JAR files in a
-    place expected by some of this code, and the current Leiningen
-    version 2 puts them somewhere else):
+    (2a) Leiningen version 2.x installation instructions:
     http://github.com/technomancy/leiningen
 
-    Save Leiningen 1.7.1 as 'lein1' somewhere in your command path.
+    Save Leiningen 2.x as 'lein' somewhere in your command path.
     Then use the following script to install multiple Clojure JAR
     files in your $HOME/lein directory.
 

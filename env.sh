@@ -364,7 +364,7 @@ then
 	1>&2 echo ""
         exit 1
     fi
-    CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/lein/clojure-${CLJ_VERSION_STR}/lib"`
+    CLOJURE_JAR_DIR=`cygpath -w "${HOME_DIR}/.m2/repository/org/clojure/clojure/${CLJ_VERSION_STR}"`
     CLOJURE_CLASSPATH=`cygpath -w "${CLOJURE_JAR_DIR}/clojure-${CLJ_VERSION_STR}.jar"`
     # Platform-specific form of Clojure object file directory
     PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}clojure-${CLJ_VERSION_STR}"
@@ -423,7 +423,7 @@ then
 	1>&2 echo ""
         exit 1
     fi
-    CLOJURE_JAR_DIR="${HOME}/lein/clojure-${CLJ_VERSION_STR}/lib"
+    CLOJURE_JAR_DIR="${HOME}/.m2/repository/org/clojure/clojure/${CLJ_VERSION_STR}"
     CLOJURE_CLASSPATH="${CLOJURE_JAR_DIR}/clojure-${CLJ_VERSION_STR}.jar"
     # Platform-specific form of Clojure object file directory
     PS_CLJ_OBJ_DIR=".${SEP}obj${SEP}clojure-${CLJ_VERSION_STR}"
