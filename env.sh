@@ -196,6 +196,13 @@ internal_check_clojure_version_spec()
         CLJ_VERSION_STR="${spec}"
         ;;
 
+    1.8-master-SNAPSHOT)
+        CLJ_VERSION_STR="1.8.0${spec/1.8/}"
+        ;;
+    1.8.0-master-SNAPSHOT)
+        CLJ_VERSION_STR="${spec}"
+        ;;
+
     *)
         # Unknown Clojure version
 	ret_val=1
