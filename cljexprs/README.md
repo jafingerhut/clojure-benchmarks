@@ -9,41 +9,52 @@ and present the results as graphs.
 First, update the following bash scripts in the directory above this
 one.
 
-File env.sh:
+File `env.sh`:
 
 * Add all desired Clojure versions to be tested, and perhaps some that
   you do not want to test, if you want the list of released versions
-  to be complete, to the variable ALL_CLOJURE_VERSIONS.
+  to be complete, to the variable `ALL_CLOJURE_VERSIONS`.
 
-* Add any versions that are in ALL_CLOJURE_VERSIONS, but that you do
+* Add any versions that are in `ALL_CLOJURE_VERSIONS`, but that you do
   not want to benchmark, to the list of versions to leave out in the
-  expression that is assigned to ALL_BENCHMARK_CLOJURE_VERSIONS.
+  expression that is assigned to `ALL_BENCHMARK_CLOJURE_VERSIONS`.
 
-* Add new major versions to ALL_MAJOR_CLOJURE_VERSIONS.
+* Add new major versions to `ALL_MAJOR_CLOJURE_VERSIONS`.
 
-* Update the cases in function internal_check_clojure_version_spec().
+* Update the cases in function
+  `internal_check_clojure_version_spec()`.
 
-File lein-init.sh:
+File `lein-init.sh`:
 
-* Copy and edit new for loops to retrieve the desired versions of
+* Copy and edit new `for` loops to retrieve the desired versions of
   Clojure.
 
-Look at scripts/runseveral.sh to see if it has the OS/JDK combinations
-that you want to run on a particular machine, and the right `source`
-commands to set up for a particular JDK version you want to test.
-Edit as desired.
+Install Leiningen (any 2.x version should do).  Run `./lein-init.sh`
+from the directory containing that script to get all of the JAR files
+for every desired version of Clojure.
+
+Look at `cljexprs/scripts/runseveral.sh` to see if it has the OS/JDK
+combinations that you want to run on a particular machine, and the
+right `source` commands to set up for a particular JDK version you
+want to test.  Edit as desired.
 
 When ready, make sure nothing unnecessary is running on the test
 machine, and that will be true for as long as the benchmarks will run.
 Then do:
 
 ```bash
+% cd cljexprs
 % ./scripts/runseveral.sh
 ```
 
-TBD: What to do with the result data files to produce the updated web
-page of graphs.
+When the benchmark results are available in files in a directory tree
+structure within the `results` directory, run these commands to create
+graphs of them:
 
+```base
+% cd cljexprs/results
+% ../scripts/makegraphs.sh
+```
 
 How long does it take to run a full set of Clojure expression
 benchmarks?
