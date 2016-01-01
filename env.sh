@@ -313,7 +313,7 @@ all_clojure_versions_except()
 # weirdness of time when read vulnerability was addressed before
 # release of 1.5.0.
 
-ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC4 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9 1.5-beta11 1.5-beta13 1.5-RC15 1.5-RC16 1.5 1.6-RC4 1.7-alpha1 1.7-beta3 1.8-alpha1 1.8-beta2`"
+ALL_BENCHMARK_CLOJURE_VERSIONS="`all_clojure_versions_except 1.4-beta3 1.4-beta5 1.4-beta7 1.5-alpha6 1.5-alpha7 1.5-RC1 1.5-RC2 1.5-RC3 1.5-RC4 1.5-RC5 1.5-RC6 1.5-beta7 1.5-beta8 1.5-beta9 1.5-beta11 1.5-beta13 1.5-RC15 1.5-RC16 1.5 1.6-RC4 1.7-alpha1 1.7-beta3 1.7-RC2 1.8-alpha1 1.8-beta2`"
 #echo "ALL_BENCHMARK_CLOJURE_VERSIONS=${ALL_BENCHMARK_CLOJURE_VERSIONS}"
 #exit 0
 
