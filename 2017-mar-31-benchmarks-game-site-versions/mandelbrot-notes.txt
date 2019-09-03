@@ -1,0 +1,19 @@
+notes, command-line, and program output
+NOTES:
+64-bit Ubuntu quad core
+Clojure 1.8.0
+java version "1.8.0_45"
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)
+
+
+Sat, 27 Feb 2016 17:53:00 GMT
+
+MAKE:
+mv mandelbrot.clojure-7.clojure mandelbrot.clj
+/usr/local/src/jdk1.8.0_45/bin/java -Dclojure.compiler.direct-linking=true -Dclojure.compile.path=. -cp .:/usr/local/src/clojure/clojure-1.8.0.jar clojure.lang.Compile mandelbrot
+Compiling mandelbrot to .
+1.24s to complete and log all make actions
+
+COMMAND LINE:
+/usr/local/src/jdk1.8.0_45/bin/java -server -XX:+TieredCompilation -XX:+AggressiveOpts -XX:+UseBiasedLocking -Xmx128m -cp .:/usr/local/src/clojure/clojure-1.8.0.jar mandelbrot 16000

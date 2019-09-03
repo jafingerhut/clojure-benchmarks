@@ -4,22 +4,21 @@ I worked on this pretty extensively around 2011-2013, submitting
 faster Clojure programs for the problems on the [Computer Language
 Benchmarks
 Game](https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html)
-web site.
+web site.  Several other people, most notably Alex Miller, then spent
+a chunk of time improving on most of my solutions, and submitting
+those to that site as well.
 
-Several other people, most notably Alex Miller, then spent a chunk of
-time improving on most of my solutions, and submitting those to that
-site as well.
-
-Then some time around April 2017 the maintainer of that site decided
-not to include the Clojure programs and performance measurements any
-longer.
-
-You can see Clojure programs from an archived copy of the site from
-2017-Mar-31
+In April 2017, the maintainer of that site decided not to include the
+Clojure programs and performance measurements any longer.  You can see
+Clojure programs from an archived copy of the site from 2017-Mar-31
 [here](https://web.archive.org/web/20170331153459/http://benchmarksgame.alioth.debian.org/).
-They are not present in the next dated snapshot of the site fro
+They are not present in the next dated snapshot of the site from
 2017-Apr-29
-[here](https://web.archive.org/web/20170429193853/http://benchmarksgame.alioth.debian.org/)
+[here](https://web.archive.org/web/20170429193853/http://benchmarksgame.alioth.debian.org/).
+I have copied the latest versions of the Clojure programs from the
+archive into the directory
+[`2017-mar-31-benchmarks-game-site-versions`](2017-mar-31-benchmarks-game-site-versions/)
+of this repository.
 
 [Here](https://tratt.net/laurie/blog/entries/why_arent_more_users_more_happy_with_our_vms_part_1.html)
 is an article by Laurence Tratt that describes efforts he and a team

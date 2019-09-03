@@ -1,0 +1,19 @@
+notes, command-line, and program output
+NOTES:
+64-bit Ubuntu quad core
+Clojure 1.8.0
+java version "1.8.0_45"
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)
+
+
+Sat, 27 Feb 2016 18:17:06 GMT
+
+MAKE:
+mv spectralnorm.clojure-8.clojure spectralnorm.clj
+/usr/local/src/jdk1.8.0_45/bin/java -Dclojure.compiler.direct-linking=true -Dclojure.compile.path=. -cp .:/usr/local/src/clojure/clojure-1.8.0.jar clojure.lang.Compile spectralnorm
+Compiling spectralnorm to .
+1.21s to complete and log all make actions
+
+COMMAND LINE:
+/usr/local/src/jdk1.8.0_45/bin/java -server -XX:+TieredCompilation -XX:+AggressiveOpts -Xmx8m -cp .:/usr/local/src/clojure/clojure-1.8.0.jar spectralnorm 5500
