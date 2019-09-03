@@ -20,14 +20,24 @@ archive into the directory
 [`2017-mar-31-benchmarks-game-site-versions`](2017-mar-31-benchmarks-game-site-versions/)
 of this repository.
 
-[Here](https://tratt.net/laurie/blog/entries/why_arent_more_users_more_happy_with_our_vms_part_1.html)
-is an article by Laurence Tratt that describes efforts he and a team
-of researchers went to in order to carefully control run time
-variances on the machine where they ran these and other benchmark
-programs, and describes some odd performance behavior they found for
-just-in-time compiling virtual machines for several programming
-languages, including cases where the performance never seemed to
-stabilize, or got worse after a period of time, and stayed worse.
+Below are some articles by Laurence Tratt, who has done a lot more
+careful work than I have in analyzing why measuring run time of
+benchmarks can vary, and how to at least attempt to eliminate some of
+those causes of variation.  That team found cases where VM performance
+when running a benchmark was definitely not of the form "some number
+of initial 'warm up' repetitions are slow, then are consistently
+faster for all later runs".  For example, some got consistently
+slower, others got repeatedly faster and slow as you continued running
+it.
+
+* ["Minimum Times Tend to Mislead When
+  Benchmarking"](https://tratt.net/laurie/blog/entries/minimum_times_tend_to_mislead_when_benchmarking.html),
+  August 15 2019
+* "Why Aren't More Users More Happy With Our VMs?" [Part
+  1](https://tratt.net/laurie/blog/entries/why_arent_more_users_more_happy_with_our_vms_part_1.html)
+  and [Part
+  2](https://tratt.net/laurie/blog/entries/why_arent_more_users_more_happy_with_our_vms_part_2.html)
+  September 2018
 
 None of the performance data I have collected went to anywhere near
 that kind of effort to control the variations of results.  My best
