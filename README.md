@@ -237,7 +237,6 @@ library can run.  The gcc4-core (category Devel) and libgmp-devel
 compiling the files, but so far I haven't compiled them in a way that
 they can be used by a JVM running on Windows.  Please let me know if
 you figure out how to do this.
-----------------------------------------------------------------------
 
 The Perl, SBCL, and Haskell programs have been well tested on Mac OS
 X, and more lightly tested on Linux and Windows.  The main issue is
@@ -402,12 +401,16 @@ http://www.macports.org
 After following the instructions there for installing MacPorts, you
 can install the Glasgow Haskell compiler with the command:
 
-sudo port install ghc
+```bash
+% sudo port install ghc
+```
 
 And SBCL with the threads (i.e. multi-threading) option enabled with
 this command:
 
-sudo port install sbcl@+threads
+```bash
+% sudo port install sbcl@+threads
+```
 
 
 Here are the versions I currently have installed used to produce some
@@ -491,8 +494,7 @@ after this Stack Overflow discussion occurred, so what the discussion
 participants saw then was noticeably slower (relative to Java -6
 server) than what is on the web site now.
 
-----------------------------------------
-For example the following features in Clojure are all very cool and
+For example, the following features in Clojure are all very cool and
 useful for development convenience, but incur some runtime performance
 overhead:
 
@@ -513,7 +515,6 @@ things like:
 * Protocols
 * Java primitives and arrays
 * loop / recur for iteration
-----------------------------------------
 
 I have attempted to categorize which Clojure programs in this
 collection use the features above, and which do not, in an Excel
