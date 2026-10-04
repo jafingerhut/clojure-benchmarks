@@ -48,42 +48,16 @@ typedef struct cpu_usage_t {
 } cpu_usage;
 
 
-void
-cleanup_temp_file (char *tmp_name)
-{
-    int ret = unlink(tmp_name);
-    if (ret == -1) {
-        perror(global_prog_name);
-        exit(1);
-    }
-}
-
-
 int
 get_macosx_version (int *major_version_num, int *minor_version_num,
                     int *subminor_version_num)
 {
+    int ret;
     int exit_status = 1;
-    char *tmp_name = tmpnam(NULL);
-    if (tmp_name == NULL) {
-        perror(global_prog_name);
-        goto error_cleanup;
-    }
-    char *uname_cmd;
-    int ret = asprintf(&uname_cmd, "uname -r > %s", tmp_name);
-    if (ret == -1 || uname_cmd == NULL) {
-        fprintf(stderr, "Could not allocate enough memory for command string: uname -r > %s\n", tmp_name);
-        goto error_cleanup;
-    }
-    ret = system(uname_cmd);
-    if (ret != 0) {
-        fprintf(stderr, "error in %s: system(\"%s\") returned %d\n",
-                global_prog_name, uname_cmd, ret);
-        goto error_cleanup;
-    }
-    FILE *f = fopen(tmp_name, "r");
+
+    FILE *f = popen("uname -r", "r");
     if (f == NULL) {
-        perror(global_prog_name);
+        perror("Failed to run uname");
         goto error_cleanup;
     }
     char buf[512];
@@ -94,7 +68,6 @@ get_macosx_version (int *major_version_num, int *minor_version_num,
     ret = sscanf(buf, "%d.%d.%d",
                  major_version_num, minor_version_num, subminor_version_num);
     fclose(f);
-    cleanup_temp_file(tmp_name);
     if (ret < 2) {
         fprintf(stderr, "%s: Output of 'uname -r' was '%s', from which no major and minor version number could be parsed.\n",
                 global_prog_name, buf);
@@ -103,9 +76,6 @@ get_macosx_version (int *major_version_num, int *minor_version_num,
     return ret;
 
  error_cleanup:
-    if (tmp_name != NULL) {
-        cleanup_temp_file(tmp_name);
-    }
     exit(exit_status);
 }
 
@@ -453,6 +423,12 @@ main (int argc, char **argv, char **envp)
         // use a different method to measure it.
         ps.use_polling = 1;
     }
+    // The use_polling = 1 case was apparently needed on OS X 10.6.*
+    // according to the comments above, but at least on macOS 26.7 it
+    // is not needed.  I am not right now going to try to figure out
+    // precisely which versions of OS X / macOS that use_polling = 1
+    // is needed on.
+    ps.use_polling = 0;
 
     char **child_argv = (char **) malloc((unsigned) argc * sizeof(char *));
     int i;
@@ -622,6 +598,11 @@ main (int argc, char **argv, char **envp)
             r.ru_utime.tv_usec / 1000);
     fprintf(stderr, "sys  %9ld.%03d\n", r.ru_stime.tv_sec,
             r.ru_stime.tv_usec / 1000);
+    double avg_cores_used;
+    avg_cores_used = ((r.ru_utime.tv_sec + (r.ru_utime.tv_usec / 1000000.0) +
+                       r.ru_stime.tv_sec + (r.ru_stime.tv_usec / 1000000.0))
+                      / (elapsed_msec / 1000.0));
+    fprintf(stderr, "(user+sys)/real  %.3f\n", avg_cores_used);
     
     // Maximum resident set size
     
